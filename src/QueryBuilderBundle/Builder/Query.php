@@ -1,8 +1,8 @@
 <?php
 
-namespace TQ\QueryBuilderBundle\Builder;
+namespace O2\QueryBuilder\Builder;
 
-use TQ\QueryBuilderBundle\Builder\QueryInterface;
+use O2\QueryBuilder\Builder\QueryInterface;
 
 class Query {
     

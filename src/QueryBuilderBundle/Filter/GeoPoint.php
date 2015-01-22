@@ -1,8 +1,8 @@
 <?php
 
-namespace TQ\QueryBuilderBundle\Filter;
+namespace O2\QueryBuilder\Filter;
 
-use TQ\QueryBuilderBundle\Filter\GeoPointInterface;
+use O2\QueryBuilder\Filter\GeoPointInterface;
 
 class GeoPoint implements GeoPointInterface {
     

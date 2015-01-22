@@ -1,6 +1,6 @@
 <?php
 
-namespace TQ\QueryBuilderBundle\Controller;
+namespace O2\QueryBuilder\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 

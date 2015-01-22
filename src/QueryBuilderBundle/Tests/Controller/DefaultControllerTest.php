@@ -1,6 +1,6 @@
 <?php
 
-namespace TQ\QueryBuilderBundle\Tests\Controller;
+namespace O2\QueryBuilder\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

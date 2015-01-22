@@ -1,8 +1,8 @@
 <?php
 
-namespace TQ\QueryBuilderBundle\Filter;
+namespace O2\QueryBuilder\Filter;
 
-use TQ\QueryBuilderBundle\Filter\GeoBounding;
+use O2\QueryBuilder\Filter\GeoBounding;
 
 class FilterGeoBounding implements FilterInterface {
    

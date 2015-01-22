@@ -5,10 +5,10 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="tq_query.query_builder.query">TQ\QueryBuilderBundle\Builder\QueryBuilder</parameter>
-        <parameter key="tq_query.query_builder.term">TQ\QueryBuilderBundle\Filter\FilterTerm</parameter>
-        <parameter key="tq_query.query_builder.geo_bounding_box">TQ\QueryBuilderBundle\Filter\FilterGeoBounding</parameter>
-        <parameter key="tq_query.query_builder.aggs">TQ\QueryBuilderBundle\Filter\Aggregation</parameter>
+        <parameter key="tq_query.query_builder.query">O2\QueryBuilder\Builder\QueryBuilder</parameter>
+        <parameter key="tq_query.query_builder.term">O2\QueryBuilder\Filter\FilterTerm</parameter>
+        <parameter key="tq_query.query_builder.geo_bounding_box">O2\QueryBuilder\Filter\FilterGeoBounding</parameter>
+        <parameter key="tq_query.query_builder.aggs">O2\QueryBuilder\Filter\Aggregation</parameter>
     </parameters>
 
     <services>

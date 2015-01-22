@@ -1,6 +1,6 @@
 <?php
 
-namespace TQ\QueryBuilderBundle\Builder;
+namespace O2\QueryBuilder\Builder;
 
 interface QueryInterface {
     

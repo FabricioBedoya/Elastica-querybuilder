@@ -1,8 +1,8 @@
 <?php
 
-namespace TQ\QueryBuilderBundle\Filter;
+namespace O2\QueryBuilder\Filter;
 
-use TQ\QueryBuilderBundle\Filter\FilterInterface;
+use O2\QueryBuilder\Filter\FilterInterface;
 
 class FilterTerm implements FilterInterface {
     

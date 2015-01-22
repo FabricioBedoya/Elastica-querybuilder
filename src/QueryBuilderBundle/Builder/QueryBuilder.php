@@ -1,9 +1,9 @@
 <?php
 
-namespace TQ\QueryBuilderBundle\Builder;
+namespace O2\QueryBuilder\Builder;
 
-use TQ\QueryBuilderBundle\Filter\FilterInterface as TQFilterInterface;
-use TQ\QueryBuilderBundle\Handler\QueryHandler;
+use O2\QueryBuilder\Filter\FilterInterface as TQFilterInterface;
+use O2\QueryBuilder\Handler\QueryHandler;
 
 class QueryBuilder {
 
@@ -111,7 +111,7 @@ class QueryBuilder {
         $preparedParams[static::ES_FIELD_BODY] = $this->setQuery($preparedParams[static::ES_FIELD_BODY], $query->getQuery());
 
         if (array_key_exists(static::ES_FIELD_FILTER, $parameters)) {
-            /* @var $filter \TQ\QueryBuilderBundle\Filter\FilterInterface */
+            /* @var $filter \O2\QueryBuilder\Filter\FilterInterface */
             foreach ($parameters[static::ES_FIELD_FILTER] as $key => $parameter) {
                 $filter = $this->filters[$key];
                 $filter->updateFromArray($parameter);

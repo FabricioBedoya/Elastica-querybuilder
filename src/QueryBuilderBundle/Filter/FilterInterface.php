@@ -1,6 +1,6 @@
 <?php
 
-namespace TQ\QueryBuilderBundle\Filter;
+namespace O2\QueryBuilder\Filter;
 
 interface FilterInterface {
     

@@ -1,9 +1,9 @@
 <?php
 
-namespace TQ\QueryBuilderBundle;
+namespace O2\QueryBuilder;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class TQQueryBuilderBundle extends Bundle
+class O2QueryBuilder extends Bundle
 {
 }

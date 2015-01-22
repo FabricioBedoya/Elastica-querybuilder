@@ -1,20 +1,20 @@
 <?php
 
-namespace TQ\QueryBuilderBundle\Filter;
+namespace O2\QueryBuilder\Filter;
 
-use TQ\QueryBuilderBundle\Filter\GeoPoint;
+use O2\QueryBuilder\Filter\GeoPoint;
 
 class GeoBounding {
     
     /**
      *
-     * @var \TQ\QueryBuilderBundle\Filter\GeoPoint 
+     * @var \O2\QueryBuilder\Filter\GeoPoint 
      */
     protected $topLeft = null;
     
     /**
      *
-     * @var \TQ\QueryBuilderBundle\Filter\GeoPoint 
+     * @var \O2\QueryBuilder\Filter\GeoPoint 
      */
     protected $bottomRigth = null;
     
@@ -51,7 +51,7 @@ class GeoBounding {
     }
     /**
      * 
-     * @return \TQ\QueryBuilderBundle\Filter\GeoPoint
+     * @return \O2\QueryBuilder\Filter\GeoPoint
      */
     public function getTopLeft() {
         return $this->topLeft;
@@ -59,7 +59,7 @@ class GeoBounding {
 
     /**
      * 
-     * @return \TQ\QueryBuilderBundle\Filter\GeoPoint
+     * @return \O2\QueryBuilder\Filter\GeoPoint
      */
     public function getBottomRigth() {
         return $this->bottomRigth;
