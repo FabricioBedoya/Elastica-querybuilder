@@ -12,7 +12,7 @@
     },
     "autoload": {
         "psr-4": {
-            "O2\\QueryBuilder": "QueryBuilderBundle"
+            "O2\\QueryBuilder\\": "src/QueryBuilderBundle/"
         }
     },
     "extra": {
