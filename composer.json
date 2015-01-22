@@ -1,6 +1,5 @@
 {
     "name": "o2web/querybuilder-bundle",
-    "type": "symfony-bundle",
     "description": "This Bundle provides various tools to build a elasticsearch query",
     "authors": [
         {
