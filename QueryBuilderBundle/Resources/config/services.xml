@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="tq_query.query_builder.query">TQ\QueryBuilderBundle\Builder\QueryBuilder</parameter>
+        <parameter key="tq_query.query_builder.term">TQ\QueryBuilderBundle\Filter\FilterTerm</parameter>
+        <parameter key="tq_query.query_builder.geo_bounding_box">TQ\QueryBuilderBundle\Filter\FilterGeoBounding</parameter>
+        <parameter key="tq_query.query_builder.aggs">TQ\QueryBuilderBundle\Filter\Aggregation</parameter>
+    </parameters>
+
+    <services>
+        <service id="tq.query.builder.query" class="%tq_query.query_builder.query%">
+            <argument type="collection">
+                <argument key="term" type="service" id="tq.query.builder.filter.term" />
+                <argument key="geo_bounding_box" type="service" id="tq.query.builder.filter.geo_bounding_box" />
+                <argument key="aggs" type="service" id="tq.query.builder.filter.aggs" />
+            </argument>
+            <argument type="collection">
+                <argument key="index">testroger</argument>
+                <argument key="type">fiches_actives</argument>
+                <argument key="size">12</argument>
+                <argument key="from">0</argument>
+            </argument>
+        </service>
+        
+        <service id="tq.query.builder.filter.term" class="%tq_query.query_builder.term%"/>
+        
+        <service id="tq.query.builder.filter.geo_bounding_box" class="%tq_query.query_builder.geo_bounding_box%"/>
+        
+        <service id="tq.query.builder.filter.aggs" class="%tq_query.query_builder.aggs%"/>
+    </services>
+</container>

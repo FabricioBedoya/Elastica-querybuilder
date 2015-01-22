@@ -1,0 +1,20 @@
+{
+    "name": "o2web/querybuilder-bundle",
+    "type": "symfony-bundle",
+    "description": "This Bundle provides various tools to build a elasticsearch query",
+    "authors": [
+        {
+            "name": "Fabricio Bedoya",
+            "email": "fbedoya@o2web.ca"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "psr/log": "~1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "O2\\QueryBuilder": "QueryBuilderBundle"
+        }
+    }
+}
