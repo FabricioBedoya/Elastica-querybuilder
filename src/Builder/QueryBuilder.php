@@ -120,7 +120,7 @@ class QueryBuilder {
         }
 
         if (array_key_exists(static::ES_FIELD_AGGS, $parameters)) {
-            
+            $preparedParams = $this->addAggregation($preparedParams, $parameters[static::ES_FIELD_AGGS]);
         }
         return $preparedParams;
     }
@@ -156,6 +156,24 @@ class QueryBuilder {
         } else {
             return $parameters[$key];
         }
+    }
+    
+    /**
+     * 
+     * @param array $params
+     * @param type $filter
+     */
+    private function addAggregation(array $params = array(), $filter) {
+        /* @var $aggs \O2\QueryBuilder\Filter\FilterInterface */
+        if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
+            $aggs = $this->filters[static::ES_FIELD_AGGS];
+            if (!is_array($filter)) {
+                $filter = array($filter => $filter);
+            }
+            $aggs->updateFromArray($filter);
+            $params[static::ES_FIELD_BODY][static::ES_FIELD_AGGS] = $aggs->getFilter();
+        }
+        return $params;
     }
 
     /**
