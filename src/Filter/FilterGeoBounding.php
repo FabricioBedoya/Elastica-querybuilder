@@ -6,7 +6,7 @@ use O2\QueryBuilder\Filter\GeoBounding;
 
 class FilterGeoBounding implements FilterInterface {
    
-    protected $geoBounding;
+    protected $geoBounding = null;
     
     public function __construct(GeoBounding $geoBounding = null) {
         if ($geoBounding !== null) {
@@ -34,5 +34,9 @@ class FilterGeoBounding implements FilterInterface {
             )
         );
         return $query;
+    }
+    
+    public function __clone() {
+        $this->geoBounding = null;
     }
 }

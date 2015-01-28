@@ -35,7 +35,11 @@ class FilterTerm implements FilterInterface {
             $this->field => $this->value,
         );
         return $query;
-    }    
-    
+    }
+
+    public function __clone() {
+        $this->field = null;
+        $this->value = null;
+    }
     
 }

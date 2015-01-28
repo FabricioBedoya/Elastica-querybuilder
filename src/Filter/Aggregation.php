@@ -47,5 +47,9 @@ class Aggregation implements FilterInterface {
             }
         } 
     }
+    
+    public function __clone() {
+        $this->aggs = null;
+    }
 
 }
