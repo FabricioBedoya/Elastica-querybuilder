@@ -30,6 +30,7 @@ class QueryBuilder {
     const ES_FIELD_SIZE = 'size';
     const ES_FIELD_FROM = 'from';
     const ES_FIELD_OPTIONS = 'options';
+    
 
     /**
      *
@@ -134,13 +135,13 @@ class QueryBuilder {
                 foreach($parameter as $subKey => $subfilter) {
                     if (count($subfilter)>1) {
                         foreach($subfilter as $entry) {
-                            $filterStragety = $this->setFilterStrategy($subKey);
+                            $filterStragety = $this->getFilterStrategy($subKey);
                             $filterStragety->updateFromArray($entry);
                             $preparedParams = $this->addFilter($preparedParams, $filterStragety->getFilter(), $condition);
                         }
                     }
                     else {
-                        $filterStragety = $this->setFilterStrategy($subKey);
+                        $filterStragety = $this->getFilterStrategy($subKey);
                         $filterStragety->updateFromArray($subfilter);
                         $preparedParams = $this->addFilter($preparedParams, $filterStragety->getFilter(), $condition);
                     }
@@ -148,7 +149,7 @@ class QueryBuilder {
             }
             else {
                 $condition = static::ES_FIELD_MUST;
-                $filterStragety = $this->setFilterStrategy($key);
+                $filterStragety = $this->getFilterStrategy($key);
                 $filterStragety->updateFromArray($parameter);
                 $preparedParams = $this->addFilter($preparedParams, $filterStragety->getFilter(), $condition);
             }                
@@ -162,7 +163,7 @@ class QueryBuilder {
      * @return type
      * @throws \Exception
      */
-    private function setFilterStrategy($nameFilter) {
+    private function getFilterStrategy($nameFilter) {
         if (!array_key_exists($nameFilter, $this->filters)) {
             throw new \Exception(sprintf('Filter %s not found',$nameFilter));
         }
@@ -197,8 +198,14 @@ class QueryBuilder {
         return $params;
     }
 
-    private function setParameter($key, $parameters) {
-        if (empty($parameters[$key]) && array_key_exists($key, $this->options)) {
+    /**
+     * 
+     * @param string $key
+     * @param array $parameters
+     * @return type
+     */
+    private function setParameter($key, array $parameters) {
+        if (!array_key_exists($key, $parameters) && array_key_exists($key, $this->options)) {
             return $this->options[$key];
         } else {
             return $parameters[$key];
@@ -227,7 +234,7 @@ class QueryBuilder {
      * 
      * @return array
      */
-    private static function template_base() {
+    public static function template_base() {
         return array(
           self::ES_FIELD_SIZE => 0,
           self::ES_FIELD_FROM => 0,
@@ -244,27 +251,7 @@ class QueryBuilder {
               ),
             ),
           ),
-          self::ES_FIELD_AGGS =>
-          array(
-            'ETBL_REG_SECTION_ID' =>
-            array(
-              self::ES_FIELD_TERMS =>
-              array(
-                self::ES_FIELD_FIELD => 'ETBL_REG_SECTION_ID',
-                'size' => 0,
-              ),
-              'aggs' =>
-              array(
-                'ETBL_REG_CAT_FR' =>
-                array(
-                  self::ES_FIELD_TERMS =>
-                  array(
-                    self::ES_FIELD_FIELD => 'ETBL_REG_CAT_FR',
-                  ),
-                ),
-              ),
-            ),
-          ),
+          self::ES_FIELD_AGGS => array(),
         );
     }
 
