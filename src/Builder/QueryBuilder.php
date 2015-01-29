@@ -43,44 +43,42 @@ class QueryBuilder {
      * @var array
      */
     protected $options = array();
+    
+    /**
+     *
+     * @var array
+     */
+    protected $preparedParams = array();
 
     public function __construct($filters = array(), array $options = array()) {
         $this->options = $options;
         foreach ($filters as $key => $filter) {
             $this->addFilterHandler($key, $filter);
         }
+        $this->preparedParams[static::ES_FIELD_BODY] = static::template_base();
     }
 
     public function addFilterHandler($key, TQFilterInterface $filter) {
         $this->filters[$key] = $filter;
     }
-
-    public function prepared(array $parameters, $only_payload = false) {
-        $preparedParams = array();
-
-        if (array_key_exists(static::ES_FIELD_INDEX, $parameters)) {
-            $preparedParams[static::ES_FIELD_INDEX] = $this->setParameter(static::ES_FIELD_INDEX, $parameters);
-        }
-        if (array_key_exists(static::ES_FIELD_TYPE, $parameters)) {
-            $preparedParams[static::ES_FIELD_TYPE] = $this->setParameter(static::ES_FIELD_TYPE, $parameters);
-        }
-
-        $preparedParams[static::ES_FIELD_BODY] = static::template_base();
-
-        $preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_SIZE] = $this->setParameter(static::ES_FIELD_SIZE, $parameters);
-        $preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_FROM] = $this->setParameter(static::ES_FIELD_FROM, $parameters);
-
-        $preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY] = $parameters[static::ES_FIELD_QUERY];
-        if (array_key_exists(static::ES_FIELD_FILTER, $parameters)) {
-            $preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_FILTER] = $parameters[static::ES_FIELD_FILTER];
-        }
-        if (array_key_exists(static::ES_FIELD_AGGS, $parameters)) {
-            $preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS] = $parameters[static::ES_FIELD_AGGS];
-        }
-        return $preparedParams;
+    
+    /**
+     * 
+     * @return array
+     */
+    public function getParams() {
+        return $this->preparedParams;
     }
 
     /**
+     * 
+     * @param array $preparedParams
+     */
+    public function setParams(array $preparedParams) {
+        $this->preparedParams = $preparedParams;
+    }
+
+        /**
      * 
      * @param array $parameters
      * @return array
@@ -88,45 +86,44 @@ class QueryBuilder {
     public function processParams(array $parameters) {
 
         if (array_key_exists(static::ES_FIELD_INDEX, $parameters)) {
-            $preparedParams[static::ES_FIELD_INDEX] = $this->setParameter(static::ES_FIELD_INDEX, $parameters);
+            $this->preparedParams[static::ES_FIELD_INDEX] = $this->setParameter(static::ES_FIELD_INDEX, $parameters);
         }
         if (array_key_exists(static::ES_FIELD_TYPE, $parameters)) {
-            $preparedParams[static::ES_FIELD_TYPE] = $this->setParameter(static::ES_FIELD_TYPE, $parameters);
+            $this->preparedParams[static::ES_FIELD_TYPE] = $this->setParameter(static::ES_FIELD_TYPE, $parameters);
         }
 
-        $preparedParams[static::ES_FIELD_BODY] = static::template_base();
-
-        $preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_SIZE] = $this->setParameter(static::ES_FIELD_SIZE, $parameters);
-        $preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_FROM] = $this->setParameter(static::ES_FIELD_FROM, $parameters);
+        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_SIZE] = $this->setParameter(static::ES_FIELD_SIZE, $parameters);
+        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_FROM] = $this->setParameter(static::ES_FIELD_FROM, $parameters);
+        
         switch (true) {
             case array_key_exists(static::ES_FIELD_QUERY, $parameters):
-                $query = new Query();
-                $query->updateFromArray($parameters[static::ES_FIELD_QUERY]);
+                $baseQuery = new Query();
+                $baseQuery->updateFromArray($parameters[static::ES_FIELD_QUERY]);
                 break;
             case array_key_exists(static::ES_FIELD_KEYWORD, $parameters):
-                $query = new Query(null, $parameters[static::ES_FIELD_KEYWORD]);
+                $baseQuery = new Query(null, $parameters[static::ES_FIELD_KEYWORD]);
                 break;
             default:
-                $query = new Query();
+                $baseQuery = new Query();
                 break;
         }
-        $preparedParams[static::ES_FIELD_BODY] = $this->setQuery($preparedParams[static::ES_FIELD_BODY], $query->getQuery());
+        $this->setQuery($baseQuery->getQuery());
 
         if (array_key_exists(static::ES_FIELD_FILTER, $parameters)) {
-            $preparedParams = $this->processFilters($parameters[static::ES_FIELD_FILTER], $preparedParams);
+            $this->processFilters($parameters[static::ES_FIELD_FILTER]);
         }
 
         if (array_key_exists(static::ES_FIELD_AGGS, $parameters)) {
-            $preparedParams = $this->addAggregation($preparedParams, $parameters[static::ES_FIELD_AGGS]);
+            $this->processAggregation($parameters[static::ES_FIELD_AGGS]);
         }
-        return $preparedParams;
+        return $this;
     }
     
     /**
      * 
      * @param array $filters
      */
-    private function processFilters(array $filters, array $preparedParams) {
+    private function processFilters(array $filters) {
         /* @var $filter \O2\QueryBuilder\Filter\FilterInterface */
         foreach ($filters as $key => $parameter) {
             $condition = null;
@@ -137,13 +134,13 @@ class QueryBuilder {
                         foreach($subfilter as $entry) {
                             $filterStragety = $this->getFilterStrategy($subKey);
                             $filterStragety->updateFromArray($entry);
-                            $preparedParams = $this->addFilter($preparedParams, $filterStragety->getFilter(), $condition);
+                            $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
                         }
                     }
                     else {
                         $filterStragety = $this->getFilterStrategy($subKey);
                         $filterStragety->updateFromArray($subfilter);
-                        $preparedParams = $this->addFilter($preparedParams, $filterStragety->getFilter(), $condition);
+                        $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
                     }
                 }                    
             }
@@ -151,11 +148,12 @@ class QueryBuilder {
                 $condition = static::ES_FIELD_MUST;
                 $filterStragety = $this->getFilterStrategy($key);
                 $filterStragety->updateFromArray($parameter);
-                $preparedParams = $this->addFilter($preparedParams, $filterStragety->getFilter(), $condition);
+                $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
             }                
         }
-        return $preparedParams;
+        return $this;
     }
+    
     
     /**
      * 
@@ -177,12 +175,9 @@ class QueryBuilder {
      * @param array $query
      * @return array
      */
-    private function setQuery(array $params = array(), array $query) {
-        if (empty($params)) {
-            $body = static::template_base();
-        }
-        $params[self::ES_FIELD_QUERY][self::ES_FIELD_FILTERED][self::ES_FIELD_QUERY] = $query;
-        return $params;
+    private function setQuery(array $query) {
+        $this->preparedParams[self::ES_FIELD_BODY][self::ES_FIELD_QUERY][self::ES_FIELD_FILTERED][self::ES_FIELD_QUERY] = $query;
+        return $this->preparedParams;
     }
 
     /**
@@ -191,11 +186,11 @@ class QueryBuilder {
      * @param array $filter
      * @return array
      */
-    private function addFilter(array $params = array(), array $filter, $condition = self::ES_FIELD_MUST) {
-        $filters = $params[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+    private function addFilter(array $filter, $condition = self::ES_FIELD_MUST) {
+        $filters = $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
             [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
             [static::ES_FIELD_BOOL][$condition][] = $filter;
-        return $params;
+        return $this->preparedParams;
     }
 
     /**
@@ -217,7 +212,7 @@ class QueryBuilder {
      * @param array $params
      * @param type $filter
      */
-    private function addAggregation(array $params = array(), $filter) {
+    private function processAggregation($filter) {
         /* @var $aggs \O2\QueryBuilder\Filter\FilterInterface */
         if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
             $aggs = $this->filters[static::ES_FIELD_AGGS];
@@ -225,9 +220,9 @@ class QueryBuilder {
                 $filter = array($filter => $filter);
             }
             $aggs->updateFromArray($filter);
-            $params[static::ES_FIELD_BODY][static::ES_FIELD_AGGS] = $aggs->getFilter();
+            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS] = $aggs->getFilter();
         }
-        return $params;
+        return $this->preparedParams;
     }
 
     /**
@@ -251,7 +246,6 @@ class QueryBuilder {
               ),
             ),
           ),
-          self::ES_FIELD_AGGS => array(),
         );
     }
 
