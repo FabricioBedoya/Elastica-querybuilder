@@ -123,7 +123,7 @@ class QueryBuilder {
      * 
      * @param array $filters
      */
-    private function processFilters(array $filters) {
+    public function processFilters(array $filters) {
         /* @var $filter \O2\QueryBuilder\Filter\FilterInterface */
         foreach ($filters as $key => $parameter) {
             $condition = null;
@@ -175,7 +175,7 @@ class QueryBuilder {
      * @param array $query
      * @return array
      */
-    private function setQuery(array $query) {
+    public function setQuery(array $query) {
         $this->preparedParams[self::ES_FIELD_BODY][self::ES_FIELD_QUERY][self::ES_FIELD_FILTERED][self::ES_FIELD_QUERY] = $query;
         return $this->preparedParams;
     }
@@ -186,7 +186,7 @@ class QueryBuilder {
      * @param array $filter
      * @return array
      */
-    private function addFilter(array $filter, $condition = self::ES_FIELD_MUST) {
+    public function addFilter(array $filter, $condition = self::ES_FIELD_MUST) {
         $filters = $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
             [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
             [static::ES_FIELD_BOOL][$condition][] = $filter;
@@ -212,7 +212,7 @@ class QueryBuilder {
      * @param array $params
      * @param type $filter
      */
-    private function processAggregation($filter) {
+    public function processAggregation($filter) {
         /* @var $aggs \O2\QueryBuilder\Filter\FilterInterface */
         if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
             $aggs = $this->filters[static::ES_FIELD_AGGS];
