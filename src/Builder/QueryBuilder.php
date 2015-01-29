@@ -85,15 +85,9 @@ class QueryBuilder {
      */
     public function processParams(array $parameters) {
 
-        if (array_key_exists(static::ES_FIELD_INDEX, $parameters)) {
-            $this->preparedParams[static::ES_FIELD_INDEX] = $this->setParameter(static::ES_FIELD_INDEX, $parameters);
+        foreach(array(static::ES_FIELD_INDEX, static::ES_FIELD_TYPE, static::ES_FIELD_SIZE, static::ES_FIELD_FROM) as $key) {
+            $this->setOption($key, $parameters);
         }
-        if (array_key_exists(static::ES_FIELD_TYPE, $parameters)) {
-            $this->preparedParams[static::ES_FIELD_TYPE] = $this->setParameter(static::ES_FIELD_TYPE, $parameters);
-        }
-
-        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_SIZE] = $this->setParameter(static::ES_FIELD_SIZE, $parameters);
-        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_FROM] = $this->setParameter(static::ES_FIELD_FROM, $parameters);
         
         switch (true) {
             case array_key_exists(static::ES_FIELD_QUERY, $parameters):
@@ -199,11 +193,18 @@ class QueryBuilder {
      * @param array $parameters
      * @return type
      */
-    private function setParameter($key, array $parameters) {
+    public function setOption($key, array $parameters) {
         if (!array_key_exists($key, $parameters) && array_key_exists($key, $this->options)) {
-            return $this->options[$key];
+            $value = $this->options[$key];
         } else {
-            return $parameters[$key];
+            $value = $parameters[$key];
+        }
+        
+        if (in_array($key, array(static::ES_FIELD_INDEX, static::ES_FIELD_TYPE))) {
+            $this->preparedParams[$key] = $value;
+        }
+        else {
+            $this->preparedParams[static::ES_FIELD_BODY][$key] = $value;
         }
     }
 
