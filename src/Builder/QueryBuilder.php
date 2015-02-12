@@ -30,7 +30,6 @@ class QueryBuilder {
     const ES_FIELD_SIZE = 'size';
     const ES_FIELD_FROM = 'from';
     const ES_FIELD_OPTIONS = 'options';
-    
 
     /**
      *
@@ -43,7 +42,7 @@ class QueryBuilder {
      * @var array
      */
     protected $options = array();
-    
+
     /**
      *
      * @var array
@@ -61,7 +60,7 @@ class QueryBuilder {
     public function addFilterHandler($key, TQFilterInterface $filter) {
         $this->filters[$key] = $filter;
     }
-    
+
     /**
      * 
      * @return array
@@ -78,17 +77,17 @@ class QueryBuilder {
         $this->preparedParams = $preparedParams;
     }
 
-        /**
+    /**
      * 
      * @param array $parameters
      * @return array
      */
     public function processParams(array $parameters) {
 
-        foreach(array(static::ES_FIELD_INDEX, static::ES_FIELD_TYPE, static::ES_FIELD_SIZE, static::ES_FIELD_FROM) as $key) {
+        foreach (array(static::ES_FIELD_INDEX, static::ES_FIELD_TYPE, static::ES_FIELD_SIZE, static::ES_FIELD_FROM) as $key) {
             $this->setOption($key, $parameters);
         }
-        
+
         switch (true) {
             case array_key_exists(static::ES_FIELD_QUERY, $parameters):
                 $baseQuery = new Query();
@@ -112,7 +111,7 @@ class QueryBuilder {
         }
         return $this;
     }
-    
+
     /**
      * 
      * @param array $filters
@@ -123,32 +122,29 @@ class QueryBuilder {
             $condition = null;
             if (in_array($key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
                 $condition = $key;
-                foreach($parameter as $subKey => $subfilter) {
-                    if (count($subfilter)>1) {
-                        foreach($subfilter as $entry) {
+                foreach ($parameter as $subKey => $subfilter) {
+                    if (count($subfilter) > 1) {
+                        foreach ($subfilter as $entry) {
                             $filterStragety = $this->getFilterStrategy($subKey);
                             $filterStragety->updateFromArray($entry);
                             $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
                         }
-                    }
-                    else {
+                    } else {
                         $filterStragety = $this->getFilterStrategy($subKey);
                         $filterStragety->updateFromArray($subfilter);
                         $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
                     }
-                }                    
-            }
-            else {
+                }
+            } else {
                 $condition = static::ES_FIELD_MUST;
                 $filterStragety = $this->getFilterStrategy($key);
                 $filterStragety->updateFromArray($parameter);
                 $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
-            }                
+            }
         }
         return $this;
     }
-    
-    
+
     /**
      * 
      * @param type $nameFilter
@@ -157,7 +153,7 @@ class QueryBuilder {
      */
     private function getFilterStrategy($nameFilter) {
         if (!array_key_exists($nameFilter, $this->filters)) {
-            throw new \Exception(sprintf('Filter %s not found',$nameFilter));
+            throw new \Exception(sprintf('Filter %s not found', $nameFilter));
         }
         $filter = clone $this->filters[$nameFilter];
         return $filter;
@@ -199,11 +195,10 @@ class QueryBuilder {
         } else {
             $value = $parameters[$key];
         }
-        
+
         if (in_array($key, array(static::ES_FIELD_INDEX, static::ES_FIELD_TYPE))) {
             $this->preparedParams[$key] = $value;
-        }
-        else {
+        } else {
             $this->preparedParams[static::ES_FIELD_BODY][$key] = $value;
         }
     }
@@ -247,7 +242,64 @@ class QueryBuilder {
               ),
             ),
           ),
+          self::ES_FIELD_AGGS => array(
+            'ETBL_REG_SECTION_ID' => array(
+              'terms' => array(
+                'field' => 'ETBL_REG_SECTION_ID',
+                'size' => 0,
+              ),
+              'aggs' => array(
+                'ETBL_REG_SOUS_SEC_ID' => array(
+                  'terms' => array(
+                    'field' => 'ETBL_REG_SOUS_SEC_ID',
+                    'size' => 0,
+                  ),
+                ),
+              ),
+            ),
+            'CARACTERISTIQUES' => array(
+              'nested' => array(
+                'path' => 'CARACTERISTIQUES',
+              ),
+              'aggs' => array(
+                'CARACT_ATTRIBUTS' => array(
+                  'nested' => array(
+                    'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
+                  ),
+                  'aggs' => array(
+                    'CARACT_ATTRB_ID' => array(
+                      'terms' => array(
+                        'field' => 'CARACT_ATTRB_ID',
+                        'size' => 0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            'THEMATIQUES' => array(
+              'nested' => array(
+                'path' => 'THEMATIQUES',
+              ),
+              'aggs' => array(
+                'THEM_CLASSES' => array(
+                  'nested' => array(
+                    'path' => 'THEMATIQUES.THEM_CLASSES',
+                  ),
+                  'aggs' => array(
+                    'THEM_CLASS_ID' => array(
+                      'terms' => array(
+                        'field' => 'THEM_CLASS_ID',
+                        'size' => 0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         );
+
     }
 
 }
