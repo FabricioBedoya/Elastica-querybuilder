@@ -19,6 +19,11 @@ class FilterTerm implements FilterInterface {
         }
     }
     
+    /**
+     * 
+     * @param array $parameters
+     * @return boolean
+     */
     public function updateFromArray(array $parameters) {
         $this->field = key($parameters);
         $this->value = $parameters[key($parameters)];
@@ -33,7 +38,7 @@ class FilterTerm implements FilterInterface {
         $query = array();
         $query['term'] = array(
             $this->field => $this->value,
-        );
+        );            
         return $query;
     }
 

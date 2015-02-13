@@ -125,11 +125,19 @@ class QueryBuilder {
                 foreach ($parameter as $subKey => $subfilter) {
                     if (count($subfilter) > 1) {
                         foreach ($subfilter as $entry) {
+                            if ($this->isNested($entry)) {
+                                $subKey = 'nested';
+                                $entry = array($condition => $entry);
+                            }
                             $filterStragety = $this->getFilterStrategy($subKey);
                             $filterStragety->updateFromArray($entry);
                             $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
                         }
                     } else {
+                        if ($this->isNested($subfilter)) {
+                            $subKey = 'nested';
+                            $entry = array($condition => $subfilter);
+                        }
                         $filterStragety = $this->getFilterStrategy($subKey);
                         $filterStragety->updateFromArray($subfilter);
                         $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
@@ -137,6 +145,10 @@ class QueryBuilder {
                 }
             } else {
                 $condition = static::ES_FIELD_MUST;
+                if ($this->isNested($parameter)) {
+                    $subKey = 'nested';
+                    $entry = array($condition => $parameter);
+                }
                 $filterStragety = $this->getFilterStrategy($key);
                 $filterStragety->updateFromArray($parameter);
                 $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
@@ -159,6 +171,10 @@ class QueryBuilder {
         return $filter;
     }
 
+    private function isNested(array $filter) {
+        return strpos(key($filter), '.');
+    }
+
     /**
      * 
      * @param array $params
@@ -177,9 +193,33 @@ class QueryBuilder {
      * @return array
      */
     public function addFilter(array $filter, $condition = self::ES_FIELD_MUST) {
-        $filters = $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
-            [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
-            [static::ES_FIELD_BOOL][$condition][] = $filter;
+        if (array_key_exists('nested', $filter)) {
+            $term = null;
+            foreach ($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+            [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER][static::ES_FIELD_BOOL] as $key => $groupCond) {
+                foreach ($groupCond as $pos => $item) {
+                    if (array_key_exists('nested', $item)) {
+                        if ($item['nested']['path'] == $filter['nested']['path']) {
+                            $term = array_shift($filter['nested'][static::ES_FIELD_FILTER]
+                                [static::ES_FIELD_BOOL][$condition]);
+                            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+                                [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
+                                [static::ES_FIELD_BOOL][$key][$pos]['nested'][static::ES_FIELD_FILTER]
+                                [static::ES_FIELD_BOOL][$condition][] = $term;
+                        }
+                    }
+                }
+            }
+            if ($term === null) {
+                $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+                [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
+                [static::ES_FIELD_BOOL][$condition][] = $filter;
+            }            
+        } else {
+            $filters = $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+                [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
+                [static::ES_FIELD_BOOL][$condition][] = $filter;
+        }
         return $this->preparedParams;
     }
 
@@ -299,7 +339,6 @@ class QueryBuilder {
             ),
           ),
         );
-
     }
 
 }
