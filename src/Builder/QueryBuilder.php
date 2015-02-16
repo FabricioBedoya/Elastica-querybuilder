@@ -212,9 +212,9 @@ class QueryBuilder {
             }
             if ($term === null) {
                 $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
-                [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
-                [static::ES_FIELD_BOOL][$condition][] = $filter;
-            }            
+                    [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
+                    [static::ES_FIELD_BOOL][$condition][] = $filter;
+            }
         } else {
             $filters = $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
                 [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
@@ -288,13 +288,17 @@ class QueryBuilder {
                 'field' => 'ETBL_REG_SECTION_ID',
                 'size' => 0,
               ),
-              'aggs' => array(
-                'ETBL_REG_SOUS_SEC_ID' => array(
-                  'terms' => array(
-                    'field' => 'ETBL_REG_SOUS_SEC_ID',
-                    'size' => 0,
-                  ),
-                ),
+            ),
+            'ETBL_REG_SOUS_SEC_ID' => array(
+              'terms' => array(
+                'field' => 'ETBL_REG_SOUS_SEC_ID',
+                'size' => 0,
+              ),
+            ),
+            'ETBL_REG_CAT_ID' => array(
+              'terms' => array(
+                'field' => 'ETBL_REG_CAT_ID',
+                'size' => 0,
               ),
             ),
             'CARACTERISTIQUES' => array(
