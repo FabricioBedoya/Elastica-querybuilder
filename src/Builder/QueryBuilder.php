@@ -270,9 +270,9 @@ class QueryBuilder {
      * @param string $carateristique_id
      * @param array $ids_array
      */
-    public function processCarateristicAggregation($carateristique_id, $ids_array) {
+    public function processCarateristicAggregation($carateristic_id, $ids_array) {
         if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
-          $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_CARACT]['aggs'][$carateristique_id] = $this->carateristique_agg($carateristique_id, $ids_array);
+          $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_CARACT]['aggs'][$carateristique_id] = $this->carateristic_agg($carateristic_id, $ids_array);
         }
         return $this->preparedParams;
     }
@@ -281,11 +281,11 @@ class QueryBuilder {
      * 
      * @return array
      */
-    public static function carateristic_agg($carateristique_id, $ids_array) {
+    public static function carateristic_agg($carateristic_id, $ids_array) {
         return array(
                 'filter' => array(
                     'term' => array(
-                        'CARACT_ID' => $carateristique_id
+                        'CARACT_ID' => $carateristic_id
                     )
                 ),
                 'aggs' => array(
