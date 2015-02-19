@@ -272,7 +272,7 @@ class QueryBuilder {
      */
     public function processCarateristicAggregation($carateristic_id, $ids_array) {
         if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
-          $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_CARACT]['aggs'][$carateristique_id] = $this->carateristic_agg($carateristic_id, $ids_array);
+          $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_CARACT]['aggs'][$carateristic_id] = $this->carateristic_agg($carateristic_id, $ids_array);
         }
         return $this->preparedParams;
     }
