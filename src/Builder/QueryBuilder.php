@@ -31,6 +31,7 @@ class QueryBuilder {
     const ES_FIELD_SIZE = 'size';
     const ES_FIELD_FROM = 'from';
     const ES_FIELD_OPTIONS = 'options';
+    const ES_FIELD_CARACT = 'CARACTERISTIQUES';
 
     /**
      *
@@ -266,6 +267,56 @@ class QueryBuilder {
 
     /**
      * 
+     * @param string $carateristique_id
+     * @param array $ids_array
+     */
+    public function processCarateristicAggregation($carateristique_id, $ids_array) {
+        if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
+          $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_CARACT]['aggs'][$carateristique_id] = $this->carateristique_agg($carateristique_id, $ids_array);
+        }
+        return $this->preparedParams;
+    }
+
+    /**
+     * 
+     * @return array
+     */
+    public static function carateristic_agg($carateristique_id, $ids_array) {
+        return array(
+                'filter' => array(
+                    'term' => array(
+                        'CARACT_ID' => $carateristique_id
+                    )
+                ),
+                'aggs' => array(
+                  'list' => array(
+                    'nested' => array(
+                      'path' => "CARACTERISTIQUES.CARACT_ATTRIBUTS"
+                    ),
+                    'aggs' => array(
+                      'filters_fix' => array(
+                        'filter' => array(
+                          'terms' => array(
+                            'CARACT_ATTRB_ID' => $ids_array
+                          )
+                        ),
+                        'aggs' => array(
+                          'act_filters' => array(
+                             'terms' => array(
+                                'field' => 'CARACT_ATTRB_ID',
+                                'size' => 0
+                             )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                );
+    }
+
+    /**
+     * 
      * @return array
      */
     public static function template_base() {
@@ -304,24 +355,9 @@ class QueryBuilder {
                 'size' => 0,
               ),
             ),
-            'CARACTERISTIQUES' => array(
+            self::ES_FIELD_CARACT => array(
               'nested' => array(
                 'path' => 'CARACTERISTIQUES',
-              ),
-              'aggs' => array(
-                'CARACT_ATTRIBUTS' => array(
-                  'nested' => array(
-                    'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
-                  ),
-                  'aggs' => array(
-                    'CARACT_ATTRB_ID' => array(
-                      'terms' => array(
-                        'field' => 'CARACT_ATTRB_ID',
-                        'size' => 0,
-                      ),
-                    ),
-                  ),
-                ),
               ),
             ),
             'THEMATIQUES' => array(
