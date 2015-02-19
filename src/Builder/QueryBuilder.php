@@ -25,6 +25,7 @@ class QueryBuilder {
     const ES_FIELD_BOOL = 'bool';
     const ES_FIELD_MUST = 'must';
     const ES_FIELD_MUST_NOT = 'must_not';
+    const ES_FIELD_NESTED = 'nested';
     const ES_FIELD_SHOULD = 'should';
     const ES_FIELD_AGGS = 'aggs';
     const ES_FIELD_SIZE = 'size';
@@ -52,12 +53,12 @@ class QueryBuilder {
     public function __construct($filters = array(), array $options = array()) {
         $this->options = $options;
         foreach ($filters as $key => $filter) {
-            $this->addFilterHandler($key, $filter);
+            $this->addFilterStrategy($key, $filter);
         }
         $this->preparedParams[static::ES_FIELD_BODY] = static::template_base();
     }
 
-    public function addFilterHandler($key, TQFilterInterface $filter) {
+    public function addFilterStrategy($key, TQFilterInterface $filter) {
         $this->filters[$key] = $filter;
     }
 
@@ -123,22 +124,24 @@ class QueryBuilder {
             if (in_array($key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
                 $condition = $key;
                 foreach ($parameter as $subKey => $subfilter) {
-                    if (count($subfilter) > 1) {
-                        foreach ($subfilter as $entry) {
+                    if (is_numeric($subKey) || $subKey == '0') {
+                        foreach ($subfilter as $subStrategy =>$entry) {
+                            $strategy = $subStrategy;
                             if ($this->isNested($entry)) {
-                                $subKey = 'nested';
-                                $entry = array($condition => $entry);
+                                $strategy = static::ES_FIELD_NESTED;
+                                $entry = array($condition => array(static::ES_FIELD_NESTED => array($subStrategy => $entry)));
                             }
-                            $filterStragety = $this->getFilterStrategy($subKey);
+                            $filterStragety = $this->getFilterStrategy($strategy);
                             $filterStragety->updateFromArray($entry);
                             $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
                         }
                     } else {
+                        $strategy = $subKey;
                         if ($this->isNested($subfilter)) {
-                            $subKey = 'nested';
-                            $entry = array($condition => $subfilter);
+                            $strategy = static::ES_FIELD_NESTED;
+                            $subfilter = array($condition => array(static::ES_FIELD_NESTED => array($subKey => $subfilter)));
                         }
-                        $filterStragety = $this->getFilterStrategy($subKey);
+                        $filterStragety = $this->getFilterStrategy($strategy);
                         $filterStragety->updateFromArray($subfilter);
                         $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
                     }
