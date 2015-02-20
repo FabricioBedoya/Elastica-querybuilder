@@ -289,6 +289,16 @@ class QueryBuilder {
                     )
                 ),
                 'aggs' => array(
+                  "fr" => array(
+                     "terms" => array(
+                        "field" => "CARACT_NOM_FR"
+                     )
+                  ),
+                  "en" => array(
+                     "terms" => array(
+                        "field" => "CARACT_NOM_EN"
+                     )
+                  ),
                   'list' => array(
                     'nested' => array(
                       'path' => "CARACTERISTIQUES.CARACT_ATTRIBUTS"
@@ -305,7 +315,19 @@ class QueryBuilder {
                              'terms' => array(
                                 'field' => 'CARACT_ATTRB_ID',
                                 'size' => 0
-                             )
+                              ),
+                             "aggs" => array(
+                                "fr" => array(
+                                   "terms" => array(
+                                      "field" => "CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_NOM_FR.BRUT"
+                                   )
+                                ),
+                                "en" => array(
+                                  "terms" => array(
+                                    "field" => "CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_NOM_EN.BRUT"
+                                  )
+                                )
+                              )
                             )
                           )
                         )
