@@ -118,46 +118,77 @@ class QueryBuilder {
      * 
      * @param array $filters
      */
+	 var $crissDeCave = true;
     public function processFilters(array $filters) {
-        /* @var $filter \O2\QueryBuilder\Filter\FilterInterface */
-        foreach ($filters as $key => $parameter) {
-            $condition = null;
-            if (in_array($key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
-                $condition = $key;
-                foreach ($parameter as $subKey => $subfilter) {
-                    if (is_numeric($subKey) || $subKey == '0') {
-                        foreach ($subfilter as $subStrategy =>$entry) {
-                            $strategy = $subStrategy;
-                            if ($this->isNested($entry)) {
-                                $strategy = static::ES_FIELD_NESTED;
-                                $entry = array($condition => array(static::ES_FIELD_NESTED => array($subStrategy => $entry)));
-                            }
-                            $filterStragety = $this->getFilterStrategy($strategy);
-                            $filterStragety->updateFromArray($entry);
-                            $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
-                        }
-                    } else {
-                        $strategy = $subKey;
-                        if ($this->isNested($subfilter)) {
-                            $strategy = static::ES_FIELD_NESTED;
-                            $subfilter = array($condition => array(static::ES_FIELD_NESTED => array($subKey => $subfilter)));
-                        }
-                        $filterStragety = $this->getFilterStrategy($strategy);
-                        $filterStragety->updateFromArray($subfilter);
-                        $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
-                    }
-                }
-            } else {
-                $condition = static::ES_FIELD_MUST;
-                if ($this->isNested($parameter)) {
-                    $subKey = 'nested';
-                    $entry = array($condition => $parameter);
-                }
-                $filterStragety = $this->getFilterStrategy($key);
-                $filterStragety->updateFromArray($parameter);
-                $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
-            }
-        }
+		if($this->crissDeCave){
+			/* @var $filter \O2\QueryBuilder\Filter\FilterInterface */
+			foreach ($filters as $key => $parameter) {
+				$condition = null;
+				if (in_array($key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
+					$condition = $key;
+					foreach ($parameter as $subKey => $subfilter) {
+						if (is_numeric($subKey) || $subKey == '0') {
+							foreach ($subfilter as $subStrategy =>$entry) {
+								$strategy = $subStrategy;
+								if ($this->isNested($entry)) {
+									$strategy = static::ES_FIELD_NESTED;
+									$entry = array($condition => array(static::ES_FIELD_NESTED => array($subStrategy => $entry)));
+								}
+								$filterStragety = $this->getFilterStrategy($strategy);
+								$filterStragety->updateFromArray($entry);
+								$this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
+							}
+						} else {
+							$strategy = $subKey;
+							if ($this->isNested($subfilter)) {
+								$strategy = static::ES_FIELD_NESTED;
+								$subfilter = array($condition => array(static::ES_FIELD_NESTED => array($subKey => $subfilter)));
+							}
+							$filterStragety = $this->getFilterStrategy($strategy);
+							$filterStragety->updateFromArray($subfilter);
+							$this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
+						}
+					}
+				} else {
+					$condition = static::ES_FIELD_MUST;
+					if ($this->isNested($parameter)) {
+						$subKey = 'nested';
+						$entry = array($condition => $parameter);
+					}
+					$filterStragety = $this->getFilterStrategy($key);
+					$filterStragety->updateFromArray($parameter);
+					$this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
+				}
+			}
+			
+			
+		}else{
+			kpr($filters);
+			foreach ($filters as $key => $parameter) {
+				$condition = null;
+				if (in_array($key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
+					$condition = $key;
+				}else{
+					$condition = static::ES_FIELD_MUST;
+					$parameter = array($key=>$parameter);
+				}
+				foreach ($parameter as $subKey => $subfilter) {
+					if (!is_numeric($subKey) && $subKey != '0') {
+						$subfilter = array($subKey => $subfilter);
+					}
+					foreach ($subfilter as $subStrategy =>$entry) {
+						$strategy = $subStrategy;
+						if ($this->isNested($entry)) {
+							$strategy = static::ES_FIELD_NESTED;
+							$entry = array($condition => array(static::ES_FIELD_NESTED => array($subStrategy => $entry)));
+						}
+						$filterStragety = $this->getFilterStrategy($strategy);
+						$filterStragety->updateFromArray($entry);
+						$this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
+					}
+				}
+			}
+		}			
         return $this;
     }
 
