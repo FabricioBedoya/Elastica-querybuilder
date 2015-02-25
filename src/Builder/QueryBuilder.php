@@ -32,6 +32,7 @@ class QueryBuilder {
     const ES_FIELD_FROM = 'from';
     const ES_FIELD_OPTIONS = 'options';
     const ES_FIELD_CARACT = 'CARACTERISTIQUES';
+    const ES_FIELD_THEME = 'THEMATIQUES';
 
     /**
      *
@@ -309,6 +310,17 @@ class QueryBuilder {
 
     /**
      * 
+     * @param array $ids_array
+     */
+    public function processThematicAggregation($ids_array) {
+        if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
+          $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_THEME]['aggs'] = $this->thematic_agg($ids_array);
+        }
+        return $this->preparedParams;
+    }
+
+    /**
+     * 
      * @return array
      */
     public static function carateristic_agg($carateristic_id, $ids_array) {
@@ -371,6 +383,49 @@ class QueryBuilder {
      * 
      * @return array
      */
+    public static function thematic_agg($ids_array) {
+        return array(
+                  'list' => array(
+                    'nested' => array(
+                      'path' => "THEMATIQUES.THEM_CLASSES"
+                    ),
+                    'aggs' => array(
+                      'filters_fix' => array(
+                        'filter' => array(
+                          'terms' => array(
+                            'THEM_CLASS_ID' => $ids_array
+                          )
+                        ),
+                        'aggs' => array(
+                          'act_filters' => array(
+                             'terms' => array(
+                                'field' => 'THEM_CLASS_ID',
+                                'size' => 0
+                              ),
+                             "aggs" => array(
+                                "fr" => array(
+                                   "terms" => array(
+                                      "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_FR.BRUT"
+                                   )
+                                ),
+                                "en" => array(
+                                  "terms" => array(
+                                    "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_EN.BRUT"
+                                  )
+                                )
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  );
+    }
+
+    /**
+     * 
+     * @return array
+     */
     public static function template_base() {
         return array(
           self::ES_FIELD_SIZE => 0,
@@ -412,24 +467,9 @@ class QueryBuilder {
                 'path' => 'CARACTERISTIQUES',
               ),
             ),
-            'THEMATIQUES' => array(
+            self::ES_FIELD_THEME => array(
               'nested' => array(
                 'path' => 'THEMATIQUES',
-              ),
-              'aggs' => array(
-                'THEM_CLASSES' => array(
-                  'nested' => array(
-                    'path' => 'THEMATIQUES.THEM_CLASSES',
-                  ),
-                  'aggs' => array(
-                    'THEM_CLASS_ID' => array(
-                      'terms' => array(
-                        'field' => 'THEM_CLASS_ID',
-                        'size' => 0,
-                      ),
-                    ),
-                  ),
-                ),
               ),
             ),
           ),
