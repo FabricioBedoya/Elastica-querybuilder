@@ -163,7 +163,6 @@ class QueryBuilder {
 			
 			
 		}else{
-			kpr($filters);
 			foreach ($filters as $key => $parameter) {
 				$condition = null;
 				if (in_array((string)$key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
@@ -184,7 +183,6 @@ class QueryBuilder {
 						}
 						$filterStragety = $this->getFilterStrategy($strategy);
 						$filterStragety->updateFromArray($entry);
-						kpr(array($filterStragety,$condition));
 						$this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
 					}
 				}
