@@ -173,6 +173,9 @@ class QueryBuilder {
 					$parameter = array($key=>$parameter);
 				}
 				foreach ($parameter as $subKey => $subfilter) {
+                    if ($subfilter == null || empty($subfilter)) {
+                        continue;
+                    }
 					if (!is_numeric($subKey) && $subKey != '0') {
 						$subfilter = array($subKey => $subfilter);
 					}
