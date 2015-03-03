@@ -322,6 +322,11 @@ class QueryBuilder {
         return $this->preparedParams;
     }
 
+    public function unsetAggregations() {
+        unset($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]);
+        return $this->preparedParams;
+    }
+
     /**
      * 
      * @return array
