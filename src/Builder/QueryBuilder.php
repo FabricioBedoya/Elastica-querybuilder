@@ -480,7 +480,26 @@ class QueryBuilder {
                 'path' => 'THEMATIQUES',
               ),
             ),
-          ),
+            'ETBL_REGION_ID' => array(
+              'terms' => array(
+                'field' => 'ETBL_REGION_ID',
+                'size' => 0,
+              ),
+               "aggs" => array(
+                  "fr" => array(
+                     "terms" => array(
+                        "field" => "ETBL_REGION_NOM_FR"
+                     )
+                  ),
+                  "en" => array(
+                    "terms" => array(
+                      "field" => "ETBL_REGION_NOM_EN"
+                    )
+                  )
+                )
+              )
+            ),
+
         );
     }
 
