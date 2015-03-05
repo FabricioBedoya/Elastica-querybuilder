@@ -70,8 +70,12 @@ class Query {
                     break;
                 case $this->getKeyword() !== null && ($this->getField() === null || $this->getField() == self::QUERY_FIELD_ALL):
                     $this->query = array('match' => array(
-                        '_all' => $value,
-                    )); 
+                                            '_all' => array(
+                                                'query' => $value,
+                                                'operator' => 'and'
+                                            )
+                                        )
+                                    ); 
                     break;
                 case $this->getKeyword() !== null && ($this->getField() !== null && $this->getField() != self::QUERY_FIELD_ALL):
                     $this->query = array('term' => array(
