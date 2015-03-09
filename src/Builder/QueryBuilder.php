@@ -263,6 +263,30 @@ class QueryBuilder {
 
     /**
      * 
+     * @param array $filter
+     * @return array
+     */
+    public function addCityFilter(array $filter) {
+        $filter_found = false;
+        foreach($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+            [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST] as $i => $must_array) {
+            if(array_key_exists("bool", $must_array)) {
+                $filter_found = true;
+                $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY][static::ES_FIELD_FILTERED]
+                [static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST][$i][static::ES_FIELD_BOOL][static::ES_FIELD_SHOULD][] = $filter;
+            }
+        }
+
+        if(!$filter_found) {
+            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY][static::ES_FIELD_FILTERED]
+                [static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST][][static::ES_FIELD_BOOL][static::ES_FIELD_SHOULD][] = $filter;
+        }
+        
+        return $this->preparedParams;
+    }
+
+    /**
+     * 
      * @param string $key
      * @param array $parameters
      * @return type
