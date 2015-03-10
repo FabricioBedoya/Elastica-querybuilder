@@ -119,79 +119,79 @@ class QueryBuilder {
      * 
      * @param array $filters
      */
-	 var $crissDeCave = true;
+     var $crissDeCave = true;
     public function processFilters(array $filters) {
-		if($this->crissDeCave){
-			/* @var $filter \O2\QueryBuilder\Filter\FilterInterface */
-			foreach ($filters as $key => $parameter) {
-				$condition = null;
-				if (in_array($key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
-					$condition = $key;
-					foreach ($parameter as $subKey => $subfilter) {
-						if (is_numeric($subKey) || $subKey == '0') {
-							foreach ($subfilter as $subStrategy =>$entry) {
-								$strategy = $subStrategy;
-								if ($this->isNested($entry)) {
-									$strategy = static::ES_FIELD_NESTED;
-									$entry = array($condition => array(static::ES_FIELD_NESTED => array($subStrategy => $entry)));
-								}
-								$filterStragety = $this->getFilterStrategy($strategy);
-								$filterStragety->updateFromArray($entry);
-								$this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
-							}
-						} else {
-							$strategy = $subKey;
-							if ($this->isNested($subfilter)) {
-								$strategy = static::ES_FIELD_NESTED;
-								$subfilter = array($condition => array(static::ES_FIELD_NESTED => array($subKey => $subfilter)));
-							}
-							$filterStragety = $this->getFilterStrategy($strategy);
-							$filterStragety->updateFromArray($subfilter);
-							$this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
-						}
-					}
-				} else {
-					$condition = static::ES_FIELD_MUST;
-					if ($this->isNested($parameter)) {
-						$subKey = 'nested';
-						$entry = array($condition => $parameter);
-					}
-					$filterStragety = $this->getFilterStrategy($key);
-					$filterStragety->updateFromArray($parameter);
-					$this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
-				}
-			}
-			
-			
-		}else{
-			foreach ($filters as $key => $parameter) {
-				$condition = null;
-				if (in_array((string)$key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
-					$condition = $key;
-				}else{
-					$condition = static::ES_FIELD_MUST;
-					$parameter = array($key=>$parameter);
-				}
-				foreach ($parameter as $subKey => $subfilter) {
+        if($this->crissDeCave){
+            /* @var $filter \O2\QueryBuilder\Filter\FilterInterface */
+            foreach ($filters as $key => $parameter) {
+                $condition = null;
+                if (in_array($key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
+                    $condition = $key;
+                    foreach ($parameter as $subKey => $subfilter) {
+                        if (is_numeric($subKey) || $subKey == '0') {
+                            foreach ($subfilter as $subStrategy =>$entry) {
+                                $strategy = $subStrategy;
+                                if ($this->isNested($entry)) {
+                                    $strategy = static::ES_FIELD_NESTED;
+                                    $entry = array($condition => array(static::ES_FIELD_NESTED => array($subStrategy => $entry)));
+                                }
+                                $filterStragety = $this->getFilterStrategy($strategy);
+                                $filterStragety->updateFromArray($entry);
+                                $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
+                            }
+                        } else {
+                            $strategy = $subKey;
+                            if ($this->isNested($subfilter)) {
+                                $strategy = static::ES_FIELD_NESTED;
+                                $subfilter = array($condition => array(static::ES_FIELD_NESTED => array($subKey => $subfilter)));
+                            }
+                            $filterStragety = $this->getFilterStrategy($strategy);
+                            $filterStragety->updateFromArray($subfilter);
+                            $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
+                        }
+                    }
+                } else {
+                    $condition = static::ES_FIELD_MUST;
+                    if ($this->isNested($parameter)) {
+                        $subKey = 'nested';
+                        $entry = array($condition => $parameter);
+                    }
+                    $filterStragety = $this->getFilterStrategy($key);
+                    $filterStragety->updateFromArray($parameter);
+                    $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
+                }
+            }
+            
+            
+        }else{
+            foreach ($filters as $key => $parameter) {
+                $condition = null;
+                if (in_array((string)$key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
+                    $condition = $key;
+                }else{
+                    $condition = static::ES_FIELD_MUST;
+                    $parameter = array($key=>$parameter);
+                }
+                foreach ($parameter as $subKey => $subfilter) {
                     if ($subfilter == null || empty($subfilter)) {
                         continue;
                     }
-					if (!is_numeric($subKey) && $subKey != '0') {
-						$subfilter = array($subKey => $subfilter);
-					}
-					foreach ($subfilter as $subStrategy =>$entry) {
-						$strategy = $subStrategy;
-						if ($this->isNested($entry)) {
-							$strategy = static::ES_FIELD_NESTED;
-							$entry = array($condition => array(static::ES_FIELD_NESTED => array($subStrategy => $entry)));
-						}
-						$filterStragety = $this->getFilterStrategy($strategy);
-						$filterStragety->updateFromArray($entry);
-						$this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
-					}
-				}
-			}
-		}			
+                    if (!is_numeric($subKey) && $subKey != '0') {
+                        $subfilter = array($subKey => $subfilter);
+                    }
+                    foreach ($subfilter as $subStrategy =>$entry) {
+                        $strategy = $subStrategy;
+                        if ($this->isNested($entry)) {
+                            $strategy = static::ES_FIELD_NESTED;
+                            $entry = array($condition => array(static::ES_FIELD_NESTED => array($subStrategy => $entry)));
+                        }
+                        $filterStragety = $this->getFilterStrategy($strategy);
+                        $filterStragety->updateFromArray($entry);
+                        $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
+                    }
+                }
+            }
+        }           
         return $this;
     }
 
@@ -337,6 +337,19 @@ class QueryBuilder {
 
     /**
      * 
+     * @return array $params
+     */
+    public function processCitiesAggregation() {
+        if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
+          $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['ETBL_VILLE_ID'] = $this->cities_agg();
+        }
+        return $this->preparedParams;
+    }
+
+    
+
+    /**
+     * 
      * @param array $ids_array
      */
     public function processThematicAggregation($ids_array) {
@@ -452,6 +465,31 @@ class QueryBuilder {
                       )
                     )
                   );
+    }
+
+    /**
+     * 
+     * @return array
+     */
+    public static function cities_agg() {
+        return array(
+                'terms' => array(
+                'field' => 'ETBL_VILLE_ID',
+                'size' => 0,
+                  ),
+                "aggs" => array(
+                    "fr" => array(
+                        "terms" => array(
+                            "field" => "ETBL_VILLE_NOM_FR"
+                        )
+                    ),
+                    "en" => array(
+                        "terms" => array(
+                        "field" => "ETBL_VILLE_NOM_EN"
+                    )
+                  )
+                )
+            );
     }
 
     /**
