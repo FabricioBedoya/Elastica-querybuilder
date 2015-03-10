@@ -72,7 +72,8 @@ class Query {
                     $this->query = array('match' => array(
                                             '_all' => array(
                                                 'query' => $value,
-                                                'operator' => 'and'
+                                                'operator' => 'and',
+                                                'fuzziness' => 'AUTO'
                                             )
                                         )
                                     ); 
