@@ -33,6 +33,38 @@ class QueryBuilder {
     const ES_FIELD_OPTIONS = 'options';
     const ES_FIELD_CARACT = 'CARACTERISTIQUES';
     const ES_FIELD_THEME = 'THEMATIQUES';
+    const ES_FIELD_FACETS = 'facets';
+    const ES_CLUSTERS_FACTORS = array(
+                                    "1" => 1,
+                                    "2" => 1,
+                                    "3" => 0.85,
+                                    "4" => 0.82,
+                                    "5" => 0.8,
+                                    "6" => 0.77,
+                                    "7" => 0.73,
+                                    "8" => 0.7,
+                                    "9" => 0.68,
+                                    "10" => 0.67,
+                                    "11" => 0.63,
+                                    "12" => 0.58,
+                                    "13" => 0.55,
+                                    "14" => 0.5,
+                                    "15" => 0.45,
+                                    "16" => 0.37,
+                                    "17" => 0.3,
+                                );
+    const ES_BASE_GEO_BONDING_BOX = array(
+                                        "ADRESSE_PRINC.ADR_GEO_POINT" => array(
+                                            "top_left" => array(
+                                                "lat" => "63.67842894317115",
+                                                "lon" => "-83.66455117187502",
+                                            ),
+                                            "bottom_right" => array(
+                                                "lat" => "43.28200434150256",
+                                                "lon" => "-54.35302773437502",
+                                            )
+                                        )
+                                    );
 
     /**
      *
@@ -288,6 +320,34 @@ class QueryBuilder {
 
     /**
      * 
+     * @param array $geo_bounding_box
+     * @return array
+     */
+    public function addGeoBoundingBoxFilter($geo_bounding_box = array()) {
+        if(!empty($geo_bounding_box)) {
+            $geo_bounding_box = array(
+                    "ADRESSE_PRINC.ADR_GEO_POINT" => array(
+                        "top_left" => array(
+                            "lat" => (string) $geo_bounding_box["top_left"]["lat"],
+                            "lon" => (string) $geo_bounding_box["top_left"]["lon"],
+                        ),
+                        "bottom_right" => array(
+                            "lat" => (string) $geo_bounding_box["bottom_right"]["lat"],
+                            "lon" => (string) $geo_bounding_box["bottom_right"]["lon"],
+                        )
+                    )
+                );
+        }
+        else
+            $geo_bounding_box = static::ES_BASE_GEO_BONDING_BOX;
+
+        $this->processFilters(array('geo_bounding_box' => $geo_bounding_box));
+        
+        return $this->preparedParams;
+    }
+
+    /**
+     * 
      * @param string $key
      * @param array $parameters
      * @return type
@@ -362,6 +422,16 @@ class QueryBuilder {
 
     public function unsetAggregations() {
         unset($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]);
+        return $this->preparedParams;
+    }
+
+    /**
+     * 
+     * @return array $params
+     */
+    public function processClustersFacets($zoom = 1) {
+        $factor = static::ES_CLUSTERS_FACTORS[$zoom];
+        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_FACETS] = $this->cluster_agg($factor);
         return $this->preparedParams;
     }
 
@@ -497,6 +567,23 @@ class QueryBuilder {
      * 
      * @return array
      */
+    public static function cluster_agg($factor) {
+        return array(
+                "places" => array(
+                    "geohash" => array(
+                        "field" => "ADRESSE_PRINC.ADR_GEO_POINT",
+                        "factor" => $factor,
+                        "show_geohash_cell" => "false",
+                        "show_doc_id" => "true"
+                    )
+                )
+            );
+    }
+
+    /**
+     * 
+     * @return array
+     */
     public static function template_base() {
         return array(
           self::ES_FIELD_SIZE => 0,
@@ -562,7 +649,6 @@ class QueryBuilder {
                 )
               )
             ),
-
         );
     }
 
