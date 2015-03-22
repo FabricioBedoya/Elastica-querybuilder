@@ -34,7 +34,8 @@ class QueryBuilder {
     const ES_FIELD_CARACT = 'CARACTERISTIQUES';
     const ES_FIELD_THEME = 'THEMATIQUES';
     const ES_FIELD_FACETS = 'facets';
-    const ES_CLUSTERS_FACTORS = array(
+    
+    protected static $clusters = array(
                                     "1" => 1,
                                     "2" => 1,
                                     "3" => 0.85,
@@ -53,7 +54,7 @@ class QueryBuilder {
                                     "16" => 0.37,
                                     "17" => 0.3,
                                 );
-    const ES_BASE_GEO_BONDING_BOX = array(
+    protected static $base_geo_bounding_box = array(
                                         "ADRESSE_PRINC.ADR_GEO_POINT" => array(
                                             "top_left" => array(
                                                 "lat" => "63.67842894317115",
@@ -339,7 +340,7 @@ class QueryBuilder {
                 );
         }
         else
-            $geo_bounding_box = static::ES_BASE_GEO_BONDING_BOX;
+            $geo_bounding_box = static::$base_geo_bounding_box;
 
         $this->processFilters(array('geo_bounding_box' => $geo_bounding_box));
         
@@ -430,7 +431,7 @@ class QueryBuilder {
      * @return array $params
      */
     public function processClustersFacets($zoom = 1) {
-        $factor = static::ES_CLUSTERS_FACTORS[$zoom];
+        $factor = static::$clusters[$zoom];
         $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_FACETS] = $this->cluster_agg($factor);
         return $this->preparedParams;
     }
