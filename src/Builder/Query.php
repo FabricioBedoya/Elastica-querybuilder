@@ -70,70 +70,70 @@ class Query {
                       array(
                         'must' => array(
                           'match_phrase' => array(
-                            'all_french' => array(
+                            '_all' => array(
                               'query' => $value,
                               'fuzziness' => 'AUTO',
                               'slop' => '4',
                             )
                           )
                         ),
-                        'should' => array(
-                          0 => array('term' => array(
-                              'ETBL_RESERVABLE' => array(
-                                'value' => 1,
-                                'boost' => 3,
-                              )
-                            )
-                          ),
-                          1 => array('nested' => array(
-                                'path' => 'MULTIMEDIAS',
-                                'query'=> array(
-                                  'terms'=>array(
-                                    'MUL_GENRE_ID'=> array(
-                                      0 => 7148165,
-                                      1 => 179105281,
-                                    )
-                                  )
-                                ),
-                                'boost' => 2.5,
-                            )
-                          ),
-                          1 => array('nested' => array(
-                                'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
-                                'query'=> array(
-                                  'term'=>array(
-                                    'CARACT_ATTRB_ID'=> array(
-                                      'value' => 210241848,
-                                    )
-                                  )
-                                ),
-                                'boost' => 2,
-                            )
-                          ),
-                          2 => array('nested' => array(
-                                'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
-                                'query'=> array(
-                                  'term'=>array(
-                                    'CARACT_ATTRB_ID'=> array(
-                                      'value' => 373620213,
-                                    )
-                                  )
-                                ),
-                                'boost' => 1.5,
-                            )
-                          ),
-                          3 => array('nested' => array(
-                                'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
-                                'query'=> array(
-                                  'term'=>array(
-                                    'CARACT_ATTRB_ID'=> array(
-                                      'value' => 373985076,
-                                    )
-                                  )
-                                ),
-                            )
-                          )
-                        ),
+//                        'should' => array(
+//                          0 => array('term' => array(
+//                              'ETBL_RESERVABLE' => array(
+//                                'value' => 1,
+//                                'boost' => 3,
+//                              )
+//                            )
+//                          ),
+//                          1 => array('nested' => array(
+//                                'path' => 'MULTIMEDIAS',
+//                                'query'=> array(
+//                                  'terms'=>array(
+//                                    'MUL_GENRE_ID'=> array(
+//                                      0 => 7148165,
+//                                      1 => 179105281,
+//                                    )
+//                                  )
+//                                ),
+//                                'boost' => 2.5,
+//                            )
+//                          ),
+//                          1 => array('nested' => array(
+//                                'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
+//                                'query'=> array(
+//                                  'term'=>array(
+//                                    'CARACT_ATTRB_ID'=> array(
+//                                      'value' => 210241848,
+//                                    )
+//                                  )
+//                                ),
+//                                'boost' => 2,
+//                            )
+//                          ),
+//                          2 => array('nested' => array(
+//                                'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
+//                                'query'=> array(
+//                                  'term'=>array(
+//                                    'CARACT_ATTRB_ID'=> array(
+//                                      'value' => 373620213,
+//                                    )
+//                                  )
+//                                ),
+//                                'boost' => 1.5,
+//                            )
+//                          ),
+//                          3 => array('nested' => array(
+//                                'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
+//                                'query'=> array(
+//                                  'term'=>array(
+//                                    'CARACT_ATTRB_ID'=> array(
+//                                      'value' => 373985076,
+//                                    )
+//                                  )
+//                                ),
+//                            )
+//                          )
+//                        ),
                       )
                     );
                     break;
