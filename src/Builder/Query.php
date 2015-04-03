@@ -72,7 +72,7 @@ class Query {
                           'match_phrase' => array(
                             '_all' => array(
                               'query' => $value,
-                              'fuzziness' => 'AUTO',
+                              // 'fuzziness' => 'AUTO',
                               'slop' => '4',
                             )
                           )
