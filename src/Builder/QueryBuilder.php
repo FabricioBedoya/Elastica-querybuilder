@@ -497,6 +497,64 @@ class QueryBuilder {
         return $this->preparedParams;
     }
     
+    
+    /**
+     * 
+     * @param type $params
+     * @return \TQ\QueryBundle\Controller\QueryController
+     */
+    public static function processMapRequest($queryHandler, \O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $params) {
+        $geo_bounding_box = array();
+        $zoom = QueryBuilder::ES_ZOOM_DEFAULT;
+        switch (true) {
+            case (array_key_exists(QueryBuilder::ES_FIELD_MAP_REQUEST, $params) && array_key_exists(QueryBuilder::ES_FIELD_ZOOM, $params) && !array_key_exists(QueryBuilder::ES_FIELD_ZOOM_NEEDS_TO_BE_FOUND, $params)):
+                $zoom = $params[QueryBuilder::ES_FIELD_ZOOM];
+                $geo_bounding_box = $params[QueryBuilder::ES_FIELD_GEO_BOUNDING_BOX];
+                break;
+            case (array_key_exists(QueryBuilder::ES_FIELD_MAP_REQUEST, $params) && array_key_exists(QueryBuilder::ES_FIELD_ZOOM_NEEDS_TO_BE_FOUND, $params) && $params[QueryBuilder::ES_FIELD_ZOOM_NEEDS_TO_BE_FOUND] == 'true'):
+                $zoomNeeds = static::calculareZoomNeedsToBeFound($queryHandler, $queryBuilder, $params);
+                if (!empty($zoomNeeds)) {
+                    $zoom = $zoomNeeds[QueryBuilder::ES_FIELD_ZOOM];
+                    $geo_bounding_box = $zoomNeeds[QueryBuilder::ES_FIELD_GEO_BOUNDING_BOX];
+                }
+                break;
+        }
+        $queryBuilder->processClustersFacets($zoom);
+        $queryBuilder->addGeoBoundingBoxFilter($geo_bounding_box);
+        return $queryBuilder;
+    }
+    
+    /**
+     * 
+     * @param type $params
+     * @return array
+     */
+    public static function calculareZoomNeedsToBeFound($queryHandler, \O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $parameters) {
+        $queryBuilderZoom = clone $queryBuilder;
+        $queryBuilderZoom->processClustersFacets(1);
+        $queryBuilderZoom->addGeoBoundingBoxFilter();
+        $params = $queryBuilderZoom->getParams();
+        $zoom_info = $queryHandler->search($params);
+        $bounds = reset($zoom_info['facets']['places']['clusters']);
+        if (isset($bounds['top_left'])) {
+            $geo_bounding_box = array('top_left' => $bounds['top_left'], 'bottom_right' => $bounds['bottom_right']);
+            $bounds = array('max_lon' => $bounds['top_left']['lon'], 'min_lon' => $bounds['bottom_right']['lon']);
+            $zoom = static::getZoom($bounds, $parameters[QueryBuilder::ES_FIELD_MAP_WIDTH]);
+            return array(
+              static::ES_FIELD_GEO_BOUNDING_BOX => $geo_bounding_box,
+              static::ES_FIELD_ZOOM => $zoom
+            );
+        }
+        return array();
+    }
+
+    
+    /**
+     * 
+     * @param type $bounds
+     * @param type $map_width
+     * @return type
+     */
     public static function getZoom($bounds, $map_width) {
         $GLOBE_WIDTH = 256; // a constant in Google's map projection
         $west = $bounds['max_lon'];
