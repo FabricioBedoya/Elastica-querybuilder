@@ -2,10 +2,11 @@
 
 namespace O2\QueryBuilder\Builder;
 
-use O2\QueryBuilder\Filter\FilterInterface as TQFilterInterface;
-use O2\QueryBuilder\Handler\QueryHandler;
+use O2\QueryBuilder\Filter\FilterInterface as O2FilterInterface;
 
 class QueryBuilder {
+    
+    const OPT_RICH_CONTENT = 'rich_content';
 
     const ES_FIELD_INDEX = 'index';
     const ES_FIELD_TYPE = 'type';
@@ -31,9 +32,16 @@ class QueryBuilder {
     const ES_FIELD_SIZE = 'size';
     const ES_FIELD_FROM = 'from';
     const ES_FIELD_OPTIONS = 'options';
+    const ES_FIELD_MAP_REQUEST = 'is_map_resquest';
+    const ES_FIELD_ZOOM = 'zoom';
+    const ES_FIELD_MAP_WIDTH = 'map_width';
+    const ES_FIELD_GEO_BOUNDING_BOX = 'geo_bounding_box';
+    const ES_FIELD_ZOOM_NEEDS_TO_BE_FOUND = 'zoom_needs_to_be_found';
     const ES_FIELD_CARACT = 'CARACTERISTIQUES';
     const ES_FIELD_THEME = 'THEMATIQUES';
     const ES_FIELD_FACETS = 'facets';
+    
+    const ES_ZOOM_DEFAULT = 14;
     
     protected static $clusters = array(
                                     "1" => 1,
@@ -77,23 +85,55 @@ class QueryBuilder {
      *
      * @var array
      */
+    protected $parameters = array();
+    
+    /**
+     *
+     * @var array
+     */
     protected $options = array();
+    
 
     /**
      *
      * @var array
      */
     protected $preparedParams = array();
+    
+    protected static $optionsDefault = array(
+      self::OPT_RICH_CONTENT => true,
+    );
 
-    public function __construct($filters = array(), array $options = array()) {
-        $this->options = $options;
+    /**
+     * 
+     * @param type $filters
+     * @param array $parameters
+     */
+    public function __construct($filters = array(), array $parameters = array(), array $options = array()) {
+        if (!empty($parameters)) {
+            $this->parameters = $parameters;
+        }
+        $this->options = array_merge(static::$optionsDefault, $options);
+        
         foreach ($filters as $key => $filter) {
             $this->addFilterStrategy($key, $filter);
         }
         $this->preparedParams[static::ES_FIELD_BODY] = static::template_base();
     }
+    
+    /**
+     * 
+     */
+    public function __clone() {
+        $this->preparedParams[static::ES_FIELD_BODY] = static::template_base();
+    }
 
-    public function addFilterStrategy($key, TQFilterInterface $filter) {
+    /**
+     * 
+     * @param type $key
+     * @param O2FilterInterface $filter
+     */
+    public function addFilterStrategy($key, O2FilterInterface $filter) {
         $this->filters[$key] = $filter;
     }
 
@@ -121,25 +161,31 @@ class QueryBuilder {
     public function processParams(array $parameters) {
 
         foreach (array(static::ES_FIELD_INDEX, static::ES_FIELD_TYPE, static::ES_FIELD_SIZE, static::ES_FIELD_FROM) as $key) {
-            $this->setOption($key, $parameters);
+            if (array_key_exists($key, $parameters)) {
+                $this->setParameter($key, $parameters[$key]);
+            }
         }
 
         switch (true) {
             case array_key_exists(static::ES_FIELD_QUERY, $parameters):
-                $baseQuery = new Query();
+                $baseQuery = new Query(null, null, $this->options);
                 $baseQuery->updateFromArray($parameters[static::ES_FIELD_QUERY]);
                 break;
             case array_key_exists(static::ES_FIELD_KEYWORD, $parameters):
-                $baseQuery = new Query(null, $parameters[static::ES_FIELD_KEYWORD]);
+                $baseQuery = new Query(null, $parameters[static::ES_FIELD_KEYWORD], $this->options);
                 break;
             default:
-                $baseQuery = new Query();
+                $baseQuery = new Query(null, null, $this->options);
                 break;
         }
         $this->setQuery($baseQuery->getQuery());
 
         if (array_key_exists(static::ES_FIELD_FILTER, $parameters)) {
             $this->processFilters($parameters[static::ES_FIELD_FILTER]);
+        }
+        
+        if (array_key_exists(static::ES_FIELD_MAP_REQUEST, $parameters)) {
+            $this->processMapOptions($parameters[static::ES_FIELD_MAP_REQUEST]);
         }
 
         if (array_key_exists(static::ES_FIELD_AGGS, $parameters)) {
@@ -353,13 +399,7 @@ class QueryBuilder {
      * @param array $parameters
      * @return type
      */
-    public function setOption($key, array $parameters) {
-        if (!array_key_exists($key, $parameters) && array_key_exists($key, $this->options)) {
-            $value = $this->options[$key];
-        } else {
-            $value = $parameters[$key];
-        }
-
+    public function setParameter($key, $value) {
         if (in_array($key, array(static::ES_FIELD_INDEX, static::ES_FIELD_TYPE))) {
             $this->preparedParams[$key] = $value;
         } else {
@@ -367,6 +407,27 @@ class QueryBuilder {
         }
     }
 
+    /**
+     * 
+     * @param type $key
+     * @param type $value
+     */
+    public function setOption($key, $value) {
+        $this->options[$key] = $value;
+    }
+    
+    /**
+     * 
+     * @param type $key
+     * @param type $defaultValue
+     * @return type
+     */
+    public function getOption($key, $defaultValue = null) {
+        if (array_key_exists($key, $this->options)) {
+            return $this->options[$key];
+        }
+        return $defaultValue;
+    }
     /**
      * 
      * @param array $params
@@ -418,7 +479,7 @@ class QueryBuilder {
         if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
           $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_THEME]['aggs'] = $this->thematic_agg($ids_array);
         }
-        return $this->preparedParams;
+        return $this->preparedParams;   
     }
 
     public function unsetAggregations() {
@@ -431,9 +492,21 @@ class QueryBuilder {
      * @return array $params
      */
     public function processClustersFacets($zoom = 1) {
-        $factor = static::$clusters[$zoom];
+        $factor = static::$clusters[$zoom]; 
         $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_FACETS] = $this->cluster_agg($factor);
         return $this->preparedParams;
+    }
+    
+    public static function getZoom($bounds, $map_width) {
+        $GLOBE_WIDTH = 256; // a constant in Google's map projection
+        $west = $bounds['max_lon'];
+        $east = $bounds['min_lon'];
+        $angle = $east - $west;
+        if ($angle < 0) {
+          $angle += 360;
+        }
+        $zoom = floor(log($map_width * 360 / $angle / $GLOBE_WIDTH) / log(2));
+        return $zoom;
     }
 
     /**

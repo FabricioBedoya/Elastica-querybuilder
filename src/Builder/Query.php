@@ -7,33 +7,77 @@ use O2\QueryBuilder\Builder\QueryInterface;
 class Query {
 
     const QUERY_FIELD_ALL = '_all';
+    const QUERY_LANG = 'lang';
+    const QUERY_OPTION_FICHE = 'rich_content';
+    
+    const QUERY_FIELD_FR = 'all_french';
+    const QUERY_FIELD_EN = 'all_english';
+    const LANG_FR = 'fr';
+    const LANG_EN = 'fr';    
+    const QUERY_SLOP = 5;
 
     protected $field;
     protected $keyword;
     protected $query = array();
+    protected $options = array(
+      self::QUERY_LANG => self::LANG_FR,
+      self::QUERY_OPTION_FICHE => true,
+    );
 
     /**
      * 
      * @param string $field
      * @param string $keyword
      */
-    public function __construct($field = null, $keyword = null) {
+    public function __construct($field = null, $keyword = null, array $options = array()) {
         if ($field !== null) {
             $this->field = $field;
         }
         if ($keyword !== null) {
             $this->keyword = $keyword;
         }
+        $this->options = array_merge($this->options, $options);        
     }
 
+    /**
+     * 
+     * @param type $key
+     * @param type $value
+     */
+    public function setOption($key, $value = null) {
+        $this->options[$key] = $value;
+    }
+
+    /**
+     * 
+     * @param type $key
+     * @return type
+     */
+    public function getOption($key) {
+        return $this->options[$key];
+    }
+
+    /**
+     * 
+     * @return type
+     */
     function getField() {
         return $this->field;
     }
 
+    /**
+     * 
+     * @return type
+     */
     function getKeyword() {
         return $this->keyword;
     }
 
+    /**
+     * 
+     * @param array $parameters
+     * @return \O2\QueryBuilder\Builder\Query
+     */
     public function updateFromArray(array $parameters) {
         if (array_key_exists('field', $parameters)) {
             $this->field = $parameters['field'];
@@ -66,76 +110,11 @@ class Query {
                     $this->query = array('match_all' => array());
                     break;
                 case $this->getKeyword() !== null && ($this->getField() === null || $this->getField() == self::QUERY_FIELD_ALL):
-                    $this->query = array('bool' =>
-                      array(
-                        'must' => array(
-                          'match_phrase' => array(
-                            '_all' => array(
-                              'query' => $value,
-                              // 'fuzziness' => 'AUTO',
-                              'slop' => '4',
-                            )
-                          )
-                        ),
-//                        'should' => array(
-//                          0 => array('term' => array(
-//                              'ETBL_RESERVABLE' => array(
-//                                'value' => 1,
-//                                'boost' => 3,
-//                              )
-//                            )
-//                          ),
-//                          1 => array('nested' => array(
-//                                'path' => 'MULTIMEDIAS',
-//                                'query'=> array(
-//                                  'terms'=>array(
-//                                    'MUL_GENRE_ID'=> array(
-//                                      0 => 7148165,
-//                                      1 => 179105281,
-//                                    )
-//                                  )
-//                                ),
-//                                'boost' => 2.5,
-//                            )
-//                          ),
-//                          1 => array('nested' => array(
-//                                'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
-//                                'query'=> array(
-//                                  'term'=>array(
-//                                    'CARACT_ATTRB_ID'=> array(
-//                                      'value' => 210241848,
-//                                    )
-//                                  )
-//                                ),
-//                                'boost' => 2,
-//                            )
-//                          ),
-//                          2 => array('nested' => array(
-//                                'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
-//                                'query'=> array(
-//                                  'term'=>array(
-//                                    'CARACT_ATTRB_ID'=> array(
-//                                      'value' => 373620213,
-//                                    )
-//                                  )
-//                                ),
-//                                'boost' => 1.5,
-//                            )
-//                          ),
-//                          3 => array('nested' => array(
-//                                'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
-//                                'query'=> array(
-//                                  'term'=>array(
-//                                    'CARACT_ATTRB_ID'=> array(
-//                                      'value' => 373985076,
-//                                    )
-//                                  )
-//                                ),
-//                            )
-//                          )
-//                        ),
-                      )
-                    );
+                    if ($this->getOption(self::QUERY_OPTION_FICHE) === true) {
+                        $this->query = static::improveedQueryRichContent($value, $this->getOption(self::QUERY_LANG));
+                    } else {
+                        $this->query = static::queryAll($value);
+                    }
                     break;
                 case $this->getKeyword() !== null && ($this->getField() !== null && $this->getField() != self::QUERY_FIELD_ALL):
                     $this->query = array('term' => array(
@@ -145,6 +124,99 @@ class Query {
             }
         }
         return $this->query;
+    }
+
+    private static function queryAll($value) {
+        return array('bool' =>
+          array(
+            'must' => array(
+              'match_phrase' => array(
+                '_all' => array(
+                  'query' => $value,
+                  'slop' => self::QUERY_SLOP,
+                )
+              )
+            ),
+          )
+        );
+    }
+
+    /**
+     * 
+     * @param string $value
+     * @return array
+     */
+    private static function improveedQueryRichContent($value, $lang = self::LANG_FR) {
+        $field = $lang == self::LANG_FR ? self::QUERY_FIELD_FR : self::QUERY_FIELD_EN;
+        return array('bool' =>
+          array(
+            'must' => array(
+              'match_phrase' => array(
+                $field => array(
+                  'query' => $value,
+                  'slop' => self::QUERY_SLOP,
+                )
+              )
+            ),
+            'should' => array(
+              0 => array('term' => array(
+                  'ETBL_RESERVABLE' => array(
+                    'value' => 1,
+                    'boost' => 3,
+                  )
+                )
+              ),
+              1 => array('nested' => array(
+                  'path' => 'MULTIMEDIAS',
+                  'query' => array(
+                    'terms' => array(
+                      'MUL_GENRE_ID' => array(
+                        0 => 7148165,
+                        1 => 179105281,
+                      )
+                    )
+                  ),
+                  'boost' => 2.5,
+                )
+              ),
+              1 => array('nested' => array(
+                  'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
+                  'query' => array(
+                    'term' => array(
+                      'CARACT_ATTRB_ID' => array(
+                        'value' => 210241848,
+                      )
+                    )
+                  ),
+                  'boost' => 2,
+                )
+              ),
+              2 => array('nested' => array(
+                  'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
+                  'query' => array(
+                    'term' => array(
+                      'CARACT_ATTRB_ID' => array(
+                        'value' => 373620213,
+                      )
+                    )
+                  ),
+                  'boost' => 1.5,
+                )
+              ),
+              3 => array('nested' => array(
+                  'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
+                  'query' => array(
+                    'term' => array(
+                      'CARACT_ATTRB_ID' => array(
+                        'value' => 373985076,
+                      )
+                    )
+                  ),
+                )
+              )
+            ),
+          )
+        );
     }
 
 }
