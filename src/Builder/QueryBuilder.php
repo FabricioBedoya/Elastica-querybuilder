@@ -5,9 +5,8 @@ namespace O2\QueryBuilder\Builder;
 use O2\QueryBuilder\Filter\FilterInterface as O2FilterInterface;
 
 class QueryBuilder {
-    
-    const OPT_RICH_CONTENT = 'rich_content';
 
+    const OPT_RICH_CONTENT = 'rich_content';
     const ES_FIELD_INDEX = 'index';
     const ES_FIELD_TYPE = 'type';
     const ES_FIELD_BODY = 'body';
@@ -41,39 +40,76 @@ class QueryBuilder {
     const ES_FIELD_THEME = 'THEMATIQUES';
     const ES_FIELD_FACETS = 'facets';
     
-    const ES_ZOOM_DEFAULT = 14;
+    const QUERY_FICHE_CLUSTER = 'es';
+    const QUERY_ARTICLE_CLUSTER = 'articles';
     
+    const OPTION_DEBUG = 'option_debug';
+    const QUERY_MAIN = 'query';
+    
+    const QUERY_FILTERS = 'filters';
+    const QUERY_SPECIAL = 'special';
+    const QUERY_ES = 'es';
+    const QUERY_ARTICLES = 'articles';
+    
+    const QUERY_NEARBY = 'nearby';
+    const QUERY_NEARBY_MAXBOX = 'max_box';
+    const QUERY_OPTIONS = 'queryOptions';
+    const QUERY_LANG = 'lang';
+    const QUERY_MAP_REQUEST = 'is_map_resquest';
+    const QUERY_ZOOM = 'zoom';
+    const QUERY_MAP_WIDTH = 'map_width';
+    const QUERY_GEO_BOUNDING_BOX = 'geo_bounding_box';
+    const QUERY_ZOOM_NEEDS_TO_BE_FOUND = 'zoom_needs_to_be_found';
+    
+    public static $paramsAllowed = array(
+      self::QUERY_MAIN,
+      self::QUERY_FILTERS,
+      self::QUERY_OPTIONS,
+      self::QUERY_MAP_REQUEST,
+      self::QUERY_ZOOM_NEEDS_TO_BE_FOUND,
+      self::QUERY_ZOOM,
+      self::QUERY_GEO_BOUNDING_BOX,
+      self::QUERY_MAP_WIDTH,
+      self::OPTION_DEBUG,
+      self::QUERY_LANG,
+      self::QUERY_NEARBY,
+    );
+    
+    const ES_ZOOM_DEFAULT = 14;
+    const ES_RADIUS_M = 3963.1676;
+    const ES_RADIUS_KM = 6378.1;
+
     protected static $clusters = array(
-                                    "1" => 1,
-                                    "2" => 1,
-                                    "3" => 1,
-                                    "4" => 0.85,
-                                    "5" => 0.82,
-                                    "6" => 0.80,
-                                    "7" => 0.78,
-                                    "8" => 0.73,
-                                    "9" => 0.68,
-                                    "10" => 0.67,
-                                    "11" => 0.63,
-                                    "12" => 0.58,
-                                    "13" => 0.55,
-                                    "14" => 0.5,
-                                    "15" => 0.45,
-                                    "16" => 0.37,
-                                    "17" => 0.3,
-                                );
+      "1" => 1,
+      "2" => 1,
+      "3" => 1,
+      "4" => 0.85,
+      "5" => 0.82,
+      "6" => 0.80,
+      "7" => 0.78,
+      "8" => 0.73,
+      "9" => 0.68,
+      "10" => 0.67,
+      "11" => 0.63,
+      "12" => 0.58,
+      "13" => 0.55,
+      "14" => 0.5,
+      "15" => 0.45,
+      "16" => 0.37,
+      "17" => 0.3,
+    );
     protected static $base_geo_bounding_box = array(
-                                        "ADRESSE_PRINC.ADR_GEO_POINT" => array(
-                                            "top_left" => array(
-                                                "lat" => "63.67842894317115",
-                                                "lon" => "-83.66455117187502",
-                                            ),
-                                            "bottom_right" => array(
-                                                "lat" => "43.28200434150256",
-                                                "lon" => "-54.35302773437502",
-                                            )
-                                        )
-                                    );
+      "ADRESSE_PRINC.ADR_GEO_POINT" => array(
+        "top_left" => array(
+          "lat" => "63.67842894317115",
+          "lon" => "-83.66455117187502",
+        ),
+        "bottom_right" => array(
+          "lat" => "43.28200434150256",
+          "lon" => "-54.35302773437502",
+        )
+      )
+    );
 
     /**
      *
@@ -86,20 +122,18 @@ class QueryBuilder {
      * @var array
      */
     protected $parameters = array();
-    
+
     /**
      *
      * @var array
      */
     protected $options = array();
-    
 
     /**
      *
      * @var array
      */
     protected $preparedParams = array();
-    
     protected static $optionsDefault = array(
       self::OPT_RICH_CONTENT => true,
     );
@@ -114,13 +148,13 @@ class QueryBuilder {
             $this->parameters = $parameters;
         }
         $this->options = array_merge(static::$optionsDefault, $options);
-        
+
         foreach ($filters as $key => $filter) {
             $this->addFilterStrategy($key, $filter);
         }
         $this->preparedParams[static::ES_FIELD_BODY] = static::template_base();
     }
-    
+
     /**
      * 
      */
@@ -183,7 +217,7 @@ class QueryBuilder {
         if (array_key_exists(static::ES_FIELD_FILTER, $parameters)) {
             $this->processFilters($parameters[static::ES_FIELD_FILTER]);
         }
-        
+
         if (array_key_exists(static::ES_FIELD_MAP_REQUEST, $parameters)) {
             $this->processMapOptions($parameters[static::ES_FIELD_MAP_REQUEST]);
         }
@@ -198,9 +232,10 @@ class QueryBuilder {
      * 
      * @param array $filters
      */
-     var $crissDeCave = true;
+    var $crissDeCave = true;
+
     public function processFilters(array $filters) {
-        if($this->crissDeCave){
+        if ($this->crissDeCave) {
             /* @var $filter \O2\QueryBuilder\Filter\FilterInterface */
             foreach ($filters as $key => $parameter) {
                 $condition = null;
@@ -208,7 +243,7 @@ class QueryBuilder {
                     $condition = $key;
                     foreach ($parameter as $subKey => $subfilter) {
                         if (is_numeric($subKey) || $subKey == '0') {
-                            foreach ($subfilter as $subStrategy =>$entry) {
+                            foreach ($subfilter as $subStrategy => $entry) {
                                 $strategy = $subStrategy;
                                 if ($this->isNested($entry)) {
                                     $strategy = static::ES_FIELD_NESTED;
@@ -240,16 +275,14 @@ class QueryBuilder {
                     $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
                 }
             }
-            
-            
-        }else{
+        } else {
             foreach ($filters as $key => $parameter) {
                 $condition = null;
-                if (in_array((string)$key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
+                if (in_array((string) $key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
                     $condition = $key;
-                }else{
+                } else {
                     $condition = static::ES_FIELD_MUST;
-                    $parameter = array($key=>$parameter);
+                    $parameter = array($key => $parameter);
                 }
                 foreach ($parameter as $subKey => $subfilter) {
                     if ($subfilter == null || empty($subfilter)) {
@@ -258,7 +291,7 @@ class QueryBuilder {
                     if (!is_numeric($subKey) && $subKey != '0') {
                         $subfilter = array($subKey => $subfilter);
                     }
-                    foreach ($subfilter as $subStrategy =>$entry) {
+                    foreach ($subfilter as $subStrategy => $entry) {
                         $strategy = $subStrategy;
                         if ($this->isNested($entry)) {
                             $strategy = static::ES_FIELD_NESTED;
@@ -270,7 +303,7 @@ class QueryBuilder {
                     }
                 }
             }
-        }           
+        }
         return $this;
     }
 
@@ -347,21 +380,21 @@ class QueryBuilder {
      */
     public function addCityFilter(array $filter) {
         $filter_found = false;
-        foreach($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
-            [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST] as $i => $must_array) {
-            if(array_key_exists("bool", $must_array)) {
+        foreach ($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+        [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST] as $i => $must_array) {
+            if (array_key_exists("bool", $must_array)) {
                 $filter_found = true;
                 $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY][static::ES_FIELD_FILTERED]
-                [static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST][$i][static::ES_FIELD_BOOL][static::ES_FIELD_SHOULD][] = $filter;
+                    [static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST][$i][static::ES_FIELD_BOOL][static::ES_FIELD_SHOULD][] = $filter;
                 break;
             }
         }
 
-        if(!$filter_found) {
+        if (!$filter_found) {
             $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY][static::ES_FIELD_FILTERED]
                 [static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST][][static::ES_FIELD_BOOL][static::ES_FIELD_SHOULD][] = $filter;
         }
-        
+
         return $this->preparedParams;
     }
 
@@ -371,25 +404,24 @@ class QueryBuilder {
      * @return array
      */
     public function addGeoBoundingBoxFilter($geo_bounding_box = array()) {
-        if(!empty($geo_bounding_box)) {
+        if (!empty($geo_bounding_box)) {
             $geo_bounding_box = array(
-                    "ADRESSE_PRINC.ADR_GEO_POINT" => array(
-                        "top_left" => array(
-                            "lat" => (string) $geo_bounding_box["top_left"]["lat"],
-                            "lon" => (string) $geo_bounding_box["top_left"]["lon"],
-                        ),
-                        "bottom_right" => array(
-                            "lat" => (string) $geo_bounding_box["bottom_right"]["lat"],
-                            "lon" => (string) $geo_bounding_box["bottom_right"]["lon"],
-                        )
-                    )
-                );
-        }
-        else
+              "ADRESSE_PRINC.ADR_GEO_POINT" => array(
+                "top_left" => array(
+                  "lat" => (string) $geo_bounding_box["top_left"]["lat"],
+                  "lon" => (string) $geo_bounding_box["top_left"]["lon"],
+                ),
+                "bottom_right" => array(
+                  "lat" => (string) $geo_bounding_box["bottom_right"]["lat"],
+                  "lon" => (string) $geo_bounding_box["bottom_right"]["lon"],
+                )
+              )
+            );
+        } else
             $geo_bounding_box = static::$base_geo_bounding_box;
 
         $this->processFilters(array('geo_bounding_box' => $geo_bounding_box));
-        
+
         return $this->preparedParams;
     }
 
@@ -415,7 +447,7 @@ class QueryBuilder {
     public function setOption($key, $value) {
         $this->options[$key] = $value;
     }
-    
+
     /**
      * 
      * @param type $key
@@ -428,6 +460,7 @@ class QueryBuilder {
         }
         return $defaultValue;
     }
+
     /**
      * 
      * @param array $params
@@ -453,7 +486,7 @@ class QueryBuilder {
      */
     public function processCarateristicAggregation($carateristic_id, $ids_array) {
         if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
-          $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_CARACT]['aggs']['carat' . $carateristic_id] = $this->carateristic_agg($carateristic_id, $ids_array);
+            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_CARACT]['aggs']['carat' . $carateristic_id] = $this->carateristic_agg($carateristic_id, $ids_array);
         }
         return $this->preparedParams;
     }
@@ -464,12 +497,10 @@ class QueryBuilder {
      */
     public function processCitiesAggregation() {
         if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
-          $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['ETBL_VILLE_ID'] = $this->cities_agg();
+            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['ETBL_VILLE_ID'] = $this->cities_agg();
         }
         return $this->preparedParams;
     }
-
-    
 
     /**
      * 
@@ -477,9 +508,9 @@ class QueryBuilder {
      */
     public function processThematicAggregation($ids_array) {
         if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
-          $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_THEME]['aggs'] = $this->thematic_agg($ids_array);
+            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_THEME]['aggs'] = $this->thematic_agg($ids_array);
         }
-        return $this->preparedParams;   
+        return $this->preparedParams;
     }
 
     public function unsetAggregations() {
@@ -492,12 +523,11 @@ class QueryBuilder {
      * @return array $params
      */
     public function processClustersFacets($zoom = 1) {
-        $factor = static::$clusters[$zoom]; 
+        $factor = static::$clusters[$zoom];
         $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_FACETS] = $this->cluster_agg($factor);
         return $this->preparedParams;
     }
-    
-    
+
     /**
      * 
      * @param type $params
@@ -506,8 +536,8 @@ class QueryBuilder {
     public static function processMapRequest($queryHandler, \O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $params) {
         $geo_bounding_box = array();
         $zoom = QueryBuilder::ES_ZOOM_DEFAULT;
-        $zoom_request = @$params[QueryBuilder::ES_FIELD_ZOOM];
-        switch(true) {
+        $zoom_request = $params[QueryBuilder::ES_FIELD_ZOOM];
+        switch (true) {
             case (array_key_exists(QueryBuilder::ES_FIELD_MAP_REQUEST, $params) && array_key_exists(QueryBuilder::ES_FIELD_ZOOM, $params) && $zoom_request !== null):
                 $zoom = $params[QueryBuilder::ES_FIELD_ZOOM];
                 $geo_bounding_box = $params[QueryBuilder::ES_FIELD_GEO_BOUNDING_BOX];
@@ -526,7 +556,7 @@ class QueryBuilder {
         $queryBuilder->addGeoBoundingBoxFilter($geo_bounding_box);
         return $queryBuilder;
     }
-    
+
     /**
      * 
      * @param type $params
@@ -551,7 +581,6 @@ class QueryBuilder {
         return array();
     }
 
-    
     /**
      * 
      * @param type $bounds
@@ -564,10 +593,90 @@ class QueryBuilder {
         $east = $bounds['min_lon'];
         $angle = $east - $west;
         if ($angle < 0) {
-          $angle += 360;
+            $angle += 360;
         }
         $zoom = floor(log($map_width * 360 / $angle / $GLOBE_WIDTH) / log(2));
         return $zoom;
+    }
+    
+    public static function processNearByRequest(\O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $parameters) {
+        switch(true) {
+            case array_key_exists(static::QUERY_NEARBY_MAXBOX, $parameters)  && isset($parameters[static::QUERY_NEARBY][static::QUERY_NEARBY_MAXBOX]) && $parameters[static::QUERY_NEARBY][static::QUERY_ZOOM] !== null: 
+                $queryBuilder->processClustersFacets($parameters[static::QUERY_NEARBY][static::QUERY_ZOOM]);
+                $geo_bounding_box = QueryBuilder::getInnerBounds($parameters[static::QUERY_NEARBY][static::QUERY_NEARBY_MAXBOX], $parameters[static::QUERY_NEARBY]['geo_bounding_box']);
+
+                $queryBuilder->addGeoBoundingBoxFilter($geo_bounding_box);
+                $queryBuilder->processFilters(array('must_not' => array('term' => array('ETBL_ID' => $parameters[static::QUERY_NEARBY]["id"]))));
+
+                $max_box = $parameters[static::QUERY_NEARBY][static::QUERY_NEARBY_MAXBOX];
+                break;
+            default:
+                $d = 10;  // distance
+                $geo_bounding_box = array('top_left' => QueryBuilder::getNearByBounds($parameters[static::QUERY_NEARBY]['lat'], $parameters[static::QUERY_NEARBY]['lon'], 315, $d, "km", true), 
+                                          'bottom_right' => QueryBuilder::getNearByBounds($parameters[static::QUERY_NEARBY]['lat'], $parameters[static::QUERY_NEARBY]['lon'], 135, $d, "km", true));
+                $bounds = array('max_lon' => $geo_bounding_box['top_left']['lon'], 'min_lon' => $geo_bounding_box['bottom_right']['lon']);
+                $zoom = tq_elastic_search_get_zoom($bounds, $parameters[static::QUERY_NEARBY][static::QUERY_MAP_WIDTH]);
+                $queryBuilder->processFilters(array('must_not' => array('term' => array('ETBL_ID' => $parameters[static::QUERY_NEARBY]['id']))));
+
+                $queryBuilder->processClustersFacets($zoom-2);
+                $queryBuilder->addGeoBoundingBoxFilter($geo_bounding_box);
+
+                $max_box = $geo_bounding_box;
+                break;
+        }
+
+        foreach($parameters[static::QUERY_NEARBY]['sections'] as $section) {
+            $queryBuilder->processFilters(array('should' => array('term' => array('ETBL_REG_SECTION_ID' => $section))));
+        }
+        return $queryBuilder;
+    }
+
+    public static function getInnerBounds(array $max_bounds, array $current_bounds) {
+        $bounds = $current_bounds;
+        if ($max_bounds['bottom_right']['lon'] < $current_bounds['bottom_right']['lon']) {
+            $bounds['bottom_right']['lon'] = $max_bounds['bottom_right']['lon'];
+        }
+        
+        $bounds['bottom_right']['lat'] = $max_bounds['bottom_right']['lat'];
+        if ($max_bounds['bottom_right']['lat'] < $current_bounds['bottom_right']['lat']) {
+            $bounds['bottom_right']['lat'] = $current_bounds['bottom_right']['lat'];
+        }
+        
+        $bounds['top_left']['lon'] = $max_bounds['top_left']['lon'];
+        if ($max_bounds['top_left']['lon'] < $current_bounds['top_left']['lon']) {
+            $bounds['top_left']['lon'] = $current_bounds['top_left']['lon'];
+        }
+
+        $bounds['top_left']['lat'] = $max_bounds['top_left']['lat'];
+        if ($max_bounds['top_left']['lat'] > $current_bounds['top_left']['lat']) {
+            $bounds['top_left']['lat'] = $current_bounds['top_left']['lat'];
+        }
+
+        return $bounds;
+    }
+    
+    public static function getNearByBounds($latitude, $longitude, $bearing, $distance, $distance_unit = 'km', $return_as_array = FALSE) {
+        $radius = self::ES_RADIUS_KM;
+        if ($distance_unit == 'm') {
+          // Distance is in miles.
+              $radius = self::ES_RADIUS_M;
+        }
+
+        //  New latitude in degrees.
+        $new_latitude = rad2deg(asin(sin(deg2rad($latitude)) * cos($distance / $radius) + cos(deg2rad($latitude)) * sin($distance / $radius) * cos(deg2rad($bearing))));
+        //  New longitude in degrees.
+        $new_longitude = rad2deg(deg2rad($longitude) + atan2(sin(deg2rad($bearing)) * sin($distance / $radius) * cos(deg2rad($latitude)), cos($distance / $radius) - sin(deg2rad($latitude)) * sin(deg2rad($new_latitude))));
+        if ($return_as_array) {
+          //  Assign new latitude and longitude to an array to be returned to the caller.
+          $coord = array();
+          $coord['lat'] = $new_latitude;
+          $coord['lon'] = $new_longitude;
+        }
+        else {
+          $coord = $new_latitude . "," . $new_longitude;
+        }
+
+        return $coord;
     }
 
     /**
@@ -576,58 +685,58 @@ class QueryBuilder {
      */
     public static function carateristic_agg($carateristic_id, $ids_array) {
         return array(
-                'filter' => array(
-                    'term' => array(
-                        'CARACT_ID' => $carateristic_id
+          'filter' => array(
+            'term' => array(
+              'CARACT_ID' => $carateristic_id
+            )
+          ),
+          'aggs' => array(
+            "fr" => array(
+              "terms" => array(
+                "field" => "CARACT_NOM_FR"
+              )
+            ),
+            "en" => array(
+              "terms" => array(
+                "field" => "CARACT_NOM_EN"
+              )
+            ),
+            'list' => array(
+              'nested' => array(
+                'path' => "CARACTERISTIQUES.CARACT_ATTRIBUTS"
+              ),
+              'aggs' => array(
+                'filters_fix' => array(
+                  'filter' => array(
+                    'terms' => array(
+                      'CARACT_ATTRB_ID' => $ids_array
                     )
-                ),
-                'aggs' => array(
-                  "fr" => array(
-                     "terms" => array(
-                        "field" => "CARACT_NOM_FR"
-                     )
                   ),
-                  "en" => array(
-                     "terms" => array(
-                        "field" => "CARACT_NOM_EN"
-                     )
-                  ),
-                  'list' => array(
-                    'nested' => array(
-                      'path' => "CARACTERISTIQUES.CARACT_ATTRIBUTS"
-                    ),
-                    'aggs' => array(
-                      'filters_fix' => array(
-                        'filter' => array(
-                          'terms' => array(
-                            'CARACT_ATTRB_ID' => $ids_array
+                  'aggs' => array(
+                    'act_filters' => array(
+                      'terms' => array(
+                        'field' => 'CARACT_ATTRB_ID',
+                        'size' => 0
+                      ),
+                      "aggs" => array(
+                        "fr" => array(
+                          "terms" => array(
+                            "field" => "CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_NOM_FR.BRUT"
                           )
                         ),
-                        'aggs' => array(
-                          'act_filters' => array(
-                             'terms' => array(
-                                'field' => 'CARACT_ATTRB_ID',
-                                'size' => 0
-                              ),
-                             "aggs" => array(
-                                "fr" => array(
-                                   "terms" => array(
-                                      "field" => "CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_NOM_FR.BRUT"
-                                   )
-                                ),
-                                "en" => array(
-                                  "terms" => array(
-                                    "field" => "CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_NOM_EN.BRUT"
-                                  )
-                                )
-                              )
-                            )
+                        "en" => array(
+                          "terms" => array(
+                            "field" => "CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_NOM_EN.BRUT"
                           )
                         )
                       )
                     )
                   )
-                );
+                )
+              )
+            )
+          )
+        );
     }
 
     /**
@@ -636,41 +745,41 @@ class QueryBuilder {
      */
     public static function thematic_agg($ids_array) {
         return array(
-                  'list' => array(
-                    'nested' => array(
-                      'path' => "THEMATIQUES.THEM_CLASSES"
+          'list' => array(
+            'nested' => array(
+              'path' => "THEMATIQUES.THEM_CLASSES"
+            ),
+            'aggs' => array(
+              'filters_fix' => array(
+                'filter' => array(
+                  'terms' => array(
+                    'THEM_CLASS_ID' => $ids_array
+                  )
+                ),
+                'aggs' => array(
+                  'act_filters' => array(
+                    'terms' => array(
+                      'field' => 'THEM_CLASS_ID',
+                      'size' => 0
                     ),
-                    'aggs' => array(
-                      'filters_fix' => array(
-                        'filter' => array(
-                          'terms' => array(
-                            'THEM_CLASS_ID' => $ids_array
-                          )
-                        ),
-                        'aggs' => array(
-                          'act_filters' => array(
-                             'terms' => array(
-                                'field' => 'THEM_CLASS_ID',
-                                'size' => 0
-                              ),
-                             "aggs" => array(
-                                "fr" => array(
-                                   "terms" => array(
-                                      "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_FR.BRUT"
-                                   )
-                                ),
-                                "en" => array(
-                                  "terms" => array(
-                                    "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_EN.BRUT"
-                                  )
-                                )
-                              )
-                            )
-                          )
+                    "aggs" => array(
+                      "fr" => array(
+                        "terms" => array(
+                          "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_FR.BRUT"
+                        )
+                      ),
+                      "en" => array(
+                        "terms" => array(
+                          "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_EN.BRUT"
                         )
                       )
                     )
-                  );
+                  )
+                )
+              )
+            )
+          )
+        );
     }
 
     /**
@@ -679,23 +788,23 @@ class QueryBuilder {
      */
     public static function cities_agg() {
         return array(
-                'terms' => array(
-                'field' => 'ETBL_VILLE_ID',
-                'size' => 0,
-                  ),
-                "aggs" => array(
-                    "fr" => array(
-                        "terms" => array(
-                            "field" => "ETBL_VILLE_NOM_FR"
-                        )
-                    ),
-                    "en" => array(
-                        "terms" => array(
-                        "field" => "ETBL_VILLE_NOM_EN"
-                    )
-                  )
-                )
-            );
+          'terms' => array(
+            'field' => 'ETBL_VILLE_ID',
+            'size' => 0,
+          ),
+          "aggs" => array(
+            "fr" => array(
+              "terms" => array(
+                "field" => "ETBL_VILLE_NOM_FR"
+              )
+            ),
+            "en" => array(
+              "terms" => array(
+                "field" => "ETBL_VILLE_NOM_EN"
+              )
+            )
+          )
+        );
     }
 
     /**
@@ -704,15 +813,15 @@ class QueryBuilder {
      */
     public static function cluster_agg($factor) {
         return array(
-                "places" => array(
-                    "geohash" => array(
-                        "field" => "ADRESSE_PRINC.ADR_GEO_POINT",
-                        "factor" => $factor,
-                        "show_geohash_cell" => "false",
-                        "show_doc_id" => "true"
-                    )
-                )
-            );
+          "places" => array(
+            "geohash" => array(
+              "field" => "ADRESSE_PRINC.ADR_GEO_POINT",
+              "factor" => $factor,
+              "show_geohash_cell" => "false",
+              "show_doc_id" => "true"
+            )
+          )
+        );
     }
 
     /**
@@ -770,20 +879,20 @@ class QueryBuilder {
                 'field' => 'ETBL_REGION_ID',
                 'size' => 0,
               ),
-               "aggs" => array(
-                  "fr" => array(
-                     "terms" => array(
-                        "field" => "ETBL_REGION_NOM_FR"
-                     )
-                  ),
-                  "en" => array(
-                    "terms" => array(
-                      "field" => "ETBL_REGION_NOM_EN"
-                    )
+              "aggs" => array(
+                "fr" => array(
+                  "terms" => array(
+                    "field" => "ETBL_REGION_NOM_FR"
+                  )
+                ),
+                "en" => array(
+                  "terms" => array(
+                    "field" => "ETBL_REGION_NOM_EN"
                   )
                 )
               )
-            ),
+            )
+          ),
         );
     }
 
