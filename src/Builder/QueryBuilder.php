@@ -506,17 +506,20 @@ class QueryBuilder {
     public static function processMapRequest($queryHandler, \O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $params) {
         $geo_bounding_box = array();
         $zoom = QueryBuilder::ES_ZOOM_DEFAULT;
-        switch (true) {
-            case (array_key_exists(QueryBuilder::ES_FIELD_MAP_REQUEST, $params) && array_key_exists(QueryBuilder::ES_FIELD_ZOOM, $params) && !array_key_exists(QueryBuilder::ES_FIELD_ZOOM_NEEDS_TO_BE_FOUND, $params)):
+        $zoom_request = @$params[QueryBuilder::ES_FIELD_ZOOM];
+        switch(true) {
+            case (array_key_exists(QueryBuilder::ES_FIELD_MAP_REQUEST, $params) && array_key_exists(QueryBuilder::ES_FIELD_ZOOM, $params) && $zoom_request !== null):
                 $zoom = $params[QueryBuilder::ES_FIELD_ZOOM];
                 $geo_bounding_box = $params[QueryBuilder::ES_FIELD_GEO_BOUNDING_BOX];
                 break;
             case (array_key_exists(QueryBuilder::ES_FIELD_MAP_REQUEST, $params) && array_key_exists(QueryBuilder::ES_FIELD_ZOOM_NEEDS_TO_BE_FOUND, $params) && $params[QueryBuilder::ES_FIELD_ZOOM_NEEDS_TO_BE_FOUND] == 'true'):
-                $zoomNeeds = static::calculareZoomNeedsToBeFound($queryHandler, $queryBuilder, $params);
+                $zoomNeeds = static::calculateZoomNeedsToBeFound($queryHandler, $queryBuilder, $params);
                 if (!empty($zoomNeeds)) {
                     $zoom = $zoomNeeds[QueryBuilder::ES_FIELD_ZOOM];
                     $geo_bounding_box = $zoomNeeds[QueryBuilder::ES_FIELD_GEO_BOUNDING_BOX];
                 }
+                break;
+            default:
                 break;
         }
         $queryBuilder->processClustersFacets($zoom);
@@ -529,7 +532,7 @@ class QueryBuilder {
      * @param type $params
      * @return array
      */
-    public static function calculareZoomNeedsToBeFound($queryHandler, \O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $parameters) {
+    public static function calculateZoomNeedsToBeFound($queryHandler, \O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $parameters) {
         $queryBuilderZoom = clone $queryBuilder;
         $queryBuilderZoom->processClustersFacets(1);
         $queryBuilderZoom->addGeoBoundingBoxFilter();
