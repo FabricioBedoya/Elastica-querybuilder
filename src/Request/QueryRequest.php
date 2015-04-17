@@ -2,6 +2,8 @@
 
 namespace O2\QueryBuilder\Request;
 
+use O2\QueryBuilder\Builder\QueryBuilder;
+
 class QueryRequest {
 
     const QUERY_FICHE_CLUSTER = 'es';
@@ -37,9 +39,9 @@ class QueryRequest {
       self::QUERY_NEARBY,
     );
 
-    const ES_ZOOM_DEFAULT = 14;
-    const ES_RADIUS_M = 3963.1676;
-    const ES_RADIUS_KM = 6378.1;
+    const QUERY_ZOOM_DEFAULT = 14;
+    const QUERY_RADIUS_M = 3963.1676;
+    const QUERY_RADIUS_KM = 6378.1;
 
     /**
      * 
@@ -48,18 +50,18 @@ class QueryRequest {
      */
     public static function processMapRequest($queryHandler, \O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $params) {
         $geo_bounding_box = array();
-        $zoom = QueryBuilder::ES_ZOOM_DEFAULT;
-        $zoom_request = $params[QueryBuilder::ES_FIELD_ZOOM];
+        $zoom = static::QUERY_ZOOM_DEFAULT;
+        $zoom_request = $params[static::QUERY_ZOOM];
         switch (true) {
-            case (array_key_exists(QueryBuilder::ES_FIELD_MAP_REQUEST, $params) && array_key_exists(QueryBuilder::ES_FIELD_ZOOM, $params) && $zoom_request !== null):
-                $zoom = $params[QueryBuilder::ES_FIELD_ZOOM];
-                $geo_bounding_box = $params[QueryBuilder::ES_FIELD_GEO_BOUNDING_BOX];
+            case (array_key_exists(static::QUERY_MAP_REQUEST, $params) && array_key_exists(static::QUERY_ZOOM, $params) && $zoom_request !== null):
+                $zoom = $params[static::QUERY_ZOOM];
+                $geo_bounding_box = $params[static::ES_FIELD_GEO_BOUNDING_BOX];
                 break;
-            case (array_key_exists(QueryBuilder::ES_FIELD_MAP_REQUEST, $params) && array_key_exists(QueryBuilder::ES_FIELD_ZOOM_NEEDS_TO_BE_FOUND, $params) && $params[QueryBuilder::ES_FIELD_ZOOM_NEEDS_TO_BE_FOUND] == 'true'):
+            case (array_key_exists(static::QUERY_MAP_REQUEST, $params) && array_key_exists(static::QUERY_ZOOM_NEEDS_TO_BE_FOUND, $params) && $params[static::QUERY_ZOOM_NEEDS_TO_BE_FOUND] == 'true'):
                 $zoomNeeds = static::calculateZoomNeedsToBeFound($queryHandler, $queryBuilder, $params);
                 if (!empty($zoomNeeds)) {
-                    $zoom = $zoomNeeds[QueryBuilder::ES_FIELD_ZOOM];
-                    $geo_bounding_box = $zoomNeeds[QueryBuilder::ES_FIELD_GEO_BOUNDING_BOX];
+                    $zoom = $zoomNeeds[static::QUERY_ZOOM];
+                    $geo_bounding_box = $zoomNeeds[static::QUERY_GEO_BOUNDING_BOX];
                 }
                 break;
             default:
@@ -85,10 +87,10 @@ class QueryRequest {
         if (isset($bounds['top_left'])) {
             $geo_bounding_box = array('top_left' => $bounds['top_left'], 'bottom_right' => $bounds['bottom_right']);
             $bounds = array('max_lon' => $bounds['top_left']['lon'], 'min_lon' => $bounds['bottom_right']['lon']);
-            $zoom = static::getZoom($bounds, $parameters[QueryBuilder::ES_FIELD_MAP_WIDTH]);
+            $zoom = static::getZoom($bounds, $parameters[static::QUERY_MAP_WIDTH]);
             return array(
-              static::ES_FIELD_GEO_BOUNDING_BOX => $geo_bounding_box,
-              static::ES_FIELD_ZOOM => $zoom
+              static::QUERY_GEO_BOUNDING_BOX => $geo_bounding_box,
+              static::QUERY_ZOOM => $zoom
             );
         }
         return array();
@@ -180,10 +182,10 @@ class QueryRequest {
     }
 
     public static function getNearByBounds($latitude, $longitude, $bearing, $distance, $distance_unit = 'km', $return_as_array = FALSE) {
-        $radius = self::ES_RADIUS_KM;
+        $radius = self::QUERY_RADIUS_KM;
         if ($distance_unit == 'm') {
             // Distance is in miles.
-            $radius = self::ES_RADIUS_M;
+            $radius = self::QUERY_RADIUS_M;
         }
 
         //  New latitude in degrees.
