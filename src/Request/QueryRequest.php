@@ -123,7 +123,7 @@ class QueryRequest {
     public static function processNearByRequest(\O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $parameters) {
         $max_box = null;
         switch (true) {
-            case array_key_exists(static::QUERY_NEARBY_MAXBOX, $parameters) && isset($parameters[static::QUERY_NEARBY][static::QUERY_NEARBY_MAXBOX]) && $parameters[static::QUERY_NEARBY][static::QUERY_ZOOM] !== null:
+            case array_key_exists(static::QUERY_NEARBY_MAXBOX, $parameters[static::QUERY_NEARBY]) && isset($parameters[static::QUERY_NEARBY][static::QUERY_NEARBY_MAXBOX]) && $parameters[static::QUERY_NEARBY][static::QUERY_ZOOM] !== null:
                 $queryBuilder->processClustersFacets($parameters[static::QUERY_NEARBY][static::QUERY_ZOOM]);
                 $geo_bounding_box = static::getInnerBounds($parameters[static::QUERY_NEARBY][static::QUERY_NEARBY_MAXBOX], $parameters[static::QUERY_NEARBY]['geo_bounding_box']);
 
