@@ -8,6 +8,7 @@ class QueryRequest {
     const QUERY_ARTICLE_CLUSTER = 'articles';
     const OPTION_DEBUG = 'option_debug';
     const QUERY_MAIN = 'query';
+    const QUERY_FILTER = 'filter';
     const QUERY_FILTERS = 'filters';
     const QUERY_SPECIAL = 'special';
     const QUERY_ES = 'es';

@@ -191,82 +191,61 @@ class QueryBuilder {
     }
 
     /**
+     *
+     * @var boolean 
+     */
+    public $processThru = true;
+    
+    /**
      * 
      * @param array $filters
+     * @return \O2\QueryBuilder\Builder\QueryBuilder
      */
-    var $crissDeCave = true;
-
     public function processFilters(array $filters) {
-        if ($this->crissDeCave) {
-            /* @var $filter \O2\QueryBuilder\Filter\FilterInterface */
-            foreach ($filters as $key => $parameter) {
-                $condition = null;
-                if (in_array($key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
+        foreach ($filters as $key => $parameter) {
+            $condition = null;
+            switch(true) {
+                case (in_array((string) $key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))):
                     $condition = $key;
                     foreach ($parameter as $subKey => $subfilter) {
-                        if (is_numeric($subKey) || $subKey == '0') {
-                            foreach ($subfilter as $subStrategy => $entry) {
-                                $strategy = $subStrategy;
-                                if ($this->isNested($entry)) {
-                                    $strategy = static::ES_FIELD_NESTED;
-                                    $entry = array($condition => array(static::ES_FIELD_NESTED => array($subStrategy => $entry)));
-                                }
-                                $filterStragety = $this->getFilterStrategy($strategy);
-                                $filterStragety->updateFromArray($entry);
-                                $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
-                            }
-                        } else {
-                            $strategy = $subKey;
-                            if ($this->isNested($subfilter)) {
-                                $strategy = static::ES_FIELD_NESTED;
-                                $subfilter = array($condition => array(static::ES_FIELD_NESTED => array($subKey => $subfilter)));
-                            }
-                            $filterStragety = $this->getFilterStrategy($strategy);
-                            $filterStragety->updateFromArray($subfilter);
-                            $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
+                        if (!is_numeric($subKey) && $subKey != '0') {
+                            $this->preparedParams = $this->getFilter($subKey, $subfilter, $condition);
+                        }
+                        else {
+                            $this->processFilters(array($condition => $subfilter));
                         }
                     }
-                } else {
-                    $condition = static::ES_FIELD_MUST;
-                    if ($this->isNested($parameter)) {
-                        $subKey = 'nested';
-                        $entry = array($condition => $parameter);
+                    break;
+                case (is_numeric($key) && is_array($parameter)):
+                    foreach($parameter as $subKey => $subfilter) {
+                        $this->processFilters(array($subKey => $subfilter));
                     }
-                    $filterStragety = $this->getFilterStrategy($key);
-                    $filterStragety->updateFromArray($parameter);
-                    $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
-                }
-            }
-        } else {
-            foreach ($filters as $key => $parameter) {
-                $condition = null;
-                if (in_array((string) $key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))) {
-                    $condition = $key;
-                } else {
-                    $condition = static::ES_FIELD_MUST;
-                    $parameter = array($key => $parameter);
-                }
-                foreach ($parameter as $subKey => $subfilter) {
-                    if ($subfilter == null || empty($subfilter)) {
-                        continue;
-                    }
-                    if (!is_numeric($subKey) && $subKey != '0') {
-                        $subfilter = array($subKey => $subfilter);
-                    }
-                    foreach ($subfilter as $subStrategy => $entry) {
-                        $strategy = $subStrategy;
-                        if ($this->isNested($entry)) {
-                            $strategy = static::ES_FIELD_NESTED;
-                            $entry = array($condition => array(static::ES_FIELD_NESTED => array($subStrategy => $entry)));
-                        }
-                        $filterStragety = $this->getFilterStrategy($strategy);
-                        $filterStragety->updateFromArray($entry);
-                        $this->preparedParams = $this->addFilter($filterStragety->getFilter(), $condition);
-                    }
-                }
+                    break;
+                default:
+                    $this->preparedParams = $this->getFilter($key, $parameter, static::ES_FIELD_MUST);
+                    break;
             }
         }
+        
         return $this;
+    }
+    
+    /**
+     * 
+     * @param string $strategy
+     * @param array $params
+     * @param string $condition
+     * @return type
+     */
+    private function getFilter($strategy, array $params, $condition = self::ES_FIELD_MUST) {
+        if ($this->isNested($params)) {
+            $subStrategy = $strategy;
+            $strategy = static::ES_FIELD_NESTED;
+            $params = array($condition => array(static::ES_FIELD_NESTED => array($subStrategy => $params)));
+        }
+        $filterStragety = $this->getFilterStrategy($strategy);
+        $filterStragety->updateFromArray($params);
+        return $this->addFilter($filterStragety->getFilter(), $condition);
     }
 
     /**
@@ -305,34 +284,10 @@ class QueryBuilder {
      * @return array
      */
     public function addFilter(array $filter, $condition = self::ES_FIELD_MUST) {
-        if (array_key_exists('nested', $filter)) {
-            $term = null;
-            foreach ($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
-            [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER][static::ES_FIELD_BOOL] as $key => $groupCond) {
-                foreach ($groupCond as $pos => $item) {
-                    if (array_key_exists('nested', $item)) {
-                        if ($item['nested']['path'] == $filter['nested']['path']) {
-                            $term = array_shift($filter['nested'][static::ES_FIELD_FILTER]
-                                [static::ES_FIELD_BOOL][$condition]);
-                            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
-                                [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
-                                [static::ES_FIELD_BOOL][$key][$pos]['nested'][static::ES_FIELD_FILTER]
-                                [static::ES_FIELD_BOOL][$condition][] = $term;
-                        }
-                    }
-                }
-            }
-            if ($term === null) {
-                $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
-                    [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
-                    [static::ES_FIELD_BOOL][$condition][] = $filter;
-            }
-        } else {
-            $filters = $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
-                [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
-                [static::ES_FIELD_BOOL][$condition][] = $filter;
-        }
-        return $this->preparedParams;
+       $filters = $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+               [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
+               [static::ES_FIELD_BOOL][$condition][] = $filter;
+       return $this->preparedParams;
     }
 
     /**
