@@ -55,7 +55,7 @@ class QueryRequest {
         switch (true) {
             case (array_key_exists(static::QUERY_MAP_REQUEST, $params) && array_key_exists(static::QUERY_ZOOM, $params) && $zoom_request !== null):
                 $zoom = $params[static::QUERY_ZOOM];
-                $geo_bounding_box = $params[static::ES_FIELD_GEO_BOUNDING_BOX];
+                $geo_bounding_box = $params[static::QUERY_GEO_BOUNDING_BOX];
                 break;
             case (array_key_exists(static::QUERY_MAP_REQUEST, $params) && array_key_exists(static::QUERY_ZOOM_NEEDS_TO_BE_FOUND, $params) && $params[static::QUERY_ZOOM_NEEDS_TO_BE_FOUND] == 'true'):
                 $zoomNeeds = static::calculateZoomNeedsToBeFound($queryHandler, $queryBuilder, $params);
@@ -125,7 +125,7 @@ class QueryRequest {
         switch (true) {
             case array_key_exists(static::QUERY_NEARBY_MAXBOX, $parameters) && isset($parameters[static::QUERY_NEARBY][static::QUERY_NEARBY_MAXBOX]) && $parameters[static::QUERY_NEARBY][static::QUERY_ZOOM] !== null:
                 $queryBuilder->processClustersFacets($parameters[static::QUERY_NEARBY][static::QUERY_ZOOM]);
-                $geo_bounding_box = QueryBuilder::getInnerBounds($parameters[static::QUERY_NEARBY][static::QUERY_NEARBY_MAXBOX], $parameters[static::QUERY_NEARBY]['geo_bounding_box']);
+                $geo_bounding_box = static::getInnerBounds($parameters[static::QUERY_NEARBY][static::QUERY_NEARBY_MAXBOX], $parameters[static::QUERY_NEARBY]['geo_bounding_box']);
 
                 $queryBuilder->addGeoBoundingBoxFilter($geo_bounding_box);
                 $queryBuilder->processFilters(array('must_not' => array('term' => array('ETBL_ID' => $parameters[static::QUERY_NEARBY]["id"]))));
@@ -134,8 +134,8 @@ class QueryRequest {
                 break;
             default:
                 $d = 10;  // distance
-                $geo_bounding_box = array('top_left' => QueryBuilder::getNearByBounds($parameters[static::QUERY_NEARBY]['lat'], $parameters[static::QUERY_NEARBY]['lon'], 315, $d, "km", true),
-                  'bottom_right' => QueryBuilder::getNearByBounds($parameters[static::QUERY_NEARBY]['lat'], $parameters[static::QUERY_NEARBY]['lon'], 135, $d, "km", true));
+                $geo_bounding_box = array('top_left' => static::getNearByBounds($parameters[static::QUERY_NEARBY]['lat'], $parameters[static::QUERY_NEARBY]['lon'], 315, $d, "km", true),
+                  'bottom_right' => static::getNearByBounds($parameters[static::QUERY_NEARBY]['lat'], $parameters[static::QUERY_NEARBY]['lon'], 135, $d, "km", true));
                 $bounds = array('max_lon' => $geo_bounding_box['top_left']['lon'], 'min_lon' => $geo_bounding_box['bottom_right']['lon']);
                 $zoom = static::getZoom($bounds, $parameters[static::QUERY_NEARBY][static::QUERY_MAP_WIDTH]);
                 $queryBuilder->processFilters(array('must_not' => array('term' => array('ETBL_ID' => $parameters[static::QUERY_NEARBY]['id']))));
