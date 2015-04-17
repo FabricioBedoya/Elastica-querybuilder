@@ -41,6 +41,10 @@ class QueryBuilder {
     const ES_FIELD_THEME = 'THEMATIQUES';
     const ES_FIELD_FACETS = 'facets';
     
+    protected static $notNested = array(
+      'ADRESSE_PRINC',
+    );
+    
     protected static $clusters = array(
       "1" => 1,
       "2" => 1,
@@ -263,6 +267,12 @@ class QueryBuilder {
     }
 
     private function isNested(array $filter) {
+        foreach(static::$notNested as $keyNotNested) {
+            $pattern = '/^'.$keyNotNested.'.+/';
+            if (preg_match($pattern, key($filter))) {
+                return false;
+            }
+        }
         return strpos(key($filter), '.');
     }
 
