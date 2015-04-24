@@ -3,7 +3,7 @@
 namespace O2\QueryBuilder\Builder;
 
 use O2\QueryBuilder\Filter\FilterInterface as O2FilterInterface;
-use O2\QueryBuilder\Request\QueryRequest; 
+use O2\QueryBuilder\Request\QueryRequest;
 
 class QueryBuilder {
 
@@ -40,11 +40,10 @@ class QueryBuilder {
     const ES_FIELD_CARACT = 'CARACTERISTIQUES';
     const ES_FIELD_THEME = 'THEMATIQUES';
     const ES_FIELD_FACETS = 'facets';
-    
+
     protected static $notNested = array(
       'ADRESSE_PRINC',
     );
-    
     protected static $clusters = array(
       "1" => 1,
       "2" => 1,
@@ -199,7 +198,7 @@ class QueryBuilder {
      * @var boolean 
      */
     public $processThru = true;
-    
+
     /**
      * 
      * @param array $filters
@@ -208,20 +207,19 @@ class QueryBuilder {
     public function processFilters(array $filters) {
         foreach ($filters as $key => $parameter) {
             $condition = null;
-            switch(true) {
+            switch (true) {
                 case (in_array((string) $key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))):
                     $condition = $key;
                     foreach ($parameter as $subKey => $subfilter) {
                         if (!is_numeric($subKey) && $subKey != '0') {
                             $this->preparedParams = $this->getFilter($subKey, $subfilter, $condition);
-                        }
-                        else {
+                        } else {
                             $this->processFilters(array($condition => $subfilter));
                         }
                     }
                     break;
                 case (is_numeric($key) && is_array($parameter)):
-                    foreach($parameter as $subKey => $subfilter) {
+                    foreach ($parameter as $subKey => $subfilter) {
                         $this->processFilters(array($subKey => $subfilter));
                     }
                     break;
@@ -230,10 +228,10 @@ class QueryBuilder {
                     break;
             }
         }
-        
+
         return $this;
     }
-    
+
     /**
      * 
      * @param string $strategy
@@ -267,8 +265,8 @@ class QueryBuilder {
     }
 
     private function isNested(array $filter) {
-        foreach(static::$notNested as $keyNotNested) {
-            $pattern = '/^'.$keyNotNested.'.+/';
+        foreach (static::$notNested as $keyNotNested) {
+            $pattern = '/^' . $keyNotNested . '.+/';
             if (preg_match($pattern, key($filter))) {
                 return false;
             }
@@ -294,10 +292,32 @@ class QueryBuilder {
      * @return array
      */
     public function addFilter(array $filter, $condition = self::ES_FIELD_MUST) {
-       $filters = $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
-               [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
-               [static::ES_FIELD_BOOL][$condition][] = $filter;
-       return $this->preparedParams;
+        if ($condition == static::ES_FIELD_SHOULD) {
+            if (isset($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+                    [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST])) {
+                $filter_found = false;
+                foreach ($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+                [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST] as $i => $must_array) {
+                    if (array_key_exists("bool", $must_array)) {
+                        $filter_found = true;
+                        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY][static::ES_FIELD_FILTERED]
+                            [static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST][$i][static::ES_FIELD_BOOL][static::ES_FIELD_SHOULD][] = $filter;
+                        break;
+                    }
+                }
+            } else
+                $filter_found = false;
+
+            if (!$filter_found) {
+                $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY][static::ES_FIELD_FILTERED]
+                    [static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST][][static::ES_FIELD_BOOL][static::ES_FIELD_SHOULD][] = $filter;
+            }
+        } else {
+            $filters = $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+                [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
+                [static::ES_FIELD_BOOL][$condition][] = $filter;
+        }
+        return $this->preparedParams;
     }
 
     /**
@@ -410,33 +430,31 @@ class QueryBuilder {
      * 
      * @param string $carateristique_id
      * @param array $ids_array
+     * @param array $filter_query
      */
-    public function processCarateristicAggregation($carateristic_id, $ids_array) {
-        if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
-            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_CARACT]['aggs']['carat' . $carateristic_id] = $this->carateristic_agg($carateristic_id, $ids_array);
-        }
-        return $this->preparedParams;
-    }
-
-    /**
-     * 
-     * @return array $params
-     */
-    public function processCitiesAggregation() {
-        if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
-            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['ETBL_VILLE_ID'] = $this->cities_agg();
-        }
+    public function processCarateristicAggregation($carateristic_id, $ids_array, $filter_query) {
+        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations']
+            [static::ES_FIELD_AGGS]['caract-' . $carateristic_id] = $this->carateristic_agg($ids_array);
+        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations']
+            [static::ES_FIELD_AGGS]['caract-' . $carateristic_id]['filter']['query'] = $filter_query;
         return $this->preparedParams;
     }
 
     /**
      * 
      * @param array $ids_array
+     * @param array $filter_query
      */
-    public function processThematicAggregation($ids_array) {
-        if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
-            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS][self::ES_FIELD_THEME]['aggs'] = $this->thematic_agg($ids_array);
-        }
+    public function processThematicAggregation($ids_array, $filter_query) {
+        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations']
+            [static::ES_FIELD_AGGS]['thematics'] = $this->thematic_agg($ids_array);
+        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations']
+            [static::ES_FIELD_AGGS]['thematics']['filter']['query'] = $filter_query;
+        return $this->preparedParams;
+    }
+
+    public function unsetAggregation($aggregation) {
+        unset($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations'][static::ES_FIELD_AGGS][$aggregation]);
         return $this->preparedParams;
     }
 
@@ -459,24 +477,9 @@ class QueryBuilder {
      * 
      * @return array
      */
-    public static function carateristic_agg($carateristic_id, $ids_array) {
+    public static function carateristic_agg($ids_array) {
         return array(
-          'filter' => array(
-            'term' => array(
-              'CARACT_ID' => $carateristic_id
-            )
-          ),
           'aggs' => array(
-            "fr" => array(
-              "terms" => array(
-                "field" => "CARACT_NOM_FR"
-              )
-            ),
-            "en" => array(
-              "terms" => array(
-                "field" => "CARACT_NOM_EN"
-              )
-            ),
             'list' => array(
               'nested' => array(
                 'path' => "CARACTERISTIQUES.CARACT_ATTRIBUTS"
@@ -521,62 +524,39 @@ class QueryBuilder {
      */
     public static function thematic_agg($ids_array) {
         return array(
-          'list' => array(
-            'nested' => array(
-              'path' => "THEMATIQUES.THEM_CLASSES"
-            ),
-            'aggs' => array(
-              'filters_fix' => array(
-                'filter' => array(
-                  'terms' => array(
-                    'THEM_CLASS_ID' => $ids_array
-                  )
-                ),
-                'aggs' => array(
-                  'act_filters' => array(
+          'aggs' => array(
+            'list' => array(
+              'nested' => array(
+                'path' => "THEMATIQUES.THEM_CLASSES"
+              ),
+              'aggs' => array(
+                'filters_fix' => array(
+                  'filter' => array(
                     'terms' => array(
-                      'field' => 'THEM_CLASS_ID',
-                      'size' => 0
-                    ),
-                    "aggs" => array(
-                      "fr" => array(
-                        "terms" => array(
-                          "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_FR.BRUT"
-                        )
+                      'THEM_CLASS_ID' => $ids_array
+                    )
+                  ),
+                  'aggs' => array(
+                    'act_filters' => array(
+                      'terms' => array(
+                        'field' => 'THEM_CLASS_ID',
+                        'size' => 0
                       ),
-                      "en" => array(
-                        "terms" => array(
-                          "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_EN.BRUT"
+                      "aggs" => array(
+                        "fr" => array(
+                          "terms" => array(
+                            "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_FR.BRUT"
+                          )
+                        ),
+                        "en" => array(
+                          "terms" => array(
+                            "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_EN.BRUT"
+                          )
                         )
                       )
                     )
                   )
                 )
-              )
-            )
-          )
-        );
-    }
-
-    /**
-     * 
-     * @return array
-     */
-    public static function cities_agg() {
-        return array(
-          'terms' => array(
-            'field' => 'ETBL_VILLE_ID',
-            'size' => 0,
-          ),
-          "aggs" => array(
-            "fr" => array(
-              "terms" => array(
-                "field" => "ETBL_VILLE_NOM_FR"
-              )
-            ),
-            "en" => array(
-              "terms" => array(
-                "field" => "ETBL_VILLE_NOM_EN"
               )
             )
           )
@@ -598,6 +578,25 @@ class QueryBuilder {
             )
           )
         );
+    }
+
+    public function getCurrentQuery() {
+        return $this->preparedParams[static::ES_FIELD_BODY][self::ES_FIELD_QUERY];
+    }
+
+    public function removeCurrentQuery() {
+        return $this->preparedParams[static::ES_FIELD_BODY][self::ES_FIELD_QUERY] = array();
+    }
+
+    /**
+     * 
+     * @return array $params
+     */
+    public function addCurrentQueryToAgg($agg_name, $query) {
+        $this->preparedParams[static::ES_FIELD_BODY][self::ES_FIELD_AGGS]
+            ['global_aggregations'][self::ES_FIELD_AGGS]
+            [$agg_name]['filter'] = array(self::ES_FIELD_QUERY => $query);
+        return $this->preparedParams;
     }
 
     /**
@@ -622,52 +621,90 @@ class QueryBuilder {
             ),
           ),
           self::ES_FIELD_AGGS => array(
-            'ETBL_REG_SECTION_ID' => array(
-              'terms' => array(
-                'field' => 'ETBL_REG_SECTION_ID',
-                'size' => 0,
-              ),
-            ),
-            'ETBL_REG_SOUS_SEC_ID' => array(
-              'terms' => array(
-                'field' => 'ETBL_REG_SOUS_SEC_ID',
-                'size' => 0,
-              ),
-            ),
-            'ETBL_REG_CAT_ID' => array(
-              'terms' => array(
-                'field' => 'ETBL_REG_CAT_ID',
-                'size' => 0,
-              ),
-            ),
-            self::ES_FIELD_CARACT => array(
-              'nested' => array(
-                'path' => 'CARACTERISTIQUES',
-              ),
-            ),
-            self::ES_FIELD_THEME => array(
-              'nested' => array(
-                'path' => 'THEMATIQUES',
-              ),
-            ),
-            'ETBL_REGION_ID' => array(
-              'terms' => array(
-                'field' => 'ETBL_REGION_ID',
-                'size' => 0,
-              ),
-              "aggs" => array(
-                "fr" => array(
-                  "terms" => array(
-                    "field" => "ETBL_REGION_NOM_FR"
+            'global_aggregations' => array(
+              "global" => (object) array(),
+              self::ES_FIELD_AGGS => array(
+                "sections" => array(
+                  "filter" => (object) array(),
+                  self::ES_FIELD_AGGS => array(
+                    'sections' => array(
+                      'terms' => array(
+                        'field' => 'ETBL_REG_SECTION_ID',
+                        'size' => 0,
+                      ),
+                    )
                   )
                 ),
-                "en" => array(
-                  "terms" => array(
-                    "field" => "ETBL_REGION_NOM_EN"
+                "subsections" => array(
+                  "filter" => (object) array(),
+                  self::ES_FIELD_AGGS => array(
+                    'subsections' => array(
+                      'terms' => array(
+                        'field' => 'ETBL_REG_SOUS_SEC_ID',
+                        'size' => 0,
+                      ),
+                    )
                   )
-                )
+                ),
+                "categories" => array(
+                  "filter" => (object) array(),
+                  self::ES_FIELD_AGGS => array(
+                    'categories' => array(
+                      'terms' => array(
+                        'field' => 'ETBL_REG_CAT_ID',
+                        'size' => 0,
+                      ),
+                    )
+                  )
+                ),
+                "regions" => array(
+                  "filter" => (object) array(),
+                  self::ES_FIELD_AGGS => array(
+                    'regions' => array(
+                      'terms' => array(
+                        'field' => 'ETBL_REGION_ID',
+                        'size' => 0,
+                      ),
+                      "aggs" => array(
+                        "fr" => array(
+                          "terms" => array(
+                            "field" => "ETBL_REGION_NOM_FR"
+                          )
+                        ),
+                        "en" => array(
+                          "terms" => array(
+                            "field" => "ETBL_REGION_NOM_EN"
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+                "cities" => array(
+                  "filter" => (object) array(),
+                  self::ES_FIELD_AGGS => array(
+                    'cities' => array(
+                      'terms' => array(
+                        'field' => 'ETBL_VILLE_ID',
+                        'size' => 0,
+                      ),
+                      "aggs" => array(
+                        "fr" => array(
+                          "terms" => array(
+                            "field" => "ETBL_VILLE_NOM_FR"
+                          )
+                        ),
+                        "en" => array(
+                          "terms" => array(
+                            "field" => "ETBL_VILLE_NOM_EN"
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
               )
-            )
+            ),
           ),
         );
     }

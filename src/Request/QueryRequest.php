@@ -52,6 +52,290 @@ class QueryRequest {
      * @param type $params
      * @return \TQ\QueryBundle\Controller\QueryController
      */
+    public static function processRequest(\O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $params, array $mapping, array $json_params, array $query_options) {
+        $applied_filters = static::applyFilters($params, $mapping);
+
+        $filters = $applied_filters['filters'];
+        $subsection_filter_with_term = $applied_filters['subsection_filter_with_term'];
+        $unique_should_caracteristic_filters = $applied_filters['unique_should_caracteristic_filters'];
+        $all_selected_caracteristics = $applied_filters['all_selected_caracteristics'];
+        $subsection_mapping = $mapping['subsection_mapping'];
+        $category_mapping = $mapping['category_mapping'];
+
+        $section = $params['section'];
+        $subsection = $params['subsection'];
+        $category = $params['category'];
+        $region = $params['region'];
+        $city = $params['city'];
+        $active_selection = $params['active_selection'];
+        $theme_active_selection = $params['theme_active_selection'];
+
+        $allowed_features = $json_params['allowed_features'];
+        $allowed_themes = $json_params['allowed_themes'];
+        $filters_specs = $json_params['filters_specs'];
+
+
+        $caracteristics_array = $params['caracteristics'];
+        $thematic = $params['thematic'];
+
+        $section_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['section']);
+        $subsection_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['subsection'], $subsection_filter_with_term);
+        $category_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['category'], $subsection_filter_with_term);
+
+        //regions
+        $region_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['region'], $subsection_filter_with_term);
+        $queryBuilder->addCurrentQueryToAgg('regions', $region_query);
+
+        if ($region) {
+            $city_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['city'], $subsection_filter_with_term);
+            $queryBuilder->addCurrentQueryToAgg('cities', $city_query);
+        } else
+            $queryBuilder->unsetAggregation('cities');
+
+        switch (true) {
+            case $category:
+                $queryBuilder->addCurrentQueryToAgg('sections', $section_query);
+                $queryBuilder->addCurrentQueryToAgg('subsections', $subsection_query);
+                $queryBuilder->addCurrentQueryToAgg('categories', $category_query);
+                break;
+            case $subsection:
+                $queryBuilder->addCurrentQueryToAgg('sections', $section_query);
+
+                if (strpos($subsection_mapping, "SOUS_SEC"))
+                    $agg_subsection = "subsections";
+                else
+                    $agg_subsection = "categories";
+
+                $queryBuilder->addCurrentQueryToAgg($agg_subsection, $subsection_query);
+                if ($category_mapping)
+                    $queryBuilder->addCurrentQueryToAgg('categories', $category_query);
+                break;
+            case $section:
+                $queryBuilder->addCurrentQueryToAgg('sections', $section_query);
+
+                if (strpos($subsection_mapping, "SOUS_SEC"))
+                    $agg_subsection = "subsections";
+                else
+                    $agg_subsection = "categories";
+
+                $queryBuilder->addCurrentQueryToAgg($agg_subsection, $subsection_query);
+                break;
+            default:
+                $queryBuilder->addCurrentQueryToAgg('sections', $section_query);
+                break;
+        }
+
+        if ($active_selection) {
+            $caracteristic_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['caracteristic'], $subsection_filter_with_term);
+            foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                $unique_should_caracteristic_query[$unique_should_name] = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $unique_should_caracteristic, $subsection_filter_with_term);
+            }
+
+            foreach ($allowed_features[$active_selection] as $caracteristic_type_id => $caracteristic_ids) {
+                if (in_array($filters_specs['caract-' . $caracteristic_type_id]['type'], array('should', 'unique')) &&
+                    isset($unique_should_caracteristic_query[$filters_specs['caract-' . $caracteristic_type_id]['name']])) {
+                    $queryBuilder->processCarateristicAggregation((string) $caracteristic_type_id, $caracteristic_ids, $unique_should_caracteristic_query[$filters_specs['caract-' . $caracteristic_type_id]['name']]);
+                } else
+                    $queryBuilder->processCarateristicAggregation((string) $caracteristic_type_id, $caracteristic_ids, $caracteristic_query);
+            }
+        }
+
+        if ($theme_active_selection) {
+            $thematic_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['thematic'], $subsection_filter_with_term);
+            $queryBuilder->processThematicAggregation($allowed_themes[$theme_active_selection], $thematic_query);
+        }
+
+        $results_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['results'], $subsection_filter_with_term);
+
+        return $queryBuilder;
+    }
+
+    /**
+     * 
+     * @param type $params
+     * @return array
+     */
+    public static function applyFilters(array $params, array $mapping) {
+        $section = $params['section'];
+        $subsection = $params['subsection'];
+        $category = $params['category'];
+        $region = $params['region'];
+        $city = $params['city'];
+        $caracteristics_array = $params['caracteristics'];
+        $thematic = $params['thematic'];
+
+        $filters = array(
+          'results' => array(),
+          'city' => array(),
+          'region' => array(),
+          'section' => array(),
+          'subsection' => array(),
+          'category' => array(),
+          'caracteristic' => array(),
+          'thematic' => array(),
+          'results' => array()
+        );
+
+        $subsection_mapping = $mapping['subsection_mapping'];
+        $category_mapping = $mapping['category_mapping'];
+
+        $unique_should_caracteristic_filters = array();
+
+        $subsection_filter_with_term = array();
+
+        foreach ($caracteristics_array as $caracteristic_types => $caracteristics) {
+            if (in_array($caracteristic_types, array('should', 'unique'))) {
+                foreach ($caracteristics as $name => $caracteristic) {
+                    $unique_should_caracteristic_filters[$name] = array();
+                }
+            }
+        }
+
+        foreach ($caracteristics_array as $caracteristic_types => $caracteristics) {
+            foreach ($caracteristics as $name => $caracteristic) {
+
+                foreach ($filters as $filter_name => $filter) {
+                    array_push($filters[$filter_name], $name);
+                }
+
+                foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                    if ($name != $unique_should_name && !isset($caracteristics_array['should'][$unique_should_name])) {
+                        array_push($unique_should_caracteristic_filters[$unique_should_name], $name);
+                    }
+                }
+            }
+        }
+
+        if ($thematic) {
+            foreach ($filters as $filter_name => $filter) {
+                if (!in_array($filter_name, array('thematic')))
+                    array_push($filters[$filter_name], 'thematic');
+            }
+
+            foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                array_push($unique_should_caracteristic_filters[$unique_should_name], 'thematic');
+            }
+        }
+
+        if ($region) {
+            foreach ($filters as $filter_name => $filter) {
+                if (!in_array($filter_name, array('region')))
+                    array_push($filters[$filter_name], 'region');
+            }
+
+            foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                array_push($unique_should_caracteristic_filters[$unique_should_name], 'region');
+            }
+            if ($city) {
+                foreach ($filters as $filter_name => $filter) {
+                    if (!in_array($filter_name, array('city', 'region')))
+                        array_push($filters[$filter_name], 'city');
+                }
+
+                foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                    array_push($unique_should_caracteristic_filters[$unique_should_name], 'city');
+                }
+            }
+        }
+
+        switch (true) {
+            case ($category && $subsection && $section):
+
+                foreach ($filters as $filter_name => $filter) {
+                    if (!in_array($filter_name, array('section', 'subsection', 'category')))
+                        array_push($filters[$filter_name], 'category');
+                }
+
+                array_push($filters['subsection'], 'section');
+                array_push($filters['category'], 'section', 'subsection');
+
+                foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                    array_push($unique_should_caracteristic_filters[$unique_should_name], 'section', 'subsection', 'category');
+                }
+
+                break;
+            case ($subsection && $section):
+
+                $subsection_filter_with_term = array($subsection_mapping => $subsection);
+
+                array_push($filters['subsection'], 'section');
+                array_push($filters['category'], 'section');
+
+                foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                    array_push($unique_should_caracteristic_filters[$unique_should_name], 'section');
+                }
+
+                break;
+            case ($section):
+
+                foreach ($filters as $filter_name => $filter) {
+                    if (!in_array($filter_name, array('section', 'subsection', 'category')))
+                        array_push($filters[$filter_name], 'section');
+                }
+
+                array_push($filters['subsection'], 'section');
+
+                foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                    array_push($unique_should_caracteristic_filters[$unique_should_name], 'section');
+                }
+
+                break;
+            default:
+                break;
+        }
+        return array('filters' => $filters,
+          'subsection_filter_with_term' => $subsection_filter_with_term,
+          'unique_should_caracteristic_filters' => $unique_should_caracteristic_filters,
+        );
+    }
+
+    public static function getFilters(\O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $caracteristics, array $params, array $query_options, array $search_filters = array(), array $search_filter_with_term = array()) {
+        $queryBuilder->removeCurrentQuery();
+        $queryBuilder->processParams($query_options);
+
+        if (!empty($search_filters) || !empty($search_filter_with_term)) {
+            $terms = array('section' => 'ETBL_REG_SECTION_ID', 'subsection' => 'ETBL_REG_SOUS_SEC_ID',
+              'category' => 'ETBL_REG_CAT_ID', 'region' => 'ETBL_REGION_ID', 'city' => 'ETBL_VILLE_ID',
+              'services' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'activities' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'rating' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'amenities' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'accessibility' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'specialties' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'boat' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'hunting' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'thematic' => 'THEMATIQUES.THEM_CLASSES.THEM_CLASS_ID',
+            );
+            $filters = array();
+            foreach ($search_filters as $filter) {
+                if (is_array($params[$filter])) {
+                    foreach ($params[$filter] as $caracteristic_filter) {
+                        if (isset($caracteristics['should'][$filter]))
+                            $filters[] = array('should' => array('term' => array($terms[$filter] => $caracteristic_filter)));
+                        else
+                            $filters[] = array('term' => array($terms[$filter] => $caracteristic_filter));
+                    }
+                }
+                else {
+                    if (isset($caracteristics['should'][$filter]))
+                        $filters[] = array('should' => array('term' => array($terms[$filter] => $params[$filter])));
+                    else
+                        $filters[] = array('term' => array($terms[$filter] => $params[$filter]));
+                }
+            }
+            if (!empty($search_filter_with_term))
+                $filters[] = array('term' => $search_filter_with_term);
+            $queryBuilder->processFilters($filters);
+        }
+
+        return $queryBuilder->getCurrentQuery();
+    }
+
+    /**
+     * 
+     * @param type $params
+     * @return \TQ\QueryBundle\Controller\QueryController
+     */
     public static function processMapRequest($queryHandler, \O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $params) {
         $geo_bounding_box = array();
         $zoom = static::QUERY_ZOOM_DEFAULT;
