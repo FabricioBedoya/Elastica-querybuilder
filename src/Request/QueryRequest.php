@@ -24,6 +24,8 @@ class QueryRequest {
     const QUERY_MAP_WIDTH = 'map_width';
     const QUERY_GEO_BOUNDING_BOX = 'geo_bounding_box';
     const QUERY_ZOOM_NEEDS_TO_BE_FOUND = 'zoom_needs_to_be_found';
+    const QUERY_FACETTES = 'facettes';
+    const QUERY_PARAMS = 'params';
 
     public static $paramsAllowed = array(
       self::QUERY_MAIN,
@@ -37,6 +39,8 @@ class QueryRequest {
       self::OPTION_DEBUG,
       self::QUERY_LANG,
       self::QUERY_NEARBY,
+      self::QUERY_FACETTES,
+      self::QUERY_PARAMS,
     );
 
     const QUERY_ZOOM_DEFAULT = 14;
