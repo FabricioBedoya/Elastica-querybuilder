@@ -89,11 +89,10 @@ class QueryRequest {
         if ($region) {
             $city_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['city'], $subsection_filter_with_term);
             $queryBuilder->addCurrentQueryToAgg('cities', $city_query);
-        }
-        else
+        } else
             $queryBuilder->unsetAggregation('cities');
 
-        switch(true) {
+        switch (true) {
             case $category:
                 $queryBuilder->addCurrentQueryToAgg('sections', $section_query);
                 $queryBuilder->addCurrentQueryToAgg('subsections', $subsection_query);
@@ -102,19 +101,19 @@ class QueryRequest {
             case $subsection:
                 $queryBuilder->addCurrentQueryToAgg('sections', $section_query);
 
-                if(strpos($subsection_mapping, "SOUS_SEC"))
+                if (strpos($subsection_mapping, "SOUS_SEC"))
                     $agg_subsection = "subsections";
                 else
                     $agg_subsection = "categories";
-                
+
                 $queryBuilder->addCurrentQueryToAgg($agg_subsection, $subsection_query);
-                if($category_mapping)
+                if ($category_mapping)
                     $queryBuilder->addCurrentQueryToAgg('categories', $category_query);
                 break;
             case $section:
                 $queryBuilder->addCurrentQueryToAgg('sections', $section_query);
 
-                if(strpos($subsection_mapping, "SOUS_SEC"))
+                if (strpos($subsection_mapping, "SOUS_SEC"))
                     $agg_subsection = "subsections";
                 else
                     $agg_subsection = "categories";
@@ -126,18 +125,17 @@ class QueryRequest {
                 break;
         }
 
-        if($active_selection) {
+        if ($active_selection) {
             $caracteristic_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['caracteristic'], $subsection_filter_with_term);
-            foreach($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+            foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
                 $unique_should_caracteristic_query[$unique_should_name] = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $unique_should_caracteristic, $subsection_filter_with_term);
             }
 
-            foreach($allowed_features[$active_selection] as $caracteristic_type_id => $caracteristic_ids) {
-                if(in_array($filters_specs['caract-' . $caracteristic_type_id]['type'], array('should', 'unique')) &&
-                   isset($unique_should_caracteristic_query[$filters_specs['caract-' . $caracteristic_type_id]['name']])) {
+            foreach ($allowed_features[$active_selection] as $caracteristic_type_id => $caracteristic_ids) {
+                if (in_array($filters_specs['caract-' . $caracteristic_type_id]['type'], array('should', 'unique')) &&
+                    isset($unique_should_caracteristic_query[$filters_specs['caract-' . $caracteristic_type_id]['name']])) {
                     $queryBuilder->processCarateristicAggregation((string) $caracteristic_type_id, $caracteristic_ids, $unique_should_caracteristic_query[$filters_specs['caract-' . $caracteristic_type_id]['name']]);
-                }
-                else
+                } else
                     $queryBuilder->processCarateristicAggregation((string) $caracteristic_type_id, $caracteristic_ids, $caracteristic_query);
             }
         }
@@ -166,17 +164,17 @@ class QueryRequest {
         $caracteristics_array = $params['caracteristics'];
         $thematic = $params['thematic'];
 
-        $filters =  array(
-                        'results' => array(),
-                        'city' => array(),
-                        'region' => array(),
-                        'section' => array(),
-                        'subsection' => array(),
-                        'category' => array(),
-                        'caracteristic' => array(),
-                        'thematic' => array(),
-                        'results' => array()
-                    );
+        $filters = array(
+          'results' => array(),
+          'city' => array(),
+          'region' => array(),
+          'section' => array(),
+          'subsection' => array(),
+          'category' => array(),
+          'caracteristic' => array(),
+          'thematic' => array(),
+          'results' => array()
+        );
 
         $subsection_mapping = $mapping['subsection_mapping'];
         $category_mapping = $mapping['category_mapping'];
@@ -185,73 +183,73 @@ class QueryRequest {
 
         $subsection_filter_with_term = array();
 
-        foreach($caracteristics_array as $caracteristic_types => $caracteristics) {
-            if(in_array($caracteristic_types, array('should', 'unique'))) {
-                foreach($caracteristics as $name => $caracteristic) {
+        foreach ($caracteristics_array as $caracteristic_types => $caracteristics) {
+            if (in_array($caracteristic_types, array('should', 'unique'))) {
+                foreach ($caracteristics as $name => $caracteristic) {
                     $unique_should_caracteristic_filters[$name] = array();
                 }
             }
         }
 
-        foreach($caracteristics_array as $caracteristic_types => $caracteristics) {
-            foreach($caracteristics as $name => $caracteristic) {
+        foreach ($caracteristics_array as $caracteristic_types => $caracteristics) {
+            foreach ($caracteristics as $name => $caracteristic) {
 
-                foreach($filters as $filter_name => $filter) {
-                     array_push($filters[$filter_name], $name);
+                foreach ($filters as $filter_name => $filter) {
+                    array_push($filters[$filter_name], $name);
                 }
 
-                foreach($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
-                    if($name != $unique_should_name && !isset($caracteristics_array['should'][$unique_should_name])) {
+                foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                    if ($name != $unique_should_name && !isset($caracteristics_array['should'][$unique_should_name])) {
                         array_push($unique_should_caracteristic_filters[$unique_should_name], $name);
                     }
                 }
             }
         }
 
-        if($thematic) {
-            foreach($filters as $filter_name => $filter) {
-                if(!in_array($filter_name, array('thematic')))
+        if ($thematic) {
+            foreach ($filters as $filter_name => $filter) {
+                if (!in_array($filter_name, array('thematic')))
                     array_push($filters[$filter_name], 'thematic');
             }
 
-            foreach($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+            foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
                 array_push($unique_should_caracteristic_filters[$unique_should_name], 'thematic');
             }
         }
 
-        if($region) {
-            foreach($filters as $filter_name => $filter) {
-                if(!in_array($filter_name, array('region')))
+        if ($region) {
+            foreach ($filters as $filter_name => $filter) {
+                if (!in_array($filter_name, array('region')))
                     array_push($filters[$filter_name], 'region');
             }
 
-            foreach($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+            foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
                 array_push($unique_should_caracteristic_filters[$unique_should_name], 'region');
             }
-            if($city) {
-                foreach($filters as $filter_name => $filter) {
-                    if(!in_array($filter_name, array('city', 'region')))
+            if ($city) {
+                foreach ($filters as $filter_name => $filter) {
+                    if (!in_array($filter_name, array('city', 'region')))
                         array_push($filters[$filter_name], 'city');
                 }
-                
-                foreach($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+
+                foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
                     array_push($unique_should_caracteristic_filters[$unique_should_name], 'city');
                 }
             }
         }
 
-        switch(true) {
+        switch (true) {
             case ($category && $subsection && $section):
 
-                foreach($filters as $filter_name => $filter) {
-                    if(!in_array($filter_name, array('section', 'subsection', 'category')))
+                foreach ($filters as $filter_name => $filter) {
+                    if (!in_array($filter_name, array('section', 'subsection', 'category')))
                         array_push($filters[$filter_name], 'category');
                 }
 
                 array_push($filters['subsection'], 'section');
                 array_push($filters['category'], 'section', 'subsection');
 
-                foreach($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
                     array_push($unique_should_caracteristic_filters[$unique_should_name], 'section', 'subsection', 'category');
                 }
 
@@ -263,21 +261,21 @@ class QueryRequest {
                 array_push($filters['subsection'], 'section');
                 array_push($filters['category'], 'section');
 
-                foreach($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
                     array_push($unique_should_caracteristic_filters[$unique_should_name], 'section');
                 }
 
                 break;
             case ($section):
 
-                foreach($filters as $filter_name => $filter) {
-                    if(!in_array($filter_name, array('section', 'subsection', 'category')))
+                foreach ($filters as $filter_name => $filter) {
+                    if (!in_array($filter_name, array('section', 'subsection', 'category')))
                         array_push($filters[$filter_name], 'section');
                 }
 
                 array_push($filters['subsection'], 'section');
 
-                foreach($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
                     array_push($unique_should_caracteristic_filters[$unique_should_name], 'section');
                 }
 
@@ -286,46 +284,46 @@ class QueryRequest {
                 break;
         }
         return array('filters' => $filters,
-                     'subsection_filter_with_term' => $subsection_filter_with_term,
-                     'unique_should_caracteristic_filters' => $unique_should_caracteristic_filters,
-                    );
+          'subsection_filter_with_term' => $subsection_filter_with_term,
+          'unique_should_caracteristic_filters' => $unique_should_caracteristic_filters,
+        );
     }
 
     public static function getFilters(\O2\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $caracteristics, array $params, array $query_options, array $search_filters = array(), array $search_filter_with_term = array()) {
         $queryBuilder->removeCurrentQuery();
         $queryBuilder->processParams($query_options);
 
-        if(!empty($search_filters) || !empty($search_filter_with_term)) {
-            $terms = array('section' => 'ETBL_REG_SECTION_ID', 'subsection' =>'ETBL_REG_SOUS_SEC_ID',
-                           'category' => 'ETBL_REG_CAT_ID', 'region' => 'ETBL_REGION_ID', 'city' => 'ETBL_VILLE_ID',
-                           'services' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
-                           'activities' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
-                           'rating' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
-                           'amenities' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
-                           'accessibility' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
-                           'specialties' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
-                           'boat' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
-                           'hunting' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
-                           'thematic' => 'THEMATIQUES.THEM_CLASSES.THEM_CLASS_ID',
-                        );
+        if (!empty($search_filters) || !empty($search_filter_with_term)) {
+            $terms = array('section' => 'ETBL_REG_SECTION_ID', 'subsection' => 'ETBL_REG_SOUS_SEC_ID',
+              'category' => 'ETBL_REG_CAT_ID', 'region' => 'ETBL_REGION_ID', 'city' => 'ETBL_VILLE_ID',
+              'services' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'activities' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'rating' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'amenities' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'accessibility' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'specialties' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'boat' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'hunting' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
+              'thematic' => 'THEMATIQUES.THEM_CLASSES.THEM_CLASS_ID',
+            );
             $filters = array();
-            foreach($search_filters as $filter) {
-                if(is_array($params[$filter])) {
-                    foreach($params[$filter] as $caracteristic_filter) {
-                        if(isset($caracteristics['should'][$filter]))
+            foreach ($search_filters as $filter) {
+                if (is_array($params[$filter])) {
+                    foreach ($params[$filter] as $caracteristic_filter) {
+                        if (isset($caracteristics['should'][$filter]))
                             $filters[] = array('should' => array('term' => array($terms[$filter] => $caracteristic_filter)));
                         else
                             $filters[] = array('term' => array($terms[$filter] => $caracteristic_filter));
                     }
                 }
                 else {
-                    if(isset($caracteristics['should'][$filter]))
+                    if (isset($caracteristics['should'][$filter]))
                         $filters[] = array('should' => array('term' => array($terms[$filter] => $params[$filter])));
                     else
                         $filters[] = array('term' => array($terms[$filter] => $params[$filter]));
                 }
             }
-            if(!empty($search_filter_with_term))
+            if (!empty($search_filter_with_term))
                 $filters[] = array('term' => $search_filter_with_term);
             $queryBuilder->processFilters($filters);
         }

@@ -3,7 +3,7 @@
 namespace O2\QueryBuilder\Builder;
 
 use O2\QueryBuilder\Filter\FilterInterface as O2FilterInterface;
-use O2\QueryBuilder\Request\QueryRequest; 
+use O2\QueryBuilder\Request\QueryRequest;
 
 class QueryBuilder {
 
@@ -40,11 +40,10 @@ class QueryBuilder {
     const ES_FIELD_CARACT = 'CARACTERISTIQUES';
     const ES_FIELD_THEME = 'THEMATIQUES';
     const ES_FIELD_FACETS = 'facets';
-    
+
     protected static $notNested = array(
       'ADRESSE_PRINC',
     );
-    
     protected static $clusters = array(
       "1" => 1,
       "2" => 1,
@@ -199,7 +198,7 @@ class QueryBuilder {
      * @var boolean 
      */
     public $processThru = true;
-    
+
     /**
      * 
      * @param array $filters
@@ -208,20 +207,19 @@ class QueryBuilder {
     public function processFilters(array $filters) {
         foreach ($filters as $key => $parameter) {
             $condition = null;
-            switch(true) {
+            switch (true) {
                 case (in_array((string) $key, array(static::ES_FIELD_MUST, static::ES_FIELD_MUST_NOT, static::ES_FIELD_SHOULD))):
                     $condition = $key;
                     foreach ($parameter as $subKey => $subfilter) {
                         if (!is_numeric($subKey) && $subKey != '0') {
                             $this->preparedParams = $this->getFilter($subKey, $subfilter, $condition);
-                        }
-                        else {
+                        } else {
                             $this->processFilters(array($condition => $subfilter));
                         }
                     }
                     break;
                 case (is_numeric($key) && is_array($parameter)):
-                    foreach($parameter as $subKey => $subfilter) {
+                    foreach ($parameter as $subKey => $subfilter) {
                         $this->processFilters(array($subKey => $subfilter));
                     }
                     break;
@@ -230,10 +228,10 @@ class QueryBuilder {
                     break;
             }
         }
-        
+
         return $this;
     }
-    
+
     /**
      * 
      * @param string $strategy
@@ -267,8 +265,8 @@ class QueryBuilder {
     }
 
     private function isNested(array $filter) {
-        foreach(static::$notNested as $keyNotNested) {
-            $pattern = '/^'.$keyNotNested.'.+/';
+        foreach (static::$notNested as $keyNotNested) {
+            $pattern = '/^' . $keyNotNested . '.+/';
             if (preg_match($pattern, key($filter))) {
                 return false;
             }
@@ -294,9 +292,9 @@ class QueryBuilder {
      * @return array
      */
     public function addFilter(array $filter, $condition = self::ES_FIELD_MUST) {
-        if($condition == static::ES_FIELD_SHOULD) {
-            if(isset($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
-                [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST])) {
+        if ($condition == static::ES_FIELD_SHOULD) {
+            if (isset($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
+                    [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST])) {
                 $filter_found = false;
                 foreach ($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
                 [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST] as $i => $must_array) {
@@ -307,22 +305,20 @@ class QueryBuilder {
                         break;
                     }
                 }
-            }
-            else
+            } else
                 $filter_found = false;
 
             if (!$filter_found) {
                 $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY][static::ES_FIELD_FILTERED]
                     [static::ES_FIELD_FILTER][static::ES_FIELD_BOOL][static::ES_FIELD_MUST][][static::ES_FIELD_BOOL][static::ES_FIELD_SHOULD][] = $filter;
             }
-        }
-        else {
+        } else {
             $filters = $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_QUERY]
                 [static::ES_FIELD_FILTERED][static::ES_FIELD_FILTER]
                 [static::ES_FIELD_BOOL][$condition][] = $filter;
         }
         return $this->preparedParams;
-   }
+    }
 
     /**
      * 
@@ -457,7 +453,6 @@ class QueryBuilder {
         return $this->preparedParams;
     }
 
-
     public function unsetAggregation($aggregation) {
         unset($this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations'][static::ES_FIELD_AGGS][$aggregation]);
         return $this->preparedParams;
@@ -531,32 +526,31 @@ class QueryBuilder {
         return array(
           'aggs' => array(
             'list' => array(
-                'nested' => array(
-                  'path' => "THEMATIQUES.THEM_CLASSES"
-                ),
-                'aggs' => array(
-                  'filters_fix' => array(
-                    'filter' => array(
+              'nested' => array(
+                'path' => "THEMATIQUES.THEM_CLASSES"
+              ),
+              'aggs' => array(
+                'filters_fix' => array(
+                  'filter' => array(
+                    'terms' => array(
+                      'THEM_CLASS_ID' => $ids_array
+                    )
+                  ),
+                  'aggs' => array(
+                    'act_filters' => array(
                       'terms' => array(
-                        'THEM_CLASS_ID' => $ids_array
-                      )
-                    ),
-                    'aggs' => array(
-                      'act_filters' => array(
-                        'terms' => array(
-                          'field' => 'THEM_CLASS_ID',
-                          'size' => 0
+                        'field' => 'THEM_CLASS_ID',
+                        'size' => 0
+                      ),
+                      "aggs" => array(
+                        "fr" => array(
+                          "terms" => array(
+                            "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_FR.BRUT"
+                          )
                         ),
-                        "aggs" => array(
-                          "fr" => array(
-                            "terms" => array(
-                              "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_FR.BRUT"
-                            )
-                          ),
-                          "en" => array(
-                            "terms" => array(
-                              "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_EN.BRUT"
-                            )
+                        "en" => array(
+                          "terms" => array(
+                            "field" => "THEMATIQUES.THEM_CLASSES.THEM_CLASS_NOM_EN.BRUT"
                           )
                         )
                       )
@@ -565,6 +559,7 @@ class QueryBuilder {
                 )
               )
             )
+          )
         );
     }
 
@@ -627,90 +622,91 @@ class QueryBuilder {
           ),
           self::ES_FIELD_AGGS => array(
             'global_aggregations' => array(
-                "global" => (object) array(),
-                self::ES_FIELD_AGGS => array(
-                    "sections" => array(
-                        "filter" => (object) array(),
-                        self::ES_FIELD_AGGS => array(
-                            'sections' => array(
-                                'terms' => array(
-                                    'field' => 'ETBL_REG_SECTION_ID',
-                                    'size' => 0,
-                                ),
-                            )
+              "global" => (object) array(),
+              self::ES_FIELD_AGGS => array(
+                "sections" => array(
+                  "filter" => (object) array(),
+                  self::ES_FIELD_AGGS => array(
+                    'sections' => array(
+                      'terms' => array(
+                        'field' => 'ETBL_REG_SECTION_ID',
+                        'size' => 0,
+                      ),
+                    )
+                  )
+                ),
+                "subsections" => array(
+                  "filter" => (object) array(),
+                  self::ES_FIELD_AGGS => array(
+                    'subsections' => array(
+                      'terms' => array(
+                        'field' => 'ETBL_REG_SOUS_SEC_ID',
+                        'size' => 0,
+                      ),
+                    )
+                  )
+                ),
+                "categories" => array(
+                  "filter" => (object) array(),
+                  self::ES_FIELD_AGGS => array(
+                    'categories' => array(
+                      'terms' => array(
+                        'field' => 'ETBL_REG_CAT_ID',
+                        'size' => 0,
+                      ),
+                    )
+                  )
+                ),
+                "regions" => array(
+                  "filter" => (object) array(),
+                  self::ES_FIELD_AGGS => array(
+                    'regions' => array(
+                      'terms' => array(
+                        'field' => 'ETBL_REGION_ID',
+                        'size' => 0,
+                      ),
+                      "aggs" => array(
+                        "fr" => array(
+                          "terms" => array(
+                            "field" => "ETBL_REGION_NOM_FR"
+                          )
+                        ),
+                        "en" => array(
+                          "terms" => array(
+                            "field" => "ETBL_REGION_NOM_EN"
+                          )
                         )
-                    ),
-                    "subsections" => array(
-                        "filter" => (object) array(),
-                        self::ES_FIELD_AGGS => array(
-                            'subsections' => array(
-                                'terms' => array(
-                                    'field' => 'ETBL_REG_SOUS_SEC_ID',
-                                    'size' => 0,
-                                ),
-                            )
+                      )
+                    )
+                  )
+                ),
+                "cities" => array(
+                  "filter" => (object) array(),
+                  self::ES_FIELD_AGGS => array(
+                    'cities' => array(
+                      'terms' => array(
+                        'field' => 'ETBL_VILLE_ID',
+                        'size' => 0,
+                      ),
+                      "aggs" => array(
+                        "fr" => array(
+                          "terms" => array(
+                            "field" => "ETBL_VILLE_NOM_FR"
+                          )
+                        ),
+                        "en" => array(
+                          "terms" => array(
+                            "field" => "ETBL_VILLE_NOM_EN"
+                          )
                         )
-                    ),
-                    "categories" => array(
-                        "filter" => (object) array(),
-                        self::ES_FIELD_AGGS => array(
-                            'categories' => array(
-                                'terms' => array(
-                                    'field' => 'ETBL_REG_CAT_ID',
-                                    'size' => 0,
-                                ),
-                            )
-                        )
-                    ),
-                    "regions" => array(
-                        "filter" => (object) array(),
-                        self::ES_FIELD_AGGS => array(
-                            'regions' => array(
-                                'terms' => array(
-                                    'field' => 'ETBL_REGION_ID',
-                                    'size' => 0,
-                                ),
-                                "aggs" => array(
-                                    "fr" => array(
-                                        "terms" => array(
-                                            "field" => "ETBL_REGION_NOM_FR"
-                                        )
-                                    ),
-                                    "en" => array(
-                                        "terms" => array(
-                                            "field" => "ETBL_REGION_NOM_EN"
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    ),
-                    "cities" => array(
-                        "filter" => (object) array(),
-                        self::ES_FIELD_AGGS => array(
-                            'cities' => array(
-                                'terms' => array(
-                                    'field' => 'ETBL_VILLE_ID',
-                                    'size' => 0,
-                                ),
-                                "aggs" => array(
-                                    "fr" => array(
-                                        "terms" => array(
-                                            "field" => "ETBL_VILLE_NOM_FR"
-                                        )
-                                    ),
-                                    "en" => array(
-                                        "terms" => array(
-                                            "field" => "ETBL_VILLE_NOM_EN"
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    ),
-                )
+                      )
+                    )
+                  )
+                ),
+              )
             ),
           ),
         );
     }
+
 }
