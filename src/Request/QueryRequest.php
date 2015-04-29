@@ -54,6 +54,7 @@ class QueryRequest {
         "ETBL_RESERVABLE", 
         "ETBL_TYPE_FR", 
         "ETBL_TYPE_EN", 
+        "ETBL_TYPE_GRP_ID", 
         "ETBL_TYPE_GRP_FR", 
         "ETBL_TYPE_GRP_EN", 
         "ETBL_CLASSIFICATIONS", 
