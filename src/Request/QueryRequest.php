@@ -47,6 +47,38 @@ class QueryRequest {
     const QUERY_RADIUS_M = 3963.1676;
     const QUERY_RADIUS_KM = 6378.1;
 
+    public static $es_needed_fields = array(
+        "ETBL_ID",
+        "ETBL_NOM_FR", 
+        "ETBL_NOM_EN", 
+        "ETBL_RESERVABLE", 
+        "ETBL_TYPE_FR", 
+        "ETBL_TYPE_EN", 
+        "ETBL_TYPE_GRP_FR", 
+        "ETBL_TYPE_GRP_EN", 
+        "ETBL_CLASSIFICATIONS", 
+        "ETBL_VILLE_ID", 
+        "ETBL_VILLE_NOM_FR", 
+        "ETBL_VILLE_NOM_EN", 
+        "ETBL_REGION_ID", 
+        "ETBL_REGION_NOM_FR", 
+        "ETBL_REGION_NOM_EN", 
+        "ETBL_QUARTIER_ID", 
+        "ETBL_QUARTIER_NOM_FR", 
+        "ETBL_QUARTIER_NOM_EN",
+        "ETBL_REG_CAT_ID",
+        "ETBL_REG_CAT_FR",
+        "ETBL_REG_CAT_EN",
+        "ETBL_REG_SOUS_SEC_ID",
+        "ETBL_REG_SOUS_SEC_FR",
+        "ETBL_REG_SOUS_SEC_EN",
+        "ETBL_REG_SECTION_ID",
+        "ETBL_REG_SECTION_FR",
+        "ETBL_REG_SECTION_EN",
+        "MULTIMEDIAS",
+        "PERIODES_EXPLOITATION",
+    );
+
     /**
      * 
      * @param type $params
@@ -146,6 +178,8 @@ class QueryRequest {
         }
 
         $results_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['results'], $subsection_filter_with_term);
+
+        $queryBuilder->setParameter('_source', self::$es_needed_fields);
 
         return $queryBuilder;
     }
