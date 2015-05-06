@@ -26,7 +26,8 @@ class Aggregation implements FilterInterface {
     public function getFilter() {
         $aggsArray = array();
         $termPart = array('terms' => array(
-              'field' => $this->field
+              'field' => $this->field,
+              'size' => 0,
             ));
         if ($this->aggs !== null) {
             $aggsArray['aggs'] = $this->aggs->getFilter();

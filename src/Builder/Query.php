@@ -153,7 +153,7 @@ class Query {
             'must' => array(
               'multi_match' => array(
                 'query' => $value,
-                'fields' => array('ETBL_NOM_'.strtoupper($lang).'^3',$field),
+                'fields' => array('ETBL_NOM_'.strtoupper($lang).'^10',$field),
                 'type' => 'phrase',
                 'slop' => self::QUERY_SLOP,
               )
@@ -176,7 +176,7 @@ class Query {
                       )
                     )
                   ),
-                  'boost' => 2.5,
+                  'boost' => 5,
                 )
               ),
               1 => array('nested' => array(
