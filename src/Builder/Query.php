@@ -13,7 +13,7 @@ class Query {
     const QUERY_FIELD_FR = 'all_french';
     const QUERY_FIELD_EN = 'all_english';
     const LANG_FR = 'fr';
-    const LANG_EN = 'fr';    
+    const LANG_EN = 'en';    
     const QUERY_SLOP = 5;
 
     protected $field;
@@ -151,11 +151,11 @@ class Query {
         return array('bool' =>
           array(
             'must' => array(
-              'match_phrase' => array(
-                $field => array(
-                  'query' => $value,
-                  'slop' => self::QUERY_SLOP,
-                )
+              'multi_match' => array(
+                'query' => $value,
+                'fields' => array('ETBL_NOM_'.strtoupper($lang).'^3',$field),
+                'type' => 'phrase',
+                'slop' => self::QUERY_SLOP,
               )
             ),
             'should' => array(
