@@ -179,7 +179,7 @@ class Query {
                   'boost' => 5,
                 )
               ),
-              1 => array('nested' => array(
+              2 => array('nested' => array(
                   'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
                   'query' => array(
                     'term' => array(
@@ -191,7 +191,7 @@ class Query {
                   'boost' => 2,
                 )
               ),
-              2 => array('nested' => array(
+              3 => array('nested' => array(
                   'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
                   'query' => array(
                     'term' => array(
@@ -203,7 +203,7 @@ class Query {
                   'boost' => 1.5,
                 )
               ),
-              3 => array('nested' => array(
+              4 => array('nested' => array(
                   'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
                   'query' => array(
                     'term' => array(
