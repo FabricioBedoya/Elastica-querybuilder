@@ -331,7 +331,7 @@ class QueryRequest {
 
         if (!empty($search_filters) || !empty($search_filter_with_term)) {
             $terms = array('section' => 'ETBL_REG_SECTION_ID', 'subsection' => 'ETBL_REG_SOUS_SEC_ID',
-              'category' => 'ETBL_REG_CAT_ID', 'region' => 'ETBL_REGION_ID', 'city' => 'ETBL_VILLE_ID',
+              'category' => 'ETBL_REG_CAT_ID', 'region' => 'TERRITOIRES.REGION_ID', 'city' => 'TERRITOIRES.VILLE_ID',
               'services' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
               'activities' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
               'rating' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
