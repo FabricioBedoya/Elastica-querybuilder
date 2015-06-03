@@ -107,7 +107,19 @@ class Query {
             switch (true) {
                 case $this->getKeyword() === null :
                 default :
-                    $this->query = array('match_all' => array());
+                    if ($this->getOption(self::QUERY_OPTION_FICHE) === true) {
+                        $this->query = array(
+                          'bool' => array(
+                            'must'=> array(
+                              'match_all' => (object) array(),
+                            ),
+                            'should' => self::boostRichContent(),
+                          )
+                          );
+                    }
+                    else {
+                        $this->query = array('match_all' => (object) array());
+                    }
                     break;
                 case $this->getKeyword() !== null && ($this->getField() === null || $this->getField() == self::QUERY_FIELD_ALL):
                     if ($this->getOption(self::QUERY_OPTION_FICHE) === true) {
@@ -144,6 +156,7 @@ class Query {
     /**
      * 
      * @param string $value
+     * @param string $lang
      * @return array
      */
     private static function improveedQueryRichContent($value, $lang = self::LANG_FR) {
@@ -158,63 +171,71 @@ class Query {
                 'slop' => self::QUERY_SLOP,
               )
             ),
-            'should' => array(
-              0 => array('term' => array(
-                  'ETBL_RESERVABLE' => array(
-                    'value' => 1,
-                    'boost' => 3,
+            'should' => self::boostRichContent(),
+          )
+        );
+    }
+    
+    /**
+     * 
+     * @return array
+     */
+    private static function boostRichContent() {
+        return array(
+          0 => array('term' => array(
+              'ETBL_RESERVABLE' => array(
+                'value' => 1,
+                'boost' => 3,
+              )
+            )
+          ),
+          1 => array('nested' => array(
+              'path' => 'MULTIMEDIAS',
+              'query' => array(
+                'terms' => array(
+                  'MUL_GENRE_ID' => array(
+                    0 => 7148165,
+                    1 => 179105281,
                   )
                 )
               ),
-              1 => array('nested' => array(
-                  'path' => 'MULTIMEDIAS',
-                  'query' => array(
-                    'terms' => array(
-                      'MUL_GENRE_ID' => array(
-                        0 => 7148165,
-                        1 => 179105281,
-                      )
-                    )
-                  ),
-                  'boost' => 5,
+              'boost' => 5,
+            )
+          ),
+          2 => array('nested' => array(
+              'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
+              'query' => array(
+                'term' => array(
+                  'CARACT_ATTRB_ID' => array(
+                    'value' => 210241848,
+                  )
                 )
               ),
-              2 => array('nested' => array(
-                  'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
-                  'query' => array(
-                    'term' => array(
-                      'CARACT_ATTRB_ID' => array(
-                        'value' => 210241848,
-                      )
-                    )
-                  ),
-                  'boost' => 2,
+              'boost' => 2,
+            )
+          ),
+          3 => array('nested' => array(
+              'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
+              'query' => array(
+                'term' => array(
+                  'CARACT_ATTRB_ID' => array(
+                    'value' => 373620213,
+                  )
                 )
               ),
-              3 => array('nested' => array(
-                  'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
-                  'query' => array(
-                    'term' => array(
-                      'CARACT_ATTRB_ID' => array(
-                        'value' => 373620213,
-                      )
-                    )
-                  ),
-                  'boost' => 1.5,
+              'boost' => 1.5,
+            )
+          ),
+          4 => array('nested' => array(
+              'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
+              'query' => array(
+                'term' => array(
+                  'CARACT_ATTRB_ID' => array(
+                    'value' => 373985076,
+                  )
                 )
               ),
-              4 => array('nested' => array(
-                  'path' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS',
-                  'query' => array(
-                    'term' => array(
-                      'CARACT_ATTRB_ID' => array(
-                        'value' => 373985076,
-                      )
-                    )
-                  ),
-                )
-              )
-            ),
+            )
           )
         );
     }
