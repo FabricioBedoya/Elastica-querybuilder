@@ -113,7 +113,7 @@ class Query {
                             'must'=> array(
                               'match_all' => (object) array(),
                             ),
-                            'should' => self::boostRichContent(),
+                            'should' => self::boostWidgetContent(),
                           )
                           );
                     }
@@ -237,6 +237,28 @@ class Query {
               ),
             )
           )
+        );
+    }
+    
+    /**
+     * 
+     * @return array
+     */
+    private static function boostWidgetContent() {
+        return array(
+          0 => array('nested' => array(
+              'path' => 'MULTIMEDIAS',
+              'query' => array(
+                'terms' => array(
+                  'MUL_GENRE_ID' => array(
+                    0 => 7148165,
+                    1 => 179105281,
+                  )
+                )
+              ),
+              'boost' => 5,
+            )
+          ),
         );
     }
 
