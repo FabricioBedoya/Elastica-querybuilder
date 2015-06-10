@@ -92,7 +92,7 @@ class QueryRequest {
         $filters = $applied_filters['filters'];
         $subsection_filter_with_term = $applied_filters['subsection_filter_with_term'];
         $unique_should_caracteristic_filters = $applied_filters['unique_should_caracteristic_filters'];
-        $all_selected_caracteristics = $applied_filters['all_selected_caracteristics'];
+//        $all_selected_caracteristics = $applied_filters['all_selected_caracteristics'];
         $subsection_mapping = $mapping['subsection_mapping'];
         $category_mapping = $mapping['category_mapping'];
 
