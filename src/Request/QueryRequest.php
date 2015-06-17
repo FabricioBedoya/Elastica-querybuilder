@@ -115,6 +115,9 @@ class QueryRequest {
         $section_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['section']);
         $subsection_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['subsection'], $subsection_filter_with_term);
         $category_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['category'], $subsection_filter_with_term);
+        
+        $range_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['range'], $subsection_filter_with_term);
+        $queryBuilder->addCurrentQueryToAgg('range', $range_query);
 
         //regions
         $region_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['region'], $subsection_filter_with_term);
@@ -123,8 +126,10 @@ class QueryRequest {
         if ($region) {
             $city_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['city'], $subsection_filter_with_term);
             $queryBuilder->addCurrentQueryToAgg('cities', $city_query);
-        } else
+        } 
+        else {
             $queryBuilder->unsetAggregation('cities');
+        }
 
         switch (true) {
             case $category:
@@ -199,6 +204,9 @@ class QueryRequest {
         $city = $params['city'];
         $caracteristics_array = $params['caracteristics'];
         $thematic = $params['thematic'];
+        if (isset($params['range'])) {
+            $range = $params['range'];
+        }
 
         $filters = array(
           'results' => array(),
@@ -209,7 +217,7 @@ class QueryRequest {
           'category' => array(),
           'caracteristic' => array(),
           'thematic' => array(),
-          'results' => array()
+          'range' => array(),
         );
 
         $subsection_mapping = $mapping['subsection_mapping'];
@@ -273,6 +281,15 @@ class QueryRequest {
                 }
             }
         }
+        if (isset($range)) {
+            foreach ($filters as $filter_name => $filter) {
+                if (!in_array($filter_name, array('range')))
+                    array_push($filters[$filter_name], 'range');
+            }
+            foreach ($unique_should_caracteristic_filters as $unique_should_name => $unique_should_caracteristic) {
+                array_push($unique_should_caracteristic_filters[$unique_should_name], 'range');
+            }
+        }
 
         switch (true) {
             case ($category && $subsection && $section):
@@ -305,8 +322,9 @@ class QueryRequest {
             case ($section):
 
                 foreach ($filters as $filter_name => $filter) {
-                    if (!in_array($filter_name, array('section', 'subsection', 'category')))
+                    if (!in_array($filter_name, array('section', 'subsection', 'category'))){
                         array_push($filters[$filter_name], 'section');
+                    }
                 }
 
                 array_push($filters['subsection'], 'section');
@@ -342,26 +360,46 @@ class QueryRequest {
               'boat' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
               'hunting' => 'CARACTERISTIQUES.CARACT_ATTRIBUTS.CARACT_ATTRB_ID',
               'thematic' => 'THEMATIQUES.THEM_CLASSES.THEM_CLASS_ID',
+              'range' => array(
+                'begining' => 'PERIODES_EXPLOITATION.PER_EXPL_JJMMYYYY_DEBUT',
+                'ending' => 'PERIODES_EXPLOITATION.PER_EXPL_JJMMYYYY_FIN',
+                ),
             );
             $filters = array();
             foreach ($search_filters as $filter) {
-                if (is_array($params[$filter])) {
-                    foreach ($params[$filter] as $caracteristic_filter) {
-                        if (isset($caracteristics['should'][$filter]))
-                            $filters[] = array('should' => array('term' => array($terms[$filter] => $caracteristic_filter)));
-                        else
-                            $filters[] = array('term' => array($terms[$filter] => $caracteristic_filter));
-                    }
-                }
-                else {
-                    if (isset($caracteristics['should'][$filter]))
-                        $filters[] = array('should' => array('term' => array($terms[$filter] => $params[$filter])));
-                    else
-                        $filters[] = array('term' => array($terms[$filter] => $params[$filter]));
+                switch(true) {
+                    case (is_array($params[$filter]) && $filter !== 'range'):
+                        foreach ($params[$filter] as $caracteristic_filter) {
+                            if (isset($caracteristics['should'][$filter]))
+                                $filters[] = array('should' => array('term' => array($terms[$filter] => $caracteristic_filter)));
+                            else
+                                $filters[] = array('term' => array($terms[$filter] => $caracteristic_filter));
+                        }
+                        break;
+                    case $filter === 'range':
+                        foreach($params[$filter] as $i => $value) {
+                            $time = strtotime($value);
+                            $date = new \DateTime();
+                            $date->setTimestamp($time);
+                            $params[$filter][$i] = $date->format('d-m-Y');
+                        }
+                        $filters[] = array('range' => array($terms[$filter]['begining'] => array($params[$filter][0], '*')));
+                        $filters[] = array('range' => array($terms[$filter]['ending'] => array('*', $params[$filter][1])));
+                        $queryBuilder->addSort($terms[$filter]['begining'], 'asc');
+                        break;
+                    default:
+                        if (isset($caracteristics['should'][$filter])) {
+                            $filters[] = array('should' => array('term' => array($terms[$filter] => $params[$filter])));
+                        }
+                        else {
+                            $filters[] = array('term' => array($terms[$filter] => $params[$filter]));
+                        }
+                        break;
                 }
             }
-            if (!empty($search_filter_with_term))
+            if (!empty($search_filter_with_term)) {
                 $filters[] = array('term' => $search_filter_with_term);
+            }
             $queryBuilder->processFilters($filters);
         }
 
@@ -527,6 +565,45 @@ class QueryRequest {
         }
 
         return $coord;
+    }
+    
+    /**
+     * Format all date value
+     * @param array $params
+     * @return array
+     */
+    public static function formatRangeDate(array $params) {
+        foreach($params as $key => $value) {
+            if (is_array($value)) {
+                $params[$key] = self::formatRangeDate($value);
+            }
+            if (preg_match('/([0-9]{2,4})\-([0-9]{2,4})\-([0-9]{2,4})/', $value)) {
+                $date = new \DateTime($value);
+                $params[$key] = $date->format('d-m-Y');
+            }
+            
+        }
+        return $params;
+    }
+    
+    /**
+     * 
+     * @param array $params
+     * @param array $params2
+     * @return array
+     */
+    public static function mergeFilters(array $params, array $params2) {
+        if (isset($params2['filter'])) {
+            foreach($params2['filter'] as $key => $filter) {
+                if (isset($filter['must'])) {
+                    $filter = $filter['must'];
+                    if (isset($params['query']['filtered']['filter']['and'])) {
+                        $params['query']['filtered']['filter']['and']['filters'][] = $filter;
+                    }
+                }
+            }
+        }
+        return $params;
     }
 
 }

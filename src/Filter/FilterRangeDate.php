@@ -42,12 +42,13 @@ class FilterRangeDate implements FilterInterface {
      */
     public function getFilter() {
         $query = array();
-        $query['range'] = array(
-            $this->field => array(
-              'gte' => $this->value1,
-              'lte' => $this->value2,
-                ),
-        );            
+        $query['range'] = array($this->field => array());
+        if ($this->value1 !== '*') {
+            $query['range'][$this->field]['gte'] = $this->value1;
+        }
+        if ($this->value2 !== '*') {
+            $query['range'][$this->field]['lte'] = $this->value2;
+        }
         return $query;
     }
 
