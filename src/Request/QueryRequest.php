@@ -384,8 +384,8 @@ class QueryRequest {
                             $date->setTimestamp($time);
                             $params[$filter][$i] = $date->format('d-m-Y');
                         }
-                        $filters[] = array('should' => array('range' => array($terms[$filter]['begining'] => array($params[$filter][0], $params[$filter][1]))));
-                        $filters[] = array('should' => array('range' => array($terms[$filter]['ending'] => array($params[$filter][0], $params[$filter][1]))));
+                        $filters[] = array('must' => array('range' => array($terms[$filter]['begining'] => array('*',$params[$filter][1]))));
+                        $filters[] = array('must' => array('range' => array($terms[$filter]['ending'] => array($params[$filter][0], '*'))));
                         $queryBuilder->addSort($terms[$filter]['begining'], 'asc');
                         break;
                     default:
