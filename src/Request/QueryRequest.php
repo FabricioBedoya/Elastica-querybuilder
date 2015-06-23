@@ -96,11 +96,12 @@ class QueryRequest {
         $subsection_mapping = $mapping['subsection_mapping'];
         $category_mapping = $mapping['category_mapping'];
 
-        $section = $params['section'];
-        $subsection = $params['subsection'];
-        $category = $params['category'];
-        $region = $params['region'];
-        $city = $params['city'];
+        $section = (isset($params['section'])) ? $params['section'] : null;
+        $subsection = (isset($params['subsection'])) ? $params['subsection'] : null;
+        $category = (isset($params['category'])) ? $params['category'] : null;
+        $region = (isset($params['region'])) ? $params['region'] : null;
+        
+//        $city = $params['city'];
         $active_selection = $params['active_selection'];
         $theme_active_selection = $params['theme_active_selection'];
 
@@ -110,7 +111,7 @@ class QueryRequest {
 
 
         $caracteristics_array = $params['caracteristics'];
-        $thematic = $params['thematic'];
+//        $thematic = $params['thematic'];
 
         $section_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['section']);
         $subsection_query = static::getFilters($queryBuilder, $caracteristics_array, $params, $query_options, $filters['subsection'], $subsection_filter_with_term);
@@ -203,7 +204,7 @@ class QueryRequest {
         $region = $params['region'];
         $city = $params['city'];
         $caracteristics_array = $params['caracteristics'];
-        $thematic = $params['thematic'];
+        $thematic = (isset($params['thematic'])) ? $params['thematic'] : null;
         if (isset($params['range'])) {
             $range = $params['range'];
         }
@@ -597,15 +598,12 @@ class QueryRequest {
             foreach($params2['filter'] as $key => $filter) {
                 if (isset($filter['must'])) {
                     $filter = $filter['must'];
-                    if (isset($params['query']['filtered']['filter']['bool']['should'])) {
-                        $params['query']['filtered']['filter']['bool']['should'][] = $filter;
+                    if (isset($params['query']['filtered']['filter']['bool'])) {
+                        $params['query']['filtered']['filter']['bool']['must'][] = $filter;
                     }
-                    else {
-                        $params['query']['filtered']['filter']['bool'] = array('should' => array(array($filter)));
                     }
                 }
             }
-        }
         return $params;
     }
 
