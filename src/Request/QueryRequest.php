@@ -383,8 +383,8 @@ class QueryRequest {
                             $date->setTimestamp($time);
                             $params[$filter][$i] = $date->format('d-m-Y');
                         }
-                        $filters[] = array('range' => array($terms[$filter]['begining'] => array($params[$filter][0], '*')));
-                        $filters[] = array('range' => array($terms[$filter]['ending'] => array('*', $params[$filter][1])));
+                        $filters[] = array('should' => array('range' => array($terms[$filter]['begining'] => array($params[$filter][0], $params[$filter][1]))));
+                        $filters[] = array('should' => array('range' => array($terms[$filter]['ending'] => array($params[$filter][0], $params[$filter][1]))));
                         $queryBuilder->addSort($terms[$filter]['begining'], 'asc');
                         break;
                     default:
@@ -577,7 +577,7 @@ class QueryRequest {
             if (is_array($value)) {
                 $params[$key] = self::formatRangeDate($value);
             }
-            if (preg_match('/([0-9]{2,4})\-([0-9]{2,4})\-([0-9]{2,4})/', $value)) {
+            if (!is_array($value) && preg_match('/([0-9]{2,4})\-([0-9]{2,4})\-([0-9]{2,4})/', $value)) {
                 $date = new \DateTime($value);
                 $params[$key] = $date->format('d-m-Y');
             }
@@ -597,8 +597,11 @@ class QueryRequest {
             foreach($params2['filter'] as $key => $filter) {
                 if (isset($filter['must'])) {
                     $filter = $filter['must'];
-                    if (isset($params['query']['filtered']['filter']['and'])) {
-                        $params['query']['filtered']['filter']['and']['filters'][] = $filter;
+                    if (isset($params['query']['filtered']['filter']['bool']['should'])) {
+                        $params['query']['filtered']['filter']['bool']['should'][] = $filter;
+                    }
+                    else {
+                        $params['query']['filtered']['filter']['bool'] = array('should' => array(array($filter)));
                     }
                 }
             }

@@ -323,12 +323,15 @@ class QueryBuilder {
     }
     
     public function addSort($field, $order = 'asc') {
-        foreach($this->preparedParams[self::ES_FIELD_BODY][self::ES_FIELD_SORT] as $key => $sort) {
-            if ($field === key($sort)) {
-                return false;
+        if (isset($this->preparedParams[self::ES_FIELD_BODY][self::ES_FIELD_SORT])) {
+            foreach($this->preparedParams[self::ES_FIELD_BODY][self::ES_FIELD_SORT] as $key => $sort) {
+                if ($field === key($sort)) {
+                    return false;
+                }
             }
+            $this->preparedParams[self::ES_FIELD_BODY][self::ES_FIELD_SORT][] = array($field => array(self::ES_FIELD_ORDER => $order));
         }
-        $this->preparedParams[self::ES_FIELD_BODY][self::ES_FIELD_SORT][] = array($field => array(self::ES_FIELD_ORDER => $order));
+        $this->preparedParams[self::ES_FIELD_BODY][self::ES_FIELD_SORT] = array(array($field => array(self::ES_FIELD_ORDER => $order)));
     }
 
     /**
