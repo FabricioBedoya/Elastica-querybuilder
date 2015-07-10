@@ -4,6 +4,8 @@ namespace O2\QueryBuilder\Builder;
 
 use O2\QueryBuilder\Filter\FilterInterface as O2FilterInterface;
 use O2\QueryBuilder\Request\QueryRequest;
+use O2\QueryBuilder\Query\QueryManager;
+use O2\QueryBuilder\Filter\FilterManager;
 
 class QueryBuilder {
 
@@ -95,7 +97,19 @@ class QueryBuilder {
      * @var array
      */
     protected $options = array();
+    
+    /**
+     *
+     * @var O2\QueryBuilder\Query\QueryManager
+     */
+    protected $queryManager = null;
 
+    /**
+     *
+     * @var O2\QueryBuilder\Filter\FilterManager
+     */
+    protected $filterManager = null;
+    
     /**
      *
      * @var array
@@ -132,11 +146,57 @@ class QueryBuilder {
     /**
      * 
      * @param type $key
-     * @param O2FilterInterface $filter
+     * @param \O2\QueryBuilder\Filter\FilterInterface $filter
      */
     public function addFilterStrategy($key, O2FilterInterface $filter) {
         $this->filters[$key] = $filter;
     }
+    
+    /**
+     * 
+     * @param string $nameFilter
+     * @return \O2\QueryBuilder\Filter\FilterInterface
+     * @throws \Exception
+     */
+    private function getFilterStrategy($nameFilter) {
+        if (!array_key_exists($nameFilter, $this->filters)) {
+            throw new \Exception(sprintf('Filter %s not found', $nameFilter));
+        }
+        $filter = clone $this->filters[$nameFilter];
+        return $filter;
+    }
+    
+    /**
+     * 
+     * @param \O2\QueryBuilder\Query\QueryManager $queryManager
+     */
+    public function setQueryManager(QueryManager $queryManager) {
+        $this->queryManager = $queryManager;
+    }
+    
+    /**
+     * 
+     * @return \O2\QueryBuilder\Query\QueryManager
+     */
+    public function getQueryManager() {
+        return $this->queryManager;
+    }   
+    
+    /**
+     * 
+     * @param O2\QueryBuilder\Query\QueryManagerInterface $filterManager
+     */
+    public function setFilterManager(FilterManager $filterManager) {
+        $this->filterManager = $filterManager;
+    }
+    
+    /**
+     * 
+     * @return O2\QueryBuilder\Query\QueryManagerInterface
+     */
+    public function getFilterManager() {
+        return $this->filterManager;
+    }   
 
     /**
      * 
@@ -252,19 +312,6 @@ class QueryBuilder {
         return $this->addFilter($filterStragety->getFilter(), $condition);
     }
 
-    /**
-     * 
-     * @param type $nameFilter
-     * @return type
-     * @throws \Exception
-     */
-    private function getFilterStrategy($nameFilter) {
-        if (!array_key_exists($nameFilter, $this->filters)) {
-            throw new \Exception(sprintf('Filter %s not found', $nameFilter));
-        }
-        $filter = clone $this->filters[$nameFilter];
-        return $filter;
-    }
 
     private function isNested(array $filter) {
         foreach (static::$notNested as $keyNotNested) {
