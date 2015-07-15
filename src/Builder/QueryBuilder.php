@@ -491,17 +491,72 @@ class QueryBuilder {
 
     /**
      * 
+     * @param array $params
+     * @param type $filter
+     */
+    public function processAggregationArray($fieldName, $aggregation) {
+        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations']
+            [static::ES_FIELD_AGGS][$fieldName] = $aggregation;
+        return $this->preparedParams;
+    }
+
+    /**
+     * 
      * @param string $carateristique_id
      * @param array $ids_array
      * @param array $filter_query
      */
-    public function processCarateristicAggregation($carateristic_id, $ids_array, $filter_query) {
+    public function processCarateristicAggregation($carateristic_id, $ids_array, $filter_query, $nameCaract = true) {
+        $fieldName = (!$nameCaract) ? $carateristic_id : 'caract-' . $carateristic_id;
         $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations']
-            [static::ES_FIELD_AGGS]['caract-' . $carateristic_id] = $this->carateristic_agg($ids_array);
+            [static::ES_FIELD_AGGS][$fieldName] = $this->carateristic_agg($ids_array);
         $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations']
-            [static::ES_FIELD_AGGS]['caract-' . $carateristic_id]['filter']['query'] = $filter_query;
+            [static::ES_FIELD_AGGS][$fieldName]['filter']['query'] = $filter_query;
         return $this->preparedParams;
     }
+    
+    /**
+     * 
+     * @param array $results
+     * @param string $aggName
+     * @return array
+     */
+    public static function getAggregationIdsAvailables(array $results, $aggName) {
+        if (isset($results['aggregations']['global_aggregations'])) {
+            $availables = array();
+            $buckets = static::getBuckets($results['aggregations']['global_aggregations'][$aggName]);
+            foreach($buckets as $key => $agg) {
+                $availables[$agg['key']] = $agg['key'];
+            }
+            $results['aggs'][$aggName] = $availables;
+        }
+        return $availables;
+    }
+    
+    /**
+     * 
+     * @param type $array
+     */
+    public static function getBuckets($array) {
+        if (!is_array($array)) {
+            $buckets = false;
+        }
+        else {
+            foreach (array_keys($array) as $key) {
+                if ($key === 'buckets') {
+                    $buckets = $array[$key];
+                }
+                else {
+                    $buckets = static::getBuckets($array[$key]);
+                }
+                if ($buckets !== false) {
+                    break;
+                }
+            }
+        }
+        return $buckets;
+    }
+
 
     /**
      * 
