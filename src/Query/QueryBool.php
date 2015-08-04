@@ -1,8 +1,8 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder\Query;
 
-use Fafas\QueryBuilder2\Query\QueryCollection;
+use Fafas\QueryBuilder\Query\QueryCollection;
 
 /**
  * Description of QueryBool
@@ -25,14 +25,14 @@ class QueryBool extends AbstractQuery {
     
     /**
      *
-     * @var \Fafas\QueryBuilder2\Query\QueryCollection 
+     * @var \Fafas\QueryBuilder\Query\QueryCollection 
      */
     protected $must = null;
     protected $should = null;
     protected $mustNot = null;
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Query\QueryCollection $must
+     * @param \Fafas\QueryBuilder\Query\QueryCollection $must
      */
     public function setMust(QueryCollection $must) {
         $this->must = $must;
@@ -40,7 +40,7 @@ class QueryBool extends AbstractQuery {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Query\QueryCollection
+     * @return \Fafas\QueryBuilder\Query\QueryCollection
      */
     public function getMust() {
         return $this->must;
@@ -48,7 +48,7 @@ class QueryBool extends AbstractQuery {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Query\QueryCollection $should
+     * @param \Fafas\QueryBuilder\Query\QueryCollection $should
      */
     public function setShould(QueryCollection $should) {
         $this->should = $should;
@@ -56,7 +56,7 @@ class QueryBool extends AbstractQuery {
 
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Query\QueryCollection
+     * @return \Fafas\QueryBuilder\Query\QueryCollection
      */
     public function getShould() {
         return $this->should;
@@ -64,7 +64,7 @@ class QueryBool extends AbstractQuery {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Query\QueryCollection $mustNot
+     * @param \Fafas\QueryBuilder\Query\QueryCollection $mustNot
      */
     public function setMustNot(QueryCollection $mustNot) {
         $this->mustNot = $mustNot;
@@ -72,7 +72,7 @@ class QueryBool extends AbstractQuery {
 
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Query\QueryCollection
+     * @return \Fafas\QueryBuilder\Query\QueryCollection
      */
     public function getMustNot() {
         return $this->mustNot;
@@ -81,10 +81,10 @@ class QueryBool extends AbstractQuery {
     /**
      * 
      * @param string $id
-     * @return \Fafas\QueryBuilder2\Elastica\EntityInterface
+     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
      */
     public function getEntityById($id) {
-        /*@var $query \Fafas\QueryBuilder2\Elastica\EntityInterface */
+        /*@var $query \Fafas\QueryBuilder\Elastica\EntityInterface */
         foreach(array(static::MUST, static::SHOULD, static::MUST_NOT) as $cond) {
             $collection = $this->getCollectionOf($cond);
             if ($collection !== null) {
@@ -109,11 +109,11 @@ class QueryBool extends AbstractQuery {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Elastica\EntityInterface $queryStrategy
+     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $queryStrategy
      * @param type $cond
-     * @return \Fafas\QueryBuilder2\Query\QueryBool
+     * @return \Fafas\QueryBuilder\Query\QueryBool
      */
-    public function addQueryToCollection(\Fafas\QueryBuilder2\Elastica\EntityInterface $queryStrategy, $cond = self::MUST) {
+    public function addQueryToCollection(\Fafas\QueryBuilder\Elastica\EntityInterface $queryStrategy, $cond = self::MUST) {
         switch (true) {
             case $cond == static::MUST_NOT:
                 $methodGet = 'getMustNot';
@@ -130,8 +130,8 @@ class QueryBool extends AbstractQuery {
                 break;
         }
         $collection = $this->$methodGet();
-        if (!$collection instanceof \Fafas\QueryBuilder2\Query\QueryCollection) {
-            $collection = new \Fafas\QueryBuilder2\Query\QueryCollection();
+        if (!$collection instanceof \Fafas\QueryBuilder\Query\QueryCollection) {
+            $collection = new \Fafas\QueryBuilder\Query\QueryCollection();
         }
         $collection->addQuery($queryStrategy);
         $this->$methodSet($collection);
@@ -139,7 +139,7 @@ class QueryBool extends AbstractQuery {
     }
     
     public function getListQueries() {
-        $collection = new \Fafas\QueryBuilder2\Query\QueryCollection();
+        $collection = new \Fafas\QueryBuilder\Query\QueryCollection();
         
     }
     

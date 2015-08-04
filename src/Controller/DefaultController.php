@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Controller;
+namespace Fafas\QueryBuilder\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 

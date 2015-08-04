@@ -4,24 +4,24 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder2\Filter;
+namespace Fafas\QueryBuilder\Filter;
 
-use Fafas\QueryBuilder2\Filter\FilterManager;
-use Fafas\QueryBuilder2\Query\QueryManager;
+use Fafas\QueryBuilder\Filter\FilterManager;
+use Fafas\QueryBuilder\Query\QueryManager;
 
 class FilterCollection extends AbstractFilter {
     
     protected $filterCollection = array();
     
-    /*@var Fafas\QueryBuilder2\Query\QueryManager */
+    /*@var Fafas\QueryBuilder\Query\QueryManager */
     protected $queryManager;
     
-    /*@var Fafas\QueryBuilder2\Filter\FilterManager */
+    /*@var Fafas\QueryBuilder\Filter\FilterManager */
     protected $filterManager;
 
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Filter\FilterInterface $filter
+     * @param \Fafas\QueryBuilder\Filter\FilterInterface $filter
      */
     public function addFilter(FilterInterface $filter) {
         array_push($this->filterCollection, $filter);
@@ -33,7 +33,7 @@ class FilterCollection extends AbstractFilter {
      */
     public function getCollectionAsArray() {
         $collectionAsArray = array();
-        /*@var $filter Fafas\QueryBuilder2\Filter\FilterInterface */
+        /*@var $filter Fafas\QueryBuilder\Filter\FilterInterface */
         foreach($this->filterCollection as $key => $filter) {
             $collectionAsArray[$key] = $filter->getFilter();
         }

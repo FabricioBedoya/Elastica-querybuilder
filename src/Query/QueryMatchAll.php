@@ -4,7 +4,7 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder\Query;
 
 class QueryMatchAll extends AbstractQuery {
     

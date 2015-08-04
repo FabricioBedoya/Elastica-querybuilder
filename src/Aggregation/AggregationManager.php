@@ -4,9 +4,9 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder2\Aggregation;
+namespace Fafas\QueryBuilder\Aggregation;
 
-use Fafas\QueryBuilder2\Builder\ManagerAbstract;
+use Fafas\QueryBuilder\Builder\ManagerAbstract;
 
 class AggregationManager extends ManagerAbstract {
     

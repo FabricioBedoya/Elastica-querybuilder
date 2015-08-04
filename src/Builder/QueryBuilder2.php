@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Builder;
+namespace Fafas\QueryBuilder\Builder;
 
 class QueryBuilder2 {
     
@@ -23,19 +23,19 @@ class QueryBuilder2 {
     
     /**
      *
-     * @var Fafas\QueryBuilder2\Query\QueryManager
+     * @var Fafas\QueryBuilder\Query\QueryManager
      */
     protected $queryManager = null;
 
     /**
      *
-     * @var Fafas\QueryBuilder2\Filter\FilterManager
+     * @var Fafas\QueryBuilder\Filter\FilterManager
      */
     protected $filterManager = null;
     
     /**
      *
-     * @var Fafas\QueryBuilder2\Aggregation\AggregationManager
+     * @var Fafas\QueryBuilder\Aggregation\AggregationManager
      */
     protected $aggregationManager = null;
     
@@ -64,22 +64,22 @@ class QueryBuilder2 {
         foreach ($filters as $key => $filter) {
             $this->addFilterStrategy($key, $filter);
         }
-        $this->setQueryFiltered(new \Fafas\QueryBuilder2\Builder\QueryFiltered());
+        $this->setQueryFiltered(new \Fafas\QueryBuilder\Builder\QueryFiltered());
     }
 
     /**
      * 
      * @param type $key
-     * @param Fafas\QueryBuilder2\Elastica\EntityInterface $strategy
+     * @param Fafas\QueryBuilder\Elastica\EntityInterface $strategy
      */
-    public function addStrategy($key, Fafas\QueryBuilder2\Elastica\EntityInterface $strategy) {
+    public function addStrategy($key, Fafas\QueryBuilder\Elastica\EntityInterface $strategy) {
         $this->strategy[$key] = $strategy;
     }
     
     /**
      * 
      * @param string $nameStrategy
-     * @return \Fafas\QueryBuilder2\Elastica\EntityInterface
+     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
      * @throws \Exception
      */
     private function getStrategy($nameStrategy) {
@@ -92,64 +92,64 @@ class QueryBuilder2 {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Query\QueryManager $queryManager
+     * @param \Fafas\QueryBuilder\Query\QueryManager $queryManager
      */
-    public function setQueryManager(Fafas\QueryBuilder2\Query\QueryManager $queryManager) {
+    public function setQueryManager(Fafas\QueryBuilder\Query\QueryManager $queryManager) {
         $this->queryManager = $queryManager;
     }
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Query\QueryManager
+     * @return \Fafas\QueryBuilder\Query\QueryManager
      */
     public function getQueryManager() {
         if ($this->queryManager === null) {
-            $this->queryManager = \Fafas\QueryBuilder2\Query\QueryManager::createInstance();
+            $this->queryManager = \Fafas\QueryBuilder\Query\QueryManager::createInstance();
         }
         return $this->queryManager;
     }   
     
     /**
      * 
-     * @param Fafas\QueryBuilder2\Query\QueryManagerInterface $filterManager
+     * @param Fafas\QueryBuilder\Query\QueryManagerInterface $filterManager
      */
-    public function setFilterManager(Fafas\QueryBuilder2\Filter\FilterManager $filterManager) {
+    public function setFilterManager(Fafas\QueryBuilder\Filter\FilterManager $filterManager) {
         $this->filterManager = $filterManager;
     }
     
     /**
      * 
-     * @return Fafas\QueryBuilder2\Filter\FilterManager
+     * @return Fafas\QueryBuilder\Filter\FilterManager
      */
     public function getFilterManager() {
         if ($this->filterManager === null) {
-            $this->filterManager = \Fafas\QueryBuilder2\Filter\FilterManager::createInstance();
+            $this->filterManager = \Fafas\QueryBuilder\Filter\FilterManager::createInstance();
         }
         return $this->filterManager;
     }   
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Builder\Fafas\QueryBuilder2\Aggregation\AggregationManager
+     * @return \Fafas\QueryBuilder\Builder\Fafas\QueryBuilder\Aggregation\AggregationManager
      */
     function getAggregationManager() {
         if ($this->aggregationManager === null) {
-            $this->aggregationManager = \Fafas\QueryBuilder2\Aggregation\AggregationManager::createInstance();
+            $this->aggregationManager = \Fafas\QueryBuilder\Aggregation\AggregationManager::createInstance();
         }
         return $this->aggregationManager;
     }
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Builder\Fafas\QueryBuilder2\Aggregation\AggregationManager $aggregationManager
+     * @param \Fafas\QueryBuilder\Builder\Fafas\QueryBuilder\Aggregation\AggregationManager $aggregationManager
      */
-    function setAggregationManager(Fafas\QueryBuilder2\Aggregation\AggregationManager $aggregationManager) {
+    function setAggregationManager(Fafas\QueryBuilder\Aggregation\AggregationManager $aggregationManager) {
         $this->aggregationManager = $aggregationManager;
     }
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Builder\QueryFiltered
+     * @return \Fafas\QueryBuilder\Builder\QueryFiltered
      */
     function getQueryFiltered() {
         return $this->queryFiltered;
@@ -157,9 +157,9 @@ class QueryBuilder2 {
 
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Builder\QueryFiltered $queryFiltered
+     * @param \Fafas\QueryBuilder\Builder\QueryFiltered $queryFiltered
      */
-    function setQueryFiltered(\Fafas\QueryBuilder2\Builder\QueryFiltered $queryFiltered) {
+    function setQueryFiltered(\Fafas\QueryBuilder\Builder\QueryFiltered $queryFiltered) {
         $this->queryFiltered = $queryFiltered;
     }
 
@@ -188,13 +188,13 @@ class QueryBuilder2 {
      * @param array $query
      * @return array
      */
-    public function setQuery(\Fafas\QueryBuilder2\Elastica\EntityInterface $query) {
+    public function setQuery(\Fafas\QueryBuilder\Elastica\EntityInterface $query) {
         $this->getQueryFiltered()->setQuery($query);
     }
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Elastica\EntityInterface
+     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
      */
     public function getQuery() {
         return $this->getQueryManager()->getQuery();
@@ -211,15 +211,15 @@ class QueryBuilder2 {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Elastica\EntityInterface $filter
+     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $filter
      */
-    public function setFilter(\Fafas\QueryBuilder2\Elastica\EntityInterface $filter) {
+    public function setFilter(\Fafas\QueryBuilder\Elastica\EntityInterface $filter) {
         $this->getFilterManager()->setFilter($filter);
     }
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Elastica\EntityInterface
+     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
      */
     public function getFilter() {
         return $this->getFilterManager();

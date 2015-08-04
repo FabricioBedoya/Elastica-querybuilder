@@ -4,7 +4,7 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder2\Filter;
+namespace Fafas\QueryBuilder\Filter;
 
 class FilterBool extends AbstractFilter {
     
@@ -21,14 +21,14 @@ class FilterBool extends AbstractFilter {
     
     /**
      *
-     * @var \Fafas\QueryBuilder2\Query\QueryCollection 
+     * @var \Fafas\QueryBuilder\Query\QueryCollection 
      */
     protected $must = null;
     protected $should = null;
     protected $mustNot = null;
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Query\QueryCollection $must
+     * @param \Fafas\QueryBuilder\Query\QueryCollection $must
      */
     public function setMust(QueryCollection $must) {
         $this->must = $must;
@@ -36,7 +36,7 @@ class FilterBool extends AbstractFilter {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Query\QueryCollection
+     * @return \Fafas\QueryBuilder\Query\QueryCollection
      */
     public function getMust() {
         return $this->must;
@@ -44,7 +44,7 @@ class FilterBool extends AbstractFilter {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Query\QueryCollection $should
+     * @param \Fafas\QueryBuilder\Query\QueryCollection $should
      */
     public function setShould(QueryCollection $should) {
         $this->should = $should;
@@ -52,7 +52,7 @@ class FilterBool extends AbstractFilter {
 
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Query\QueryCollection
+     * @return \Fafas\QueryBuilder\Query\QueryCollection
      */
     public function getShould() {
         return $this->should;
@@ -60,7 +60,7 @@ class FilterBool extends AbstractFilter {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Query\QueryCollection $mustNot
+     * @param \Fafas\QueryBuilder\Query\QueryCollection $mustNot
      */
     public function setMustNot(QueryCollection $mustNot) {
         $this->mustNot = $mustNot;
@@ -68,7 +68,7 @@ class FilterBool extends AbstractFilter {
 
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Query\QueryCollection
+     * @return \Fafas\QueryBuilder\Query\QueryCollection
      */
     public function getMustNot() {
         return $this->mustNot;
@@ -77,10 +77,10 @@ class FilterBool extends AbstractFilter {
     /**
      * 
      * @param string $id
-     * @return \Fafas\QueryBuilder2\Elastica\EntityInterface
+     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
      */
     public function getEntityById($id) {
-        /*@var $query \Fafas\QueryBuilder2\Elastica\EntityInterface */
+        /*@var $query \Fafas\QueryBuilder\Elastica\EntityInterface */
         foreach(array(static::MUST, static::SHOULD, static::MUST_NOT) as $cond) {
             $collection = $this->getCollectionOf($cond);
             if ($collection !== null) {

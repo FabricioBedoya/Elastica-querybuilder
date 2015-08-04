@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-namespace Fafas\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder\Query;
 
 /**
  * Description of QueryTerm
@@ -63,7 +63,7 @@ class QueryTerms extends AbstractQuery {
     /**
      * 
      * @param array $array
-     * @return \Fafas\QueryBuilder2\Query\QueryTerms
+     * @return \Fafas\QueryBuilder\Query\QueryTerms
      */
     public function updateFromArray(array $array) {
         parent::updateFromArray($array);

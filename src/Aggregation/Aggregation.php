@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Aggregation;
+namespace Fafas\QueryBuilder\Aggregation;
 
 class Aggregation implements AggregationInterface {
     

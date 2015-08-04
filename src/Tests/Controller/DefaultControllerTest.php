@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Tests\Controller;
+namespace Fafas\QueryBuilder\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

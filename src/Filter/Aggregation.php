@@ -1,8 +1,8 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Filter;
+namespace Fafas\QueryBuilder\Filter;
 
-use Fafas\QueryBuilder2\Filter\FilterInterface;
+use Fafas\QueryBuilder\Filter\FilterInterface;
 
 class Aggregation implements FilterInterface {
     

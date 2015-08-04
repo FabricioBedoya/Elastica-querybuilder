@@ -4,9 +4,9 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder\Query;
 
-use Fafas\QueryBuilder2\Elastica\EntityInterface;
+use Fafas\QueryBuilder\Elastica\EntityInterface;
 
 abstract class AbstractQuery implements EntityInterface, QueryInterface {
     
@@ -29,11 +29,11 @@ abstract class AbstractQuery implements EntityInterface, QueryInterface {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Builder\ManagerInterface $queryManager
+     * @param \Fafas\QueryBuilder\Builder\ManagerInterface $queryManager
      */
-    public function __construct(\Fafas\QueryBuilder2\Builder\ManagerInterface $queryManager = null) {
+    public function __construct(\Fafas\QueryBuilder\Builder\ManagerInterface $queryManager = null) {
         if ($queryManager === null) {
-            $queryManager = \Fafas\QueryBuilder2\Query\QueryManager::createInstance();
+            $queryManager = \Fafas\QueryBuilder\Query\QueryManager::createInstance();
         }
         $this->setQueryManager($queryManager);
         $this->setId(uniqid(static::PREFIX_ID));
@@ -45,7 +45,7 @@ abstract class AbstractQuery implements EntityInterface, QueryInterface {
 
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Builder\ManagerInterface
+     * @return \Fafas\QueryBuilder\Builder\ManagerInterface
      */
     public function getQueryManager() {
         return $this->queryManager;
@@ -53,21 +53,21 @@ abstract class AbstractQuery implements EntityInterface, QueryInterface {
 
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Builder\ManagerInterface $queryManager
+     * @param \Fafas\QueryBuilder\Builder\ManagerInterface $queryManager
      */
-    public function setQueryManager(\Fafas\QueryBuilder2\Builder\ManagerInterface $queryManager) {
+    public function setQueryManager(\Fafas\QueryBuilder\Builder\ManagerInterface $queryManager) {
         $this->queryManager = $queryManager;
     }
     
     /**
      * 
      * @param array $array
-     * @return \Fafas\QueryBuilder2\Query\QueryNested
+     * @return \Fafas\QueryBuilder\Query\QueryNested
      */
-    public function generateNested(\Fafas\QueryBuilder2\Elastica\EntityInterface $query, $path) {
+    public function generateNested(\Fafas\QueryBuilder\Elastica\EntityInterface $query, $path) {
         $this->nestedLocked = true;
         $queryNested = $this->getQueryManager()->getQueryStrategy('nested');
-        if ($queryNested instanceof \Fafas\QueryBuilder2\Elastica\EntityInterface) {
+        if ($queryNested instanceof \Fafas\QueryBuilder\Elastica\EntityInterface) {
             $queryNested = clone $this->getQueryManager()->getQueryStrategy('nested');
             $options = array(
                 QueryNested::PATH => $path,
@@ -81,7 +81,7 @@ abstract class AbstractQuery implements EntityInterface, QueryInterface {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Query\QueryNested
+     * @return \Fafas\QueryBuilder\Query\QueryNested
      */
     public function getQueryNested() {
         return $this->queryNested;

@@ -4,7 +4,7 @@
  * @author fabriciobedoya
  */
 
-namespace Fafas\QueryBuilder2\Aggregation;
+namespace Fafas\QueryBuilder\Aggregation;
 
 interface AggregationInterface {
     

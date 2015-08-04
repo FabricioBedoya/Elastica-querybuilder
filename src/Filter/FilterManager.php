@@ -4,9 +4,9 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder2\Filter;
+namespace Fafas\QueryBuilder\Filter;
 
-use Fafas\QueryBuilder2\Builder\ManagerAbstract;
+use Fafas\QueryBuilder\Builder\ManagerAbstract;
 
 class FilterManager extends ManagerAbstract {
     
@@ -25,7 +25,7 @@ class FilterManager extends ManagerAbstract {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Builder\ManagerInterface
+     * @return \Fafas\QueryBuilder\Builder\ManagerInterface
      */
     public static function createInstance() {
         if (static::$instance === null) {
@@ -37,15 +37,15 @@ class FilterManager extends ManagerAbstract {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Elastica\EntityInterface $filter
+     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $filter
      */
-    public function setFilter(\Fafas\QueryBuilder2\Elastica\EntityInterface $filter) {
+    public function setFilter(\Fafas\QueryBuilder\Elastica\EntityInterface $filter) {
         $this->filter = $filter;
     }
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Elastica\EntityInterface $query
+     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $query
      */
     public function getFilter() {
         return $this->filter;
@@ -54,14 +54,14 @@ class FilterManager extends ManagerAbstract {
      /**
      * 
      * @param array $filterArray
-     * @return \Fafas\QueryBuilder2\Elastica\EntityInterface
+     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
      */
     public function processFilter(array $filterArray) {
         foreach ($filterArray as $strategy => $params) {
             $queryStrategy =  $this->getQueryStrategy($strategy);
-            if ($queryStrategy instanceof \Fafas\QueryBuilder2\Query\QueryInterface) {
+            if ($queryStrategy instanceof \Fafas\QueryBuilder\Query\QueryInterface) {
                 switch(true) {
-                    case $this->getFilter() instanceof \Fafas\QueryBuilder2\Filter\FilterBool && in_array($strategy, $this->getFilter()->getStrategyKeys()):
+                    case $this->getFilter() instanceof \Fafas\QueryBuilder\Filter\FilterBool && in_array($strategy, $this->getFilter()->getStrategyKeys()):
                         $this->addToCollectionFromArray($this->getFilter(), $params, $strategy);
                         break;
                     case $this->getFilter() === null && in_array($strategy, array(FilterBool::MUST, FilterBool::SHOULD, FilterBool::MUST_NOT)):

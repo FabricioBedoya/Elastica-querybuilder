@@ -1,8 +1,8 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Builder;
+namespace Fafas\QueryBuilder\Builder;
 
-use Fafas\QueryBuilder2\Builder\QueryInterface;
+use Fafas\QueryBuilder\Builder\QueryInterface;
 
 class Query {
 
@@ -76,7 +76,7 @@ class Query {
     /**
      * 
      * @param array $parameters
-     * @return \Fafas\QueryBuilder2\Builder\Query
+     * @return \Fafas\QueryBuilder\Builder\Query
      */
     public function updateFromArray(array $parameters) {
         if (array_key_exists('field', $parameters)) {

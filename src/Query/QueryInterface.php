@@ -3,15 +3,15 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder\Query;
 
 
 interface QueryInterface {
     
-    public function __construct(\Fafas\QueryBuilder2\Builder\ManagerInterface $queryManager);
+    public function __construct(\Fafas\QueryBuilder\Builder\ManagerInterface $queryManager);
     
     function getQueryManager();
     
-    function setQueryManager(\Fafas\QueryBuilder2\Builder\ManagerInterface $queryManager);
+    function setQueryManager(\Fafas\QueryBuilder\Builder\ManagerInterface $queryManager);
     
 }

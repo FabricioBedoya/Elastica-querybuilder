@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Filter;
+namespace Fafas\QueryBuilder\Filter;
 
 class FilterIds extends AbstractFilter {
     

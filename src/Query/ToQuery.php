@@ -5,9 +5,9 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder\Query;
 
-use Fafas\QueryBuilder2\Query\QueryInterface;
+use Fafas\QueryBuilder\Query\QueryInterface;
 
 class Query implements QueryInterface {
     

@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder\Query;
 
 
 /**
@@ -11,7 +11,7 @@ interface QueryNestedInterface {
     
     public function getQueryNested();
     
-    public function setQueryNested(\Fafas\QueryBuilder2\Query\QueryNested $queryNested);
+    public function setQueryNested(\Fafas\QueryBuilder\Query\QueryNested $queryNested);
     
     public function generateNested(array $array);
 }

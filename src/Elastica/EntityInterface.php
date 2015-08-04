@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Elastica;
+namespace Fafas\QueryBuilder\Elastica;
 
 /**
  *

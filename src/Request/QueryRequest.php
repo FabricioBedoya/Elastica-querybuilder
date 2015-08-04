@@ -1,8 +1,8 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Request;
+namespace Fafas\QueryBuilder\Request;
 
-use Fafas\QueryBuilder2\Builder\QueryBuilder;
+use Fafas\QueryBuilder\Builder\QueryBuilder;
 
 class QueryRequest {
 
@@ -86,7 +86,7 @@ class QueryRequest {
      * @param type $params
      * @return \TQ\QueryBundle\Controller\QueryController
      */
-    public static function processRequest(\Fafas\QueryBuilder2\Builder\QueryBuilder $queryBuilder, array $params, array $mapping, array $json_params, array $query_options) {
+    public static function processRequest(\Fafas\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $params, array $mapping, array $json_params, array $query_options) {
         $applied_filters = static::applyFilters($params, $mapping);
 
         $filters = $applied_filters['filters'];
@@ -344,7 +344,7 @@ class QueryRequest {
         );
     }
 
-    public static function getFilters(\Fafas\QueryBuilder2\Builder\QueryBuilder $queryBuilder, array $caracteristics, array $params, array $query_options, array $search_filters = array(), array $search_filter_with_term = array()) {
+    public static function getFilters(\Fafas\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $caracteristics, array $params, array $query_options, array $search_filters = array(), array $search_filter_with_term = array()) {
         $queryBuilder->removeCurrentQuery();
         $queryBuilder->processParams($query_options);
 
@@ -412,7 +412,7 @@ class QueryRequest {
      * @param type $params
      * @return \TQ\QueryBundle\Controller\QueryController
      */
-    public static function processMapRequest($queryHandler, \Fafas\QueryBuilder2\Builder\QueryBuilder $queryBuilder, array $params) {
+    public static function processMapRequest($queryHandler, \Fafas\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $params) {
         $geo_bounding_box = array();
         $zoom = static::QUERY_ZOOM_DEFAULT;
         $zoom_request = $params[static::QUERY_ZOOM];
@@ -441,7 +441,7 @@ class QueryRequest {
      * @param type $params
      * @return array
      */
-    public static function calculateZoomNeedsToBeFound($queryHandler, \Fafas\QueryBuilder2\Builder\QueryBuilder $queryBuilder, array $parameters) {
+    public static function calculateZoomNeedsToBeFound($queryHandler, \Fafas\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $parameters) {
         $queryBuilderZoom = clone $queryBuilder;
         $queryBuilderZoom->processClustersFacets(1);
         $queryBuilderZoom->addGeoBoundingBoxFilter();
@@ -480,11 +480,11 @@ class QueryRequest {
 
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Builder\QueryBuilder $queryBuilder
+     * @param \Fafas\QueryBuilder\Builder\QueryBuilder $queryBuilder
      * @param array $parameters
      * @return array $results
      */
-    public static function processNearByRequest(\Fafas\QueryBuilder2\Builder\QueryBuilder $queryBuilder, array $parameters) {
+    public static function processNearByRequest(\Fafas\QueryBuilder\Builder\QueryBuilder $queryBuilder, array $parameters) {
         $max_box = null;
         switch (true) {
             case array_key_exists(static::QUERY_NEARBY_MAXBOX, $parameters[static::QUERY_NEARBY]) && isset($parameters[static::QUERY_NEARBY][static::QUERY_NEARBY_MAXBOX]) && $parameters[static::QUERY_NEARBY][static::QUERY_ZOOM] !== null:

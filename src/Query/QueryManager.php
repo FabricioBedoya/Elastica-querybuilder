@@ -5,10 +5,10 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder\Query;
 
-use Fafas\QueryBuilder2\Builder\ManagerAbstract;
-use Fafas\QueryBuilder2\Query\QueryBool;
+use Fafas\QueryBuilder\Builder\ManagerAbstract;
+use Fafas\QueryBuilder\Query\QueryBool;
 
 class QueryManager extends ManagerAbstract {
     
@@ -29,7 +29,7 @@ class QueryManager extends ManagerAbstract {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Builder\ManagerInterface
+     * @return \Fafas\QueryBuilder\Builder\ManagerInterface
      */
     public static function createInstance() {
         if (static::$instance === null) {
@@ -41,22 +41,22 @@ class QueryManager extends ManagerAbstract {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Elastica\EntityInterface $query
+     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $query
      */
-    public function setQuery(\Fafas\QueryBuilder2\Elastica\EntityInterface $query) {
+    public function setQuery(\Fafas\QueryBuilder\Elastica\EntityInterface $query) {
         $this->query = $query;
     }
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Elastica\EntityInterface $query
+     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $query
      */
     public function getQuery() {
         return $this->query;
     }
     
     public function getEntityById($id) {
-        if ($this->getQuery() instanceof \Fafas\QueryBuilder2\Query\QueryBool) {
+        if ($this->getQuery() instanceof \Fafas\QueryBuilder\Query\QueryBool) {
             return $this->getQuery()->getEntityById($id);
         }
         return $this->getQuery();
@@ -64,7 +64,7 @@ class QueryManager extends ManagerAbstract {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Query\QueryCollectionInterface
+     * @return \Fafas\QueryBuilder\Query\QueryCollectionInterface
      */
     function getQueryCollection() {
         return $this->queryCollection;
@@ -72,7 +72,7 @@ class QueryManager extends ManagerAbstract {
 
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Query\QueryCollectionInterface $queryCollection
+     * @param \Fafas\QueryBuilder\Query\QueryCollectionInterface $queryCollection
      */
     function setQueryCollection(QueryCollectionInterface $queryCollection) {
         $this->queryCollection = $queryCollection;
@@ -83,9 +83,9 @@ class QueryManager extends ManagerAbstract {
      * @param QueryBool $queryBool
      * @param array $array
      * @param type $cond
-     * @return \Fafas\QueryBuilder2\Query\QueryManager
+     * @return \Fafas\QueryBuilder\Query\QueryManager
      */
-    protected function addToCollectionFromArray(\Fafas\QueryBuilder2\Query\QueryBool $queryBool, array $array, $cond = QueryBool::MUST) {
+    protected function addToCollectionFromArray(\Fafas\QueryBuilder\Query\QueryBool $queryBool, array $array, $cond = QueryBool::MUST) {
         $flag = (bool) count(array_filter(array_keys($array), 'is_string'));
         switch(true) {
             case ($flag !== true) :
@@ -107,14 +107,14 @@ class QueryManager extends ManagerAbstract {
     /**
      * 
      * @param array $queryArray
-     * @return \Fafas\QueryBuilder2\Elastica\EntityInterface
+     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
      */
     public function processQuery(array $queryArray) {
         foreach ($queryArray as $strategy => $params) {
             $queryStrategy =  $this->getQueryStrategy($strategy);
-            if ($queryStrategy instanceof \Fafas\QueryBuilder2\Query\QueryInterface) {
+            if ($queryStrategy instanceof \Fafas\QueryBuilder\Query\QueryInterface) {
                 switch(true) {
-                    case $this->getQuery() instanceof \Fafas\QueryBuilder2\Query\QueryBool && in_array($strategy, $this->getQuery()->getStrategyKeys()):
+                    case $this->getQuery() instanceof \Fafas\QueryBuilder\Query\QueryBool && in_array($strategy, $this->getQuery()->getStrategyKeys()):
                         $this->addToCollectionFromArray($this->getQuery(), $params, $strategy);
                         break;
                     case $this->getQuery() === null && in_array($strategy, array(QueryBool::MUST, QueryBool::SHOULD, QueryBool::MUST_NOT)):
@@ -134,20 +134,20 @@ class QueryManager extends ManagerAbstract {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Elastica\EntityInterface $query
+     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $query
      */
-    public function addQuery(\Fafas\QueryBuilder2\Elastica\EntityInterface $query) {
+    public function addQuery(\Fafas\QueryBuilder\Elastica\EntityInterface $query) {
         switch(true) {
-            case ($this->getQuery() instanceof \Fafas\QueryBuilder2\Query\QueryBool) :
-                /*@var \Fafas\QueryBuilder2\Query\QueryCollection $collection */
+            case ($this->getQuery() instanceof \Fafas\QueryBuilder\Query\QueryBool) :
+                /*@var \Fafas\QueryBuilder\Query\QueryCollection $collection */
                 $collection = $this->getQuery()->getMust();
                 $collection->addQuery($query);
                 $this->getQuery()->setMust($collection);
                 break;
-            case ($this->getQuery() !== null && !$this->getQuery() instanceof \Fafas\QueryBuilder2\Query\QueryCollectionInterface):
-                $collection = new \Fafas\QueryBuilder2\Query\QueryCollection($this);
+            case ($this->getQuery() !== null && !$this->getQuery() instanceof \Fafas\QueryBuilder\Query\QueryCollectionInterface):
+                $collection = new \Fafas\QueryBuilder\Query\QueryCollection($this);
                 $collection->updateFromArray($this->getQuery()->getFilterAsArray());
-                $bool = new \Fafas\QueryBuilder2\Query\QueryBool();
+                $bool = new \Fafas\QueryBuilder\Query\QueryBool();
                 $bool->updateFromArray(array(
                   'must' => $collection->getCollectionAsArray(),
                 ));

@@ -1,8 +1,8 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Builder;
+namespace Fafas\QueryBuilder\Builder;
 
-use Fafas\QueryBuilder2\Elastica\EntityInterface;
+use Fafas\QueryBuilder\Elastica\EntityInterface;
 /**
  * Description of QueryFilteredQuery
  *
@@ -22,7 +22,7 @@ class QueryFilteredQuery implements EntityInterface {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder2\Elastica\EntityInterface
+     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
      */
     function getQuery() {
         return $this->query;
@@ -30,9 +30,9 @@ class QueryFilteredQuery implements EntityInterface {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder2\Elastica\EntityInterface $query
+     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $query
      */
-    function setQuery(\Fafas\QueryBuilder2\Elastica\EntityInterface $query) {
+    function setQuery(\Fafas\QueryBuilder\Elastica\EntityInterface $query) {
         $this->query = $query;
     }
 

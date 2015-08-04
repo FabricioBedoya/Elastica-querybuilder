@@ -1,9 +1,9 @@
 <?php
 
-namespace Fafas\QueryBuilder2\Filter;
+namespace Fafas\QueryBuilder\Filter;
 
-use Fafas\QueryBuilder2\Filter\FilterInterface;
-use Fafas\QueryBuilder2\Elastica\EntityInterface;
+use Fafas\QueryBuilder\Filter\FilterInterface;
+use Fafas\QueryBuilder\Elastica\EntityInterface;
 
 class FilterNested extends AbstractFilter {
 
