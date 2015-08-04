@@ -1,12 +1,11 @@
 <?php
-
-namespace O2\QueryBuilder\Aggregation;
-
-use O2\QueryBuilder\Filter\FilterColletionInterface;
 /**
  *
  * @author fabriciobedoya
  */
+
+namespace O2\QueryBuilder2\Aggregation;
+
 interface AggregationInterface {
     
     public function setName($name);
@@ -17,13 +16,15 @@ interface AggregationInterface {
     
     public function getField();
     
-    public function setType($type);
+    public function getIsGlobal();
+
+    public function getSize();
     
-    public function getType();
+    public function setIsGlobal($isGlobal);
+
+    public function setSize($value);
     
-    public function setPath($path);
+    public function getAggregationAsArray();
     
-    public function getPath();
-    
-    public function setFilterCollection(FilterColletionInterface $filterCollection);
+    public function updateFromArray(array $array);
 }

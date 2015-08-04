@@ -4,7 +4,7 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder\Aggregation;
+namespace O2\QueryBuilder2\Aggregation;
 
 
 interface AggregationCollectionInterface {

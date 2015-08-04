@@ -4,95 +4,96 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
-use O2\QueryBuilder\Filter\FilterConstants;
-use O2\QueryBuilder\Filter\FilterCollectionInterface;
-
-class FilterBool implements FilterInterface {
-       
-    protected $bool = null;
+class FilterBool extends AbstractFilter {
     
+    const BOOL = 'bool';
+    const MUST = 'must';
+    const SHOULD = 'should';
+    const MUST_NOT = 'must_not';
+    
+    public static $strategyKeys = array(
+      self::BOOL,
+      self::MUST,
+      self::SHOULD,
+    );
+    
+    /**
+     *
+     * @var \O2\QueryBuilder2\Query\QueryCollection 
+     */
     protected $must = null;
-    
     protected $should = null;
-    
     protected $mustNot = null;
-    
-    public function __construct(FilterCollectionInterface $bool = null) {
-        if ($bool !== null) {
-            $this->bool = $bool;
-        }
-    }
-    
     /**
      * 
-     * @return FilterCollectionInterface
+     * @param \O2\QueryBuilder2\Query\QueryCollection $must
      */
-    function getMust() {
-        return $this->must;
-    }
-
-    /**
-     * 
-     * @return FilterCollectionInterface
-     */
-    function getShould() {
-        return $this->should;
-    }
-
-    /**
-     * 
-     * @return FilterCollectionInterface
-     */
-    function getMustNot() {
-        return $this->must_not;
-    }
-    
-    /**
-     * 
-     * @param FilterCollectionInterface $must
-     */
-    function setMust(FilterCollectionInterface $must) {
+    public function setMust(QueryCollection $must) {
         $this->must = $must;
     }
-
+    
     /**
      * 
-     * @param FilterCollectionInterface $should
+     * @return \O2\QueryBuilder2\Query\QueryCollection
      */
-    function setShould(FilterCollectionInterface $should) {
+    public function getMust() {
+        return $this->must;
+    }
+    
+    /**
+     * 
+     * @param \O2\QueryBuilder2\Query\QueryCollection $should
+     */
+    public function setShould(QueryCollection $should) {
         $this->should = $should;
     }
 
     /**
      * 
-     * @param FilterCollectionInterface $mustNot
+     * @return \O2\QueryBuilder2\Query\QueryCollection
      */
-    function setMustNot(FilterCollectionInterface $mustNot) {
-        $this->mustNot = $mustNot;
+    public function getShould() {
+        return $this->should;
     }
     
     /**
      * 
-     * @param \O2\QueryBuilder\Filter\FilterInterface $filter
-     * @param string $cond
+     * @param \O2\QueryBuilder2\Query\QueryCollection $mustNot
      */
-    function addFilter(FilterInterface $filter, $cond = FilterConstants::MUST) {
-        switch(true) {
-            case strtolower($cond) === FilterConstants::SHOULD;
-                $this->getShould()->addFilter($filter);
-                break;
-            case strtolower($cond) === FilterConstants::MUST_NO;
-                $this->getMustNot()->addFilter($filter);
-                break;
-            case strtolower($cond) === FilterConstants::MUST:
-            default:
-                $this->getMust()->addFilter($filter);
-                break;
-        } 
+    public function setMustNot(QueryCollection $mustNot) {
+        $this->mustNot = $mustNot;
     }
 
+    /**
+     * 
+     * @return \O2\QueryBuilder2\Query\QueryCollection
+     */
+    public function getMustNot() {
+        return $this->mustNot;
+    }
+    
+    /**
+     * 
+     * @param string $id
+     * @return \O2\QueryBuilder2\Elastica\EntityInterface
+     */
+    public function getEntityById($id) {
+        /*@var $query \O2\QueryBuilder2\Elastica\EntityInterface */
+        foreach(array(static::MUST, static::SHOULD, static::MUST_NOT) as $cond) {
+            $collection = $this->getCollectionOf($cond);
+            if ($collection !== null) {
+                foreach($collection->getCollection() as $key => $query) {
+                    if ($key === $id) {
+                        return $query;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
     /**
      * 
      * @return array
@@ -110,14 +111,6 @@ class FilterBool implements FilterInterface {
         }
         
         return $bool;
-    }
-
-    /**
-     * 
-     * @return array
-     */
-    public function getFilter() {
-        return $this->getFilterAsArray();
     }
 
     /**
@@ -145,5 +138,15 @@ class FilterBool implements FilterInterface {
             }
         }
     }
+    
+    public function getId() {
+        
+    }
+
+    public function setId($id) {
+        
+    }
+
+
 
 }

@@ -4,54 +4,78 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
-use O2\QueryBuilder\Query\QueryManagerInterface;
+use O2\QueryBuilder2\Builder\ManagerAbstract;
 
-class FilterManager implements QueryManagerInterface {
+class FilterManager extends ManagerAbstract {
     
-    protected $strategy = array();
+    protected $filter = null;
     
-    /**
-     * 
-     * @param type $nameFilter
-     * @param QueryInterface $queryStrategy
-     */
-    public function addQueryStrategy($nameFilter, QueryInterface $queryStrategy) {
-        $this->strategy[$nameFilter] = $queryStrategy;
+    protected static $instance = null;
+    
+    public function __construct() {
+        $this->patternClass = 'O2\\QueryBuilder\\Filter\\';
+        $this->patternFile = 'Filter';
+    }
+    
+    public function getFolder() {
+        return dirname(__FILE__);
     }
     
     /**
      * 
-     * @param type $nameFilter
-     * @return type
-     * @throws \Exception
+     * @return \O2\QueryBuilder2\Builder\ManagerInterface
      */
-    public function getQueryStrategy($nameFilter) {
-        if (!array_key_exists($nameFilter, $this->strategy)) {
-            throw new \Exception(sprintf('Filter %s not found', $nameFilter));
+    public static function createInstance() {
+        if (static::$instance === null) {
+            static::$instance = new static();
+            static::$instance->autoloadStrategies();
         }
-        $filter = clone $this->strategy[$nameFilter];
-        return $filter;
+        return static::$instance;
     }
     
+    /**
+     * 
+     * @param \O2\QueryBuilder2\Elastica\EntityInterface $filter
+     */
+    public function setFilter(\O2\QueryBuilder2\Elastica\EntityInterface $filter) {
+        $this->filter = $filter;
+    }
     
-    public function autoloadStrategies() {
-        $folder = dirname(__FILE__);
-        if ($handle = opendir($folder)) {
-            while (false !== ($entry = readdir($handle))) {
-                if (!preg_match('/manager/i', $entry) && !preg_match('/interface/i', $entry)) {
-                    if (preg_match('/([a-z|A-Z]+)\.php/', $entry, $matches)) {
-                        $class = 'O2\\QueryBuilder\\Filter\\' . $matches[1];
-                        if (preg_match('/Filter([a-z|A-Z]+)\.php/', $entry, $matches2)) {
-                            $nomStrategy = \Symfony\Component\DependencyInjection\Container::underscore($matches2[1]);
-                            $queryStrategy = new $class();
-                            $this->addQueryStrategy($nomStrategy, $queryStrategy);
-                        }
-                    }
+    /**
+     * 
+     * @param \O2\QueryBuilder2\Elastica\EntityInterface $query
+     */
+    public function getFilter() {
+        return $this->filter;
+    }
+    
+     /**
+     * 
+     * @param array $filterArray
+     * @return \O2\QueryBuilder2\Elastica\EntityInterface
+     */
+    public function processFilter(array $filterArray) {
+        foreach ($filterArray as $strategy => $params) {
+            $queryStrategy =  $this->getQueryStrategy($strategy);
+            if ($queryStrategy instanceof \O2\QueryBuilder2\Query\QueryInterface) {
+                switch(true) {
+                    case $this->getFilter() instanceof \O2\QueryBuilder2\Filter\FilterBool && in_array($strategy, $this->getFilter()->getStrategyKeys()):
+                        $this->addToCollectionFromArray($this->getFilter(), $params, $strategy);
+                        break;
+                    case $this->getFilter() === null && in_array($strategy, array(FilterBool::MUST, FilterBool::SHOULD, FilterBool::MUST_NOT)):
+                        $queryStrategy->updateFromArray(array($strategy => $params));
+                        $this->setFilter($queryStrategy);
+                        break;
+                    default:
+                        $queryStrategy->updateFromArray($params);
+                        $this->setFilter($queryStrategy);
+                        break;
                 }
+                
             }
-            closedir($handle);
         }
+        return $this->getFilter();
     }
 }

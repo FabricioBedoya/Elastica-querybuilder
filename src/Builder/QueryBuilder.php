@@ -1,11 +1,11 @@
 <?php
 
-namespace O2\QueryBuilder\Builder;
+namespace O2\QueryBuilder2\Builder;
 
-use O2\QueryBuilder\Filter\FilterInterface as O2FilterInterface;
-use O2\QueryBuilder\Request\QueryRequest;
-use O2\QueryBuilder\Query\QueryManager;
-use O2\QueryBuilder\Filter\FilterManager;
+use O2\QueryBuilder2\Filter\FilterInterface as O2FilterInterface;
+use O2\QueryBuilder2\Request\QueryRequest;
+use O2\QueryBuilder2\Query\QueryManager;
+use O2\QueryBuilder2\Filter\FilterManager;
 
 class QueryBuilder {
 
@@ -100,15 +100,21 @@ class QueryBuilder {
     
     /**
      *
-     * @var O2\QueryBuilder\Query\QueryManager
+     * @var O2\QueryBuilder2\Query\QueryManager
      */
     protected $queryManager = null;
 
     /**
      *
-     * @var O2\QueryBuilder\Filter\FilterManager
+     * @var O2\QueryBuilder2\Filter\FilterManager
      */
     protected $filterManager = null;
+    
+    /**
+     *
+     * @var O2\QueryBuilder2\Aggregation\AggregationManager
+     */
+    protected $aggregationManager = null;
     
     /**
      *
@@ -146,7 +152,7 @@ class QueryBuilder {
     /**
      * 
      * @param type $key
-     * @param \O2\QueryBuilder\Filter\FilterInterface $filter
+     * @param \O2\QueryBuilder2\Filter\FilterInterface $filter
      */
     public function addFilterStrategy($key, O2FilterInterface $filter) {
         $this->filters[$key] = $filter;
@@ -155,7 +161,7 @@ class QueryBuilder {
     /**
      * 
      * @param string $nameFilter
-     * @return \O2\QueryBuilder\Filter\FilterInterface
+     * @return \O2\QueryBuilder2\Filter\FilterInterface
      * @throws \Exception
      */
     private function getFilterStrategy($nameFilter) {
@@ -168,7 +174,7 @@ class QueryBuilder {
     
     /**
      * 
-     * @param \O2\QueryBuilder\Query\QueryManager $queryManager
+     * @param \O2\QueryBuilder2\Query\QueryManager $queryManager
      */
     public function setQueryManager(QueryManager $queryManager) {
         $this->queryManager = $queryManager;
@@ -176,7 +182,7 @@ class QueryBuilder {
     
     /**
      * 
-     * @return \O2\QueryBuilder\Query\QueryManager
+     * @return \O2\QueryBuilder2\Query\QueryManager
      */
     public function getQueryManager() {
         return $this->queryManager;
@@ -184,7 +190,7 @@ class QueryBuilder {
     
     /**
      * 
-     * @param O2\QueryBuilder\Query\QueryManagerInterface $filterManager
+     * @param O2\QueryBuilder2\Query\QueryManagerInterface $filterManager
      */
     public function setFilterManager(FilterManager $filterManager) {
         $this->filterManager = $filterManager;
@@ -192,12 +198,29 @@ class QueryBuilder {
     
     /**
      * 
-     * @return O2\QueryBuilder\Query\QueryManagerInterface
+     * @return O2\QueryBuilder2\Query\QueryManagerInterface
      */
     public function getFilterManager() {
         return $this->filterManager;
     }   
+    
+    /**
+     * 
+     * @return \O2\QueryBuilder2\Builder\O2\QueryBuilder2\Aggregation\AggregationManager
+     */
+    function getAggregationManager() {
+        return $this->aggregationManager;
+    }
+    
+    /**
+     * 
+     * @param \O2\QueryBuilder2\Builder\O2\QueryBuilder2\Aggregation\AggregationManager $aggregationManager
+     */
+    function setAggregationManager(O2\QueryBuilder2\Aggregation\AggregationManager $aggregationManager) {
+        $this->aggregationManager = $aggregationManager;
+    }
 
+        
     /**
      * 
      * @return array
@@ -264,7 +287,7 @@ class QueryBuilder {
     /**
      * 
      * @param array $filters
-     * @return \O2\QueryBuilder\Builder\QueryBuilder
+     * @return \O2\QueryBuilder2\Builder\QueryBuilder
      */
     public function processFilters(array $filters) {
         foreach ($filters as $key => $parameter) {
@@ -274,7 +297,7 @@ class QueryBuilder {
                     $condition = $key;
                     foreach ($parameter as $subKey => $subfilter) {
                         if (!is_numeric($subKey) && $subKey != '0') {
-                            $this->preparedParams = $this->getFilter($subKey, $subfilter, $condition);
+                            $this->preparedParams = $this->getFilterAsArray($subKey, $subfilter, $condition);
                         } else {
                             $this->processFilters(array($condition => $subfilter));
                         }
@@ -286,7 +309,7 @@ class QueryBuilder {
                     }
                     break;
                 default:
-                    $this->preparedParams = $this->getFilter($key, $parameter, static::ES_FIELD_MUST);
+                    $this->preparedParams = $this->getFilterAsArray($key, $parameter, static::ES_FIELD_MUST);
                     break;
             }
         }
@@ -309,7 +332,7 @@ class QueryBuilder {
         }
         $filterStragety = $this->getFilterStrategy($strategy);
         $filterStragety->updateFromArray($params);
-        return $this->addFilter($filterStragety->getFilter(), $condition);
+        return $this->addFilter($filterStragety->getFilterAsArray(), $condition);
     }
 
 
@@ -477,26 +500,15 @@ class QueryBuilder {
      * @param type $filter
      */
     public function processAggregation($filter) {
-        /* @var $aggs \O2\QueryBuilder\Filter\FilterInterface */
+        /* @var $aggs \O2\QueryBuilder2\Filter\FilterInterface */
         if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
             $aggs = $this->filters[static::ES_FIELD_AGGS];
             if (!is_array($filter)) {
                 $filter = array($filter => $filter);
             }
             $aggs->updateFromArray($filter);
-            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS] = $aggs->getFilter();
+            $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS] = $aggs->getFilterAsArray();
         }
-        return $this->preparedParams;
-    }
-
-    /**
-     * 
-     * @param array $params
-     * @param type $filter
-     */
-    public function processAggregationArray($fieldName, $aggregation) {
-        $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations']
-            [static::ES_FIELD_AGGS][$fieldName] = $aggregation;
         return $this->preparedParams;
     }
 
@@ -506,57 +518,13 @@ class QueryBuilder {
      * @param array $ids_array
      * @param array $filter_query
      */
-    public function processCarateristicAggregation($carateristic_id, $ids_array, $filter_query, $nameCaract = true) {
-        $fieldName = (!$nameCaract) ? $carateristic_id : 'caract-' . $carateristic_id;
+    public function processCarateristicAggregation($carateristic_id, $ids_array, $filter_query) {
         $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations']
-            [static::ES_FIELD_AGGS][$fieldName] = $this->carateristic_agg($ids_array);
+            [static::ES_FIELD_AGGS]['caract-' . $carateristic_id] = $this->carateristic_agg($ids_array);
         $this->preparedParams[static::ES_FIELD_BODY][static::ES_FIELD_AGGS]['global_aggregations']
-            [static::ES_FIELD_AGGS][$fieldName]['filter']['query'] = $filter_query;
+            [static::ES_FIELD_AGGS]['caract-' . $carateristic_id]['filter']['query'] = $filter_query;
         return $this->preparedParams;
     }
-    
-    /**
-     * 
-     * @param array $results
-     * @param string $aggName
-     * @return array
-     */
-    public static function getAggregationIdsAvailables(array $results, $aggName) {
-        if (isset($results['aggregations']['global_aggregations'])) {
-            $availables = array();
-            $buckets = static::getBuckets($results['aggregations']['global_aggregations'][$aggName]);
-            foreach($buckets as $key => $agg) {
-                $availables[$agg['key']] = $agg['key'];
-            }
-            $results['aggs'][$aggName] = $availables;
-        }
-        return $availables;
-    }
-    
-    /**
-     * 
-     * @param type $array
-     */
-    public static function getBuckets($array) {
-        if (!is_array($array)) {
-            $buckets = false;
-        }
-        else {
-            foreach (array_keys($array) as $key) {
-                if ($key === 'buckets') {
-                    $buckets = $array[$key];
-                }
-                else {
-                    $buckets = static::getBuckets($array[$key]);
-                }
-                if ($buckets !== false) {
-                    break;
-                }
-            }
-        }
-        return $buckets;
-    }
-
 
     /**
      * 

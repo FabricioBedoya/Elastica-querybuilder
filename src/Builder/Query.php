@@ -1,8 +1,8 @@
 <?php
 
-namespace O2\QueryBuilder\Builder;
+namespace O2\QueryBuilder2\Builder;
 
-use O2\QueryBuilder\Builder\QueryInterface;
+use O2\QueryBuilder2\Builder\QueryInterface;
 
 class Query {
 
@@ -76,7 +76,7 @@ class Query {
     /**
      * 
      * @param array $parameters
-     * @return \O2\QueryBuilder\Builder\Query
+     * @return \O2\QueryBuilder2\Builder\Query
      */
     public function updateFromArray(array $parameters) {
         if (array_key_exists('field', $parameters)) {

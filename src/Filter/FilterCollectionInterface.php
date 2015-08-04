@@ -4,16 +4,14 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
-use O2\QueryBuilder\Filter\FilterInterface;
+use O2\QueryBuilder2\Filter\FilterInterface;
 
 interface FilterCollectionInterface {
     
     public function getCollectionAsArray();
     
     public function addFilter(FilterInterface $filter);
-    
-    public function updateFromArray(array $array);
     
 }

@@ -1,10 +1,11 @@
 <?php
 
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
-use O2\QueryBuilder\Filter\FilterInterface;
+use O2\QueryBuilder2\Filter\FilterInterface;
+use O2\QueryBuilder2\Elastica\EntityInterface;
 
-class FilterNested implements FilterInterface {
+class FilterNested extends AbstractFilter {
 
     protected $field;
     protected $strategy;
@@ -66,7 +67,7 @@ class FilterNested implements FilterInterface {
         $this->value = $parameters[$this->condition]['nested'][$this->strategy][$this->field];
     }
 
-    public function getFilter() {
+    public function getFilterAsArray() {
         $filterStragety = $this->getFilterStrategy($this->strategy);
         $filterStragety->updateFromArray(array($this->field => $this->value));
         $subFilter = $filterStragety->getFilter();

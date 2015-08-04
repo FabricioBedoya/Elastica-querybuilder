@@ -4,29 +4,17 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder\Query;
+namespace O2\QueryBuilder2\Query;
 
-use O2\QueryBuilder\Filter\FilterConstants;
-use O2\QueryBuilder\Filter\FilterInterface;
-
-class QueryMatchAll implements FilterInterface {
+class QueryMatchAll extends AbstractQuery {
     
     const MATCH_ALL = 'match_all';
     
-    protected static $defaultOptions = array(
+    protected static $strategyKeys = array(
+      self::MATCH_ALL
     );
     
     protected $options = array();
-    
-    /**
-     * 
-     * @param array $options
-     */
-    public function __construct(array $options = array()) {
-        if (!empty($options)) {
-            $this->options = $options;
-        }
-    }
     
     /**
      * 
@@ -36,16 +24,12 @@ class QueryMatchAll implements FilterInterface {
         $match_all = array(
           static::MATCH_ALL => (object) array()
             );
-        if (isset($array[FilterConstants::BOOST])) {
+        if (isset($this->options[FilterConstants::BOOST])) {
             $match_all = array(static::MATCH_ALL => array(
-              FilterConstants::BOOST => $array[FilterConstants::BOOST],
+              FilterConstants::BOOST => $this->options[FilterConstants::BOOST],
             ));
         }
         return $match_all;
-    }
-    
-    public function getFilter() {
-        return $this->getFilterAsArray();
     }
 
     /**
@@ -53,6 +37,7 @@ class QueryMatchAll implements FilterInterface {
      * @param array $array
      */
     public function updateFromArray(array $array) {
+        parent::updateFromArray($array);
         if (isset($array[FilterConstants::BOOST])) {
             $this->options[FilterConstants::BOOST] = $array[FilterConstants::BOOST];
         }

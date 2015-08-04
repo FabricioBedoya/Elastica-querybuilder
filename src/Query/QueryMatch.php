@@ -4,11 +4,9 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder\Query;
+namespace O2\QueryBuilder2\Query;
 
-use O2\QueryBuilder\Filter\FilterInterface;
-
-class QueryMatch implements FilterInterface {
+class QueryMatch extends AbstractQuery {
     
     const MATCH = 'match';
     const TYPE = 'type';
@@ -18,18 +16,12 @@ class QueryMatch implements FilterInterface {
     const ZERO_TERMS_QUERY = 'zero_terms_query';
     const ANALIZER = 'analyzer';
     
+    protected static $strategyKeys = array(
+      self::MATCH,
+    );
+    
     protected $options = array();
-    
-    /**
-     * 
-     * @param array $options
-     */
-    public function __construct(array $options = array()) {
-        if (!empty($options)) {
-            $this->options = $options;
-        }
-    }
-    
+        
     /**
      * 
      * @return array
@@ -50,20 +42,13 @@ class QueryMatch implements FilterInterface {
         }
         return $match;
     }
-    
-    /**
-     * 
-     * @return array
-     */
-    public function getFilter() {
-        return $this->getFilterAsArray();
-    }
 
     /**
      * 
      * @param array $array
      */
     public function updateFromArray(array $array) {
+        parent::updateFromArray($array);
         foreach(array(static::FIELD, static::TYPE, static::OPERATOR, static::QUERY, static::ANALIZER, static::ZERO_TERMS_QUERY) as $option) {
             if (isset($array[$option])) {
                 $this->options[$option] = $array[$option];
@@ -76,17 +61,18 @@ class QueryMatch implements FilterInterface {
      * @return string
      */
     private function getMatchType() {
+        $type = static::MATCH;
         switch(true) {
             case isset($this->options[static::MATCH_PHRASE]):
-                return static::MATCH_PHRASE;
+                $type = static::MATCH_PHRASE;
                 break;
             case isset($this->options[static::MATCH_PHRASE_PREFIX]):
-                return static::MATCH_PHRASE_PREFIX;
+                $type = static::MATCH_PHRASE_PREFIX;
                 break;
             default:
-                return static::MATCH;
                 break;
         }
+        return $type;
     }
     
     /**

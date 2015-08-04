@@ -1,25 +1,19 @@
 <?php
 
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
-use O2\QueryBuilder\Filter\GeoBounding;
+use O2\QueryBuilder2\Filter\GeoBounding;
 
-class FilterGeoBounding implements FilterInterface {
+class FilterGeoBounding extends AbstractFilter {
    
     protected $geoBounding = null;
-    
-    public function __construct(GeoBounding $geoBounding = null) {
-        if ($geoBounding !== null) {
-            $this->geoBounding = $geoBounding;
-        }
-    }
     
     public function updateFromArray(array $array) {
         $this->geoBounding = new GeoBounding();
         $this->geoBounding->updateFromArray($array);
     }
 
-    public function getFilter() {
+    public function getFilterAsArray() {
         $query = array();
         $query['geo_bounding_box'] = array(
             $this->geoBounding->getField() => array(

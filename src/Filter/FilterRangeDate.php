@@ -1,38 +1,39 @@
 <?php
 
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
-use O2\QueryBuilder\Filter\FilterInterface;
-
-class FilterRangeDate implements FilterInterface {
+class FilterRangeDate extends AbstractFilter {
     
-    protected $field;
+    const FIELD = 'field';
+    const RANGE = 'range';
+    const GTE = 'gte';
+    const LTE = 'lte';
+    const GT = 'gt';
+    const LT = 'lt';
+    const FORMAT = 'format';
     
-    protected $value1;
+    protected $options = array();
     
-    protected $value2;
-    
-    public function __construct($field = null, $value1 = null, $value2 = null) {
-        if ($field !== null) {
-            $this->field = $field;
-        }
-        if ($value1 !== null) {
-            $this->value1 = $value1;
-        }
-        if ($value2 !== null) {
-            $this->value2 = $value2;
-        }
-    }
     
     /**
      * 
-     * @param array $parameters
+     * @param array $array
      * @return boolean
      */
-    public function updateFromArray(array $parameters) {
-        $this->field = key($parameters);
-        $this->value1 = $parameters[key($parameters)][0];
-        $this->value2 = $parameters[key($parameters)][1];
+    public function updateFromArray(array $array) {
+        if (!isset($array[static::FIELD])) {
+            $this->options[static::FIELD] = key($array);
+            $array = $array[$this->options[static::FIELD]];
+        }
+        foreach(array(static::FIELD, static::GTE, static::LTE, static::GT, static::LT) as $key) {
+            if (isset($array[$key])) {
+                $this->options[$key] = $array[$key];
+            }
+        }
+        if ((!isset($this->options[static::GTE]) || !isset($this->options[static::GT])) && is_array($array) && count($array) == 2) {
+            $this->options[static::GTE] = array_shift($array);
+            $this->options[static::LTE] = array_shift($array);
+        }
     }
     
     /**
@@ -40,21 +41,15 @@ class FilterRangeDate implements FilterInterface {
      * @param array $query
      * @return array
      */
-    public function getFilter() {
+    public function getFilterAsArray() {
         $query = array();
-        $query['range'] = array($this->field => array());
-        if ($this->value1 !== '*') {
-            $query['range'][$this->field]['gte'] = $this->value1;
-        }
-        if ($this->value2 !== '*') {
-            $query['range'][$this->field]['lte'] = $this->value2;
+        $query[static::RANGE] = array($this->options[static::FIELD] => array());
+        foreach(array(static::GTE, static::LTE, static::GT, static::LT) as $key) {
+            if (isset($this->options[$key]) && $this->options[$key] !== '*') {
+                $query[static::RANGE][$this->options[static::FIELD]][$key] = $this->options[$key];
+            }
         }
         return $query;
-    }
-
-    public function __clone() {
-        $this->field = null;
-        $this->value = null;
     }
     
 }

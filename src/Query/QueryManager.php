@@ -5,59 +5,159 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder\Query;
+namespace O2\QueryBuilder2\Query;
 
-use O2\QueryBuilder\Query\QueryManagerInterface;
-use O2\QueryBuilder\Filter\FilterInterface;
+use O2\QueryBuilder2\Builder\ManagerAbstract;
+use O2\QueryBuilder2\Query\QueryBool;
 
-class QueryManager implements QueryManagerInterface {
+class QueryManager extends ManagerAbstract {
     
-    protected $strategy = array();
+    protected $query = null;
     
-    /**
-     * 
-     * @param type $name
-     * @param FilterInterface $filterStrategy
-     */
-    public function addQueryStrategy($name, FilterInterface $filterStrategy) {
-        $this->strategy[$name] = $filterStrategy;
+    public function __construct() {
+        $this->patternClass = 'O2\\QueryBuilder\\Query\\';
+        $this->patternFile = 'Query';
     }
     
     /**
      * 
-     * @param type $nameFilter
      * @return type
-     * @throws \Exception
      */
-    public function getQueryStrategy($nameFilter) {
-        if (!array_key_exists($nameFilter, $this->strategy)) {
-            throw new \Exception(sprintf('Filter %s not found', $nameFilter));
-        }
-        $filter = clone $this->strategy[$nameFilter];
-        return $filter;
+    public function getFolder() {
+        return dirname(__FILE__);
     }
     
-    
-    public function autoloadStrategies() {
-        $folder = dirname(__FILE__);
-        if ($handle = opendir($folder)) {
-            while (false !== ($entry = readdir($handle))) {
-                if (!preg_match('/manager/i', $entry) && !preg_match('/interface/i', $entry)) {
-                    if (preg_match('/([a-z|A-Z]+)\.php/', $entry, $matches)) {
-                        $class = 'O2\\QueryBuilder\\Query\\' . $matches[1];
-                        if (preg_match('/Query([a-z|A-Z]+)\.php/', $entry, $matches2)) {
-                            $nomStrategy = \Symfony\Component\DependencyInjection\Container::underscore($matches2[1]);
-                            $queryStrategy = new $class();
-                            if (is_array(class_implements($queryStrategy)) 
-                                && array_key_exists('O2\QueryBuilder\Filter\FilterInterface', class_implements($queryStrategy))) {
-                                $this->addQueryStrategy($nomStrategy, $queryStrategy);
-                            }
-                        }
-                    }
-                }
-            }
-            closedir($handle);
+    /**
+     * 
+     * @return \O2\QueryBuilder2\Builder\ManagerInterface
+     */
+    public static function createInstance() {
+        if (static::$instance === null) {
+            static::$instance = new static();
+            static::$instance->autoloadStrategies();
         }
+        return static::$instance;
+    }
+    
+    /**
+     * 
+     * @param \O2\QueryBuilder2\Elastica\EntityInterface $query
+     */
+    public function setQuery(\O2\QueryBuilder2\Elastica\EntityInterface $query) {
+        $this->query = $query;
+    }
+    
+    /**
+     * 
+     * @param \O2\QueryBuilder2\Elastica\EntityInterface $query
+     */
+    public function getQuery() {
+        return $this->query;
+    }
+    
+    public function getEntityById($id) {
+        if ($this->getQuery() instanceof \O2\QueryBuilder2\Query\QueryBool) {
+            return $this->getQuery()->getEntityById($id);
+        }
+        return $this->getQuery();
+    }
+    
+    /**
+     * 
+     * @return \O2\QueryBuilder2\Query\QueryCollectionInterface
+     */
+    function getQueryCollection() {
+        return $this->queryCollection;
+    }
+
+    /**
+     * 
+     * @param \O2\QueryBuilder2\Query\QueryCollectionInterface $queryCollection
+     */
+    function setQueryCollection(QueryCollectionInterface $queryCollection) {
+        $this->queryCollection = $queryCollection;
+    }
+    
+    /**
+     * 
+     * @param QueryBool $queryBool
+     * @param array $array
+     * @param type $cond
+     * @return \O2\QueryBuilder2\Query\QueryManager
+     */
+    protected function addToCollectionFromArray(\O2\QueryBuilder2\Query\QueryBool $queryBool, array $array, $cond = QueryBool::MUST) {
+        $flag = (bool) count(array_filter(array_keys($array), 'is_string'));
+        switch(true) {
+            case ($flag !== true) :
+                foreach ($array as $params) {
+                    $this->addToCollectionFromArray($queryBool, $params, $cond);
+                }
+                break;
+            default:
+                $key = key($array);
+                $queryStrategy = $this->getQueryStrategy($key);
+                $queryStrategy->updateFromArray($array[$key]);
+                $this->getQuery()->addQueryToCollection($queryStrategy, $cond);
+                break;
+        }
+        return $this;
+    }
+    
+
+    /**
+     * 
+     * @param array $queryArray
+     * @return \O2\QueryBuilder2\Elastica\EntityInterface
+     */
+    public function processQuery(array $queryArray) {
+        foreach ($queryArray as $strategy => $params) {
+            $queryStrategy =  $this->getQueryStrategy($strategy);
+            if ($queryStrategy instanceof \O2\QueryBuilder2\Query\QueryInterface) {
+                switch(true) {
+                    case $this->getQuery() instanceof \O2\QueryBuilder2\Query\QueryBool && in_array($strategy, $this->getQuery()->getStrategyKeys()):
+                        $this->addToCollectionFromArray($this->getQuery(), $params, $strategy);
+                        break;
+                    case $this->getQuery() === null && in_array($strategy, array(QueryBool::MUST, QueryBool::SHOULD, QueryBool::MUST_NOT)):
+                        $queryStrategy->updateFromArray(array($strategy => $params));
+                        $this->setQuery($queryStrategy);
+                        break;
+                    default:
+                        $queryStrategy->updateFromArray($params);
+                        $this->setQuery($queryStrategy);
+                        break;
+                }
+                
+            }
+        }
+        return $this->getQuery();
+    }
+    
+    /**
+     * 
+     * @param \O2\QueryBuilder2\Elastica\EntityInterface $query
+     */
+    public function addQuery(\O2\QueryBuilder2\Elastica\EntityInterface $query) {
+        switch(true) {
+            case ($this->getQuery() instanceof \O2\QueryBuilder2\Query\QueryBool) :
+                /*@var \O2\QueryBuilder2\Query\QueryCollection $collection */
+                $collection = $this->getQuery()->getMust();
+                $collection->addQuery($query);
+                $this->getQuery()->setMust($collection);
+                break;
+            case ($this->getQuery() !== null && !$this->getQuery() instanceof \O2\QueryBuilder2\Query\QueryCollectionInterface):
+                $collection = new \O2\QueryBuilder2\Query\QueryCollection($this);
+                $collection->updateFromArray($this->getQuery()->getFilterAsArray());
+                $bool = new \O2\QueryBuilder2\Query\QueryBool();
+                $bool->updateFromArray(array(
+                  'must' => $collection->getCollectionAsArray(),
+                ));
+                $this->setQuery($bool);
+                break;
+            default:
+                $this->setQuery($query);
+                break;
+        }
+        return $this;
     }
 
 }

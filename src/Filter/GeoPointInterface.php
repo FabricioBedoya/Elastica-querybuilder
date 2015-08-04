@@ -1,6 +1,6 @@
 <?php
 
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
 interface GeoPointInterface {
     

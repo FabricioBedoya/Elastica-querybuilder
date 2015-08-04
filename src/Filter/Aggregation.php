@@ -1,8 +1,8 @@
 <?php
 
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
-use O2\QueryBuilder\Filter\FilterInterface;
+use O2\QueryBuilder2\Filter\FilterInterface;
 
 class Aggregation implements FilterInterface {
     
@@ -23,7 +23,7 @@ class Aggregation implements FilterInterface {
         }
     }
     
-    public function getFilter() {
+    public function getFilterAsArray() {
         $aggsArray = array();
         $termPart = array('terms' => array(
               'field' => $this->field,

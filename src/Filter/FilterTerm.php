@@ -1,10 +1,8 @@
 <?php
 
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
-use O2\QueryBuilder\Filter\FilterInterface;
-
-class FilterTerm implements FilterInterface {
+class FilterTerm extends AbstractFilter {
     
     protected $field;
     
@@ -34,7 +32,7 @@ class FilterTerm implements FilterInterface {
      * @param array $query
      * @return array
      */
-    public function getFilter() {
+    public function getFilterAsArray() {
         $query = array();
         $query['term'] = array(
             $this->field => $this->value,

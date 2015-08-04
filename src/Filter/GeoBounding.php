@@ -1,20 +1,20 @@
 <?php
 
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
-use O2\QueryBuilder\Filter\GeoPoint;
+use O2\QueryBuilder2\Filter\GeoPoint;
 
 class GeoBounding {
     
     /**
      *
-     * @var \O2\QueryBuilder\Filter\GeoPoint 
+     * @var \O2\QueryBuilder2\Filter\GeoPoint 
      */
     protected $topLeft = null;
     
     /**
      *
-     * @var \O2\QueryBuilder\Filter\GeoPoint 
+     * @var \O2\QueryBuilder2\Filter\GeoPoint 
      */
     protected $bottomRigth = null;
     
@@ -51,7 +51,7 @@ class GeoBounding {
     }
     /**
      * 
-     * @return \O2\QueryBuilder\Filter\GeoPoint
+     * @return \O2\QueryBuilder2\Filter\GeoPoint
      */
     public function getTopLeft() {
         return $this->topLeft;
@@ -59,7 +59,7 @@ class GeoBounding {
 
     /**
      * 
-     * @return \O2\QueryBuilder\Filter\GeoPoint
+     * @return \O2\QueryBuilder2\Filter\GeoPoint
      */
     public function getBottomRigth() {
         return $this->bottomRigth;

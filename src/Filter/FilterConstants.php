@@ -4,7 +4,7 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
 
 class FilterConstants {

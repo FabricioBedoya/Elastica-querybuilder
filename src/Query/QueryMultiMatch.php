@@ -4,11 +4,9 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder\Query;
+namespace O2\QueryBuilder2\Query;
 
-use O2\QueryBuilder\Filter\FilterInterface;
-
-class QueryMultiMatch implements FilterInterface {
+class QueryMultiMatch extends AbstractQuery {
     
     const MULTI_MATCH = 'multi_match';
     
@@ -18,17 +16,11 @@ class QueryMultiMatch implements FilterInterface {
     const OPERATOR = 'operator';
     const ANALIZER = 'analyzer';
     
-    protected $options = array();
+    protected static $strategyKeys = array(
+      self::MULTI_MATCH
+    );
     
-    /**
-     * 
-     * @param array $options
-     */
-    public function __construct(array $options = array()) {
-        if (!empty($options)) {
-            $this->options = $options;
-        }
-    }
+    protected $options = array();
     
     /**
      * 
@@ -63,6 +55,7 @@ class QueryMultiMatch implements FilterInterface {
      * @param array $array
      */
     public function updateFromArray(array $array) {
+        parent::updateFromArray($array);
         foreach(array(static::FIELDS, static::TYPE, static::OPERATOR, static::QUERY, static::ANALIZER) as $option) {
             if (isset($array[$option])) {
                 $this->options[$option] = $array[$option];

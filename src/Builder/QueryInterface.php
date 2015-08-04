@@ -1,6 +1,6 @@
 <?php
 
-namespace O2\QueryBuilder\Builder;
+namespace O2\QueryBuilder2\Builder;
 
 interface QueryInterface {
     

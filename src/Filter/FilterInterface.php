@@ -1,10 +1,7 @@
 <?php
 
-namespace O2\QueryBuilder\Filter;
+namespace O2\QueryBuilder2\Filter;
 
 interface FilterInterface {
     
-    public function updateFromArray(array $array);
-    
-    public function getFilter();
 }

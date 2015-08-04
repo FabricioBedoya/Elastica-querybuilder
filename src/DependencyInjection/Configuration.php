@@ -1,6 +1,6 @@
 <?php
 
-namespace O2\QueryBuilder\DependencyInjection;
+namespace O2\QueryBuilder2\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;

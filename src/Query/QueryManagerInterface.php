@@ -3,14 +3,8 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder\Query;
-
-use O2\QueryBuilder\Filter\FilterInterface;
+namespace O2\QueryBuilder2\Query;
 
 interface QueryManagerInterface {
-    
-    public function addQueryStrategy($name, FilterInterface $queryStrategy);
-    
-    public function getQueryStrategy($nameFilter);
     
 }
