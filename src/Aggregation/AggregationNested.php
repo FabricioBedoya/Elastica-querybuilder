@@ -4,7 +4,7 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder2\Aggregation;
+namespace Fafas\QueryBuilder2\Aggregation;
 
 class AggregationNested implements AggregationInterface {
     

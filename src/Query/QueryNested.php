@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-namespace O2\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder2\Query;
 
 /**
  * Description of QueryNested

@@ -1,8 +1,8 @@
 <?php
 
-namespace O2\QueryBuilder2\Filter;
+namespace Fafas\QueryBuilder2\Filter;
 
-use O2\QueryBuilder2\Filter\GeoBounding;
+use Fafas\QueryBuilder2\Filter\GeoBounding;
 
 class FilterGeoBounding extends AbstractFilter {
    

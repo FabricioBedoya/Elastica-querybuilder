@@ -1,6 +1,6 @@
 <?php
 
-namespace O2\QueryBuilder2\DependencyInjection;
+namespace Fafas\QueryBuilder2\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;

@@ -1,8 +1,8 @@
 <?php
 
-namespace O2\QueryBuilder2\Filter;
+namespace Fafas\QueryBuilder2\Filter;
 
-use O2\QueryBuilder2\Filter\GeoPointInterface;
+use Fafas\QueryBuilder2\Filter\GeoPointInterface;
 
 class GeoPoint implements GeoPointInterface {
     

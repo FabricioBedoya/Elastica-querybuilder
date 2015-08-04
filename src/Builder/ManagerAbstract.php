@@ -1,7 +1,7 @@
 <?php
-namespace O2\QueryBuilder2\Builder;
+namespace Fafas\QueryBuilder2\Builder;
 
-use O2\QueryBuilder2\Elastica\EntityInterface;
+use Fafas\QueryBuilder2\Elastica\EntityInterface;
 /**
  * Description of newPHPClass
  *
@@ -20,7 +20,7 @@ class ManagerAbstract implements ManagerInterface {
     
     /**
      * 
-     * @return \O2\QueryBuilder2\Builder\ManagerInterface
+     * @return \Fafas\QueryBuilder2\Builder\ManagerInterface
      */
     public static function createInstance() {
         if (static::$instance === null) {
@@ -37,7 +37,7 @@ class ManagerAbstract implements ManagerInterface {
     /**
      * 
      * @param type $name
-     * @param \O2\QueryBuilder2\Elastica\EntityInterface $queryStrategy
+     * @param \Fafas\QueryBuilder2\Elastica\EntityInterface $queryStrategy
      */
     public function addQueryStrategy($name, EntityInterface $queryStrategy) {
         $this->strategy[$name] = $queryStrategy;
@@ -46,7 +46,7 @@ class ManagerAbstract implements ManagerInterface {
     /**
      * 
      * @param string $name
-     * @return \O2\QueryBuilder2\Elastica\EntityInterface
+     * @return \Fafas\QueryBuilder2\Elastica\EntityInterface
      * @throws \Exception
      */
     public function getQueryStrategy($name) {
@@ -76,7 +76,7 @@ class ManagerAbstract implements ManagerInterface {
                         if (preg_match($patternFile, $entry)) {
                             $queryStrategy = new $class($this);
                             if (is_array(class_implements($queryStrategy)) 
-                                && array_key_exists('O2\QueryBuilder2\Elastica\EntityInterface', class_implements($queryStrategy))) {
+                                && array_key_exists('Fafas\QueryBuilder2\Elastica\EntityInterface', class_implements($queryStrategy))) {
                                 try {
                                     foreach($queryStrategy->getStrategyKeys() as $nomStrategy) { 
                                         $this->addQueryStrategy($nomStrategy, $queryStrategy);

@@ -1,6 +1,6 @@
 <?php
 
-namespace O2\QueryBuilder2\Filter;
+namespace Fafas\QueryBuilder2\Filter;
 
 class FilterRangeDate extends AbstractFilter {
     

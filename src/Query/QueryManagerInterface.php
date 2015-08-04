@@ -3,7 +3,7 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder2\Query;
 
 interface QueryManagerInterface {
     

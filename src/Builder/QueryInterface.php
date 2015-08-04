@@ -1,6 +1,6 @@
 <?php
 
-namespace O2\QueryBuilder2\Builder;
+namespace Fafas\QueryBuilder2\Builder;
 
 interface QueryInterface {
     

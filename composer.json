@@ -1,6 +1,6 @@
 {
-    "name": "fafastopulos/querybuilder2-bundle",
-    "description": "This Bundle provides various tools to build a elasticsearch query",
+    "name": "fafastopulos/elastica-querybuilder",
+    "description": "This Bundle provides a elastica query builder to work with Elasticsearch",
     "authors": [
         {
             "name": "Fabricio Bedoya",
@@ -12,12 +12,7 @@
     },
     "autoload": {
         "psr-4": {
-            "O2\\QueryBuilder2\\": "src/"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.0"
+            "Fafas\\QueryBuilder\\": "src/"
         }
     }
 }

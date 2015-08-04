@@ -4,9 +4,9 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder2\Filter;
+namespace Fafas\QueryBuilder2\Filter;
 
-use O2\QueryBuilder2\Filter\FilterInterface;
+use Fafas\QueryBuilder2\Filter\FilterInterface;
 
 interface FilterCollectionInterface {
     

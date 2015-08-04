@@ -4,9 +4,9 @@
  *
  * @author fabriciobedoya
  */
-namespace O2\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder2\Query;
 
-use O2\QueryBuilder2\Elastica\EntityInterface;
+use Fafas\QueryBuilder2\Elastica\EntityInterface;
 
 interface QueryCollectionInterface {
     

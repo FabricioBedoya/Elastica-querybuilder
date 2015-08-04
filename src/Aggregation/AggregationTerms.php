@@ -1,9 +1,9 @@
 <?php
 
-namespace O2\QueryBuilder2\Aggregation;
+namespace Fafas\QueryBuilder2\Aggregation;
 
-use O2\QueryBuilder2\Aggregation\AggregationCollectionInterface;
-use O2\QueryBuilder2\Filter\FilterCollectionInterface;
+use Fafas\QueryBuilder2\Aggregation\AggregationCollectionInterface;
+use Fafas\QueryBuilder2\Filter\FilterCollectionInterface;
 
 class AggregationTerms implements AggregationInterface {
     

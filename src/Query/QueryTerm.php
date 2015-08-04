@@ -6,9 +6,9 @@
  * and open the template in the editor.
  */
 
-namespace O2\QueryBuilder2\Query;
+namespace Fafas\QueryBuilder2\Query;
 
-use O2\QueryBuilder2\Query\QueryNested;
+use Fafas\QueryBuilder2\Query\QueryNested;
 /**
  * Description of QueryTerm
  *
