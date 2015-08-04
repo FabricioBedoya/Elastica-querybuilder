@@ -1,10 +1,10 @@
 {
-    "name": "o2web/querybuilder-bundle",
+    "name": "fafastopulos/querybuilder2-bundle",
     "description": "This Bundle provides various tools to build a elasticsearch query",
     "authors": [
         {
             "name": "Fabricio Bedoya",
-            "email": "fbedoya@o2web.ca"
+            "email": "fbedoya@gmail.com"
         }
     ],
     "require": {
@@ -12,7 +12,7 @@
     },
     "autoload": {
         "psr-4": {
-            "O2\\QueryBuilder\\": "src/"
+            "O2\\QueryBuilder2\\": "src/"
         }
     },
     "extra": {
