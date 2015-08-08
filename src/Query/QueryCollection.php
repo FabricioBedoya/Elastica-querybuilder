@@ -12,8 +12,6 @@ class QueryCollection extends AbstractQuery implements QueryCollectionInterface 
     
     const QUERY_COLLECTION = 'query_collection';
     
-    protected $position = 0;
-    
     protected $filterCollection = array();
     
     protected static $strategyKeys = array(

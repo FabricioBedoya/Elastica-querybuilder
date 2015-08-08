@@ -6,12 +6,10 @@
  */
 namespace Fafas\QueryBuilder\Query;
 
-use Fafas\QueryBuilder\Elastica\EntityInterface;
-
-abstract class AbstractQuery implements EntityInterface, QueryInterface {
+abstract class AbstractQuery implements QueryInterface {
     
     const ID = '_id';
-    const PREFIX_ID = 'ENTITYELASTICA';
+    const PREFIX_ID = 'query_';
     
     protected static $strategyKeys = array(
       'abstract'

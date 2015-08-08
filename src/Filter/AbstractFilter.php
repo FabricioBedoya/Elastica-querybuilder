@@ -10,8 +10,11 @@ use Fafas\QueryBuilder\Elastica\EntityInterface;
  */
 abstract class AbstractFilter implements EntityInterface, FilterInterface {
     
+    const FIELD = 'field';
     const ID = '_id';
-    const PREFIX_ID = 'ENTITYELASTICA';
+    const RELEVANT_AGGREGATION = '_relevant_aggregation';
+    const SKIP_NESTED = '_skip_nested';
+    const PREFIX_ID = 'filter_';
     
     protected static $strategyKeys = array(
       'abstract'
@@ -23,9 +26,11 @@ abstract class AbstractFilter implements EntityInterface, FilterInterface {
     
     protected $filterManager = null;
     
-    protected $queryNested = null;
+    protected $filterNested = null;
     
     protected $skipNested = false;
+    
+    protected $optionRelevantAgg = false;
     
     /**
      * 
@@ -62,37 +67,50 @@ abstract class AbstractFilter implements EntityInterface, FilterInterface {
     /**
      * 
      * @param array $array
-     * @return \Fafas\QueryBuilder\Query\QueryNested
+     * @return \Fafas\QueryBuilder\Filter\FilterNested
      */
     public function generateNested(\Fafas\QueryBuilder\Elastica\EntityInterface $filter, $path) {
         $this->nestedLocked = true;
-        $queryNested = $this->getFilterManager()->getQueryStrategy('nested');
-        if ($queryNested instanceof \Fafas\QueryBuilder\Elastica\EntityInterface) {
-            $queryNested = clone $queryNested;
+        $filterNested = $this->getFilterManager()->getQueryStrategy('nested');
+        if ($filterNested instanceof \Fafas\QueryBuilder\Elastica\EntityInterface) {
+            $filterNested = clone $filterNested;
             $options = array(
-                QueryNested::PATH => $path,
-                QueryNested::QUERY =>  $filter->getFilterAsArray(),
+                FilterNested::PATH => $path,
+                FilterNested::QUERY =>  $filter->getFilterAsArray(),
             );
-            $queryNested->updateFromArray($options);
-            $this->setQueryNested($queryNested);
+            $filterNested->updateFromArray($options);
+            $this->setFilterNested($filterNested);
         }
         return $this;
     }
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Query\QueryNested
+     * @return \Fafas\QueryBuilder\Filter\FilterNested
      */
-    public function getQueryNested() {
-        return $this->queryNested;
+    public function getFilterNested() {
+        return $this->filterNested;
     }
 
     /**
      * 
-     * @param QueryNested $queryNested
+     * @param \Fafas\QueryBuilder\Filter\FilterNested $filterNested
      */
-    public function setQueryNested(QueryNested $queryNested) {
-        $this->queryNested = $queryNested;
+    public function setFilterNested(\Fafas\QueryBuilder\Filter\FilterNested $filterNested) {
+        $this->filterNested = $filterNested;
+    }
+    
+    /**
+     * 
+     * @return string
+     */
+    public function getFieldName() {
+        if (isset($this->options[static::FIELD])) {
+            return $this->options[static::FIELD];
+        }
+        else {
+            return '';
+        }
     }
     
     /**
@@ -125,10 +143,27 @@ abstract class AbstractFilter implements EntityInterface, FilterInterface {
      * 
      * @param array $array
      */
-    public function updateFromArray(array $array) {
+    public function updateFromArray(array $array) { 
         if (isset($array[static::ID])) {
             $this->setId($array[static::ID]);
+            unset($array[static::ID]);
         }
+        if (isset($array[static::RELEVANT_AGGREGATION]) && $array[static::RELEVANT_AGGREGATION] == true) {
+            $this->optionRelevantAgg = true;
+            unset($array[static::RELEVANT_AGGREGATION]);
+        }
+        if (isset($array[static::SKIP_NESTED]) && $array[static::SKIP_NESTED] == true) {
+            $this->skipNested = true;
+            unset($array[static::SKIP_NESTED]);
+        }
+        if (isset($array[static::FIELD])) {
+            $this->options[static::FIELD] = $array[static::FIELD];
+        }
+        return $array;
+    }
+    
+    public function hasRelevantAggregation() {
+        return $this->optionRelevantAgg;
     }
 
 }

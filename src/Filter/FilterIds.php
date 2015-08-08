@@ -4,6 +4,12 @@ namespace Fafas\QueryBuilder\Filter;
 
 class FilterIds extends AbstractFilter {
     
+    const IDS = 'ids';
+    
+    public static $strategyKeys = array(
+      self::IDS,
+    );
+    
     protected $field;
     
     protected $values;
@@ -14,6 +20,7 @@ class FilterIds extends AbstractFilter {
      * @return boolean
      */
     public function updateFromArray(array $parameters) {
+        parent::updateFromArray($parameters);
 //        $this->field = key($parameters);
         $this->values = $parameters;
     }
@@ -24,11 +31,16 @@ class FilterIds extends AbstractFilter {
      * @return array
      */
     public function getFilterAsArray() {
-        $query = array();
-        $query['ids'] = array(
-            'values' => $this->values,
-        );            
-        return $query;
+        if ($this->getFilterNested() !== null) {
+            return $this->getFilterNested()
+                    ->getFilterAsArray();
+        } else {
+            $query = array();
+            $query['ids'] = array(
+                'values' => $this->values,
+            );            
+            return $query;
+        }
     }
 
     public function __clone() {

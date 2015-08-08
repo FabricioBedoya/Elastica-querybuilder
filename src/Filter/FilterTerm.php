@@ -4,18 +4,15 @@ namespace Fafas\QueryBuilder\Filter;
 
 class FilterTerm extends AbstractFilter {
     
-    protected $field;
+    const TERM = 'term';
+    const FIELD = 'field';
+    const VALUE = 'value';
     
-    protected $value;
+    public static $strategyKeys = array(
+      self::TERM,
+    );
     
-    public function __construct($field = null, $value = null) {
-        if ($field !== null) {
-            $this->field = $field;
-        }
-        if ($value !== null) {
-            $this->value = $value;
-        }
-    }
+    protected $options = array();
     
     /**
      * 
@@ -23,8 +20,12 @@ class FilterTerm extends AbstractFilter {
      * @return boolean
      */
     public function updateFromArray(array $parameters) {
-        $this->field = key($parameters);
-        $this->value = $parameters[key($parameters)];
+        $parameters = parent::updateFromArray($parameters);
+        $this->options[static::FIELD] = key($parameters);
+        $this->options[static::VALUE] = $parameters[key($parameters)];
+        if (FilterNested::isNested($this->options[static::FIELD]) && !$this->skipNested) {
+            $this->generateNested($this, FilterNested::getParent($this->options[static::FIELD]));
+        }
     }
     
     /**
@@ -33,16 +34,16 @@ class FilterTerm extends AbstractFilter {
      * @return array
      */
     public function getFilterAsArray() {
-        $query = array();
-        $query['term'] = array(
-            $this->field => $this->value,
-        );            
-        return $query;
-    }
-
-    public function __clone() {
-        $this->field = null;
-        $this->value = null;
+        if ($this->getFilterNested() !== null) {
+            return $this->getFilterNested()
+                    ->getFilterAsArray();
+        } else {
+            $filter = array();
+            $filter[static::TERM] = array(
+                $this->options[static::FIELD] => $this->options[static::VALUE],
+            );
+            return $filter;
+        }
     }
     
 }

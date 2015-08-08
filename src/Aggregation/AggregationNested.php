@@ -6,7 +6,9 @@
  */
 namespace Fafas\QueryBuilder\Aggregation;
 
-class AggregationNested implements AggregationInterface {
+class AggregationNested extends AbstractAggregation {
+    
+    const NESTED = 'nested';
     
     const FILTER = 'filter';
     const AGGS = 'aggs';
@@ -14,6 +16,10 @@ class AggregationNested implements AggregationInterface {
     const FIELD = 'field';
     const SIZE = 'size';
     const ORDER = 'order';
+    
+    public static $strategyKeys = array(
+      self::NESTED,
+    );
     
     protected $isGlobal = true,
         $name = null,
@@ -23,127 +29,12 @@ class AggregationNested implements AggregationInterface {
         $order = null,
         $aggs = null,
         $path = null;
-    
-    /**
-     * 
-     * @param array $options
-     */
-    public function __construct(array $options = array()) {
-        if (!empty($options)) {
-            $this->updateFromArray($options);
-        }
+
+    public function getFilterAsArray() {
+        
     }
 
-    /**
-     * 
-     * @return string
-     */
-    public function getName() {
-        return $this->name;
-    }
-    
-    /**
-     * 
-     * @param string $name
-     */
-    public function setName($name) {
-        $this->name = (string) $name;
-    }
-
-    /**
-     * 
-     * @return FilterCollectionInterface
-     */
-    public function getFilter() {
-        return $this->filter;
-    }
-    
-    /**
-     * 
-     * @return AggregationCollectionInterface
-     */
-    public function getAggs() {
-        return $this->aggs;
-    }
-    
-    /**
-     * 
-     * @param FilterCollectionInterface $filter
-     */
-    public function setFilter(FilterCollectionInterface $filter) {
-        $this->filter = $filter;
-    }
-
-    /**
-     * 
-     * @param AggregationCollectionInterface $aggs
-     */
-    public function setAggs(AggregationCollectionInterface $aggs) {
-        $this->aggs = $aggs;
-    }
-
-    /**
-     * 
-     * @return type
-     */
-    public function getField() {
-        return $this->field;
-    }
-    
-    public function setField($field) {
-        $this->field = (string) $field;
-    }
-    
-    /**
-     * 
-     * @return array
-     */
-    function getOrder() {
-        return $this->order;
-    }
-    
-    /**
-     * 
-     * @param array $order
-     */
-    function setOrder(array $order) {
-        $this->order = $order;
-    }
-    
-    /**
-     * 
-     * @return type
-     */
-    public function getIsGlobal() {
-        return $this->isGlobal;
-    }
-
-    /**
-     * 
-     * @return type
-     */
-    public function getSize() {
-        return $this->size;
-    }
-
-    /**
-     * 
-     * @param type $isGlobal
-     */
-    public function setIsGlobal($isGlobal) {
-        $this->isGlobal = (bool) $isGlobal;
-    }
-
-    /**
-     * 
-     * @param type $value
-     */
-    public function setSize($value = 0) {
-        $this->size = $value;
-    }
-
-    
-    /**
+        /**
      * Get object in elasticsearch agggregation array format
      */
     public function getAggregationAsArray() {

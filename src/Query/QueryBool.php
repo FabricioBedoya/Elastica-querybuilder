@@ -100,10 +100,11 @@ class QueryBool extends AbstractQuery {
     
     /**
      * 
-     * @param type $name
+     * @param type $cond
      */
     protected function getCollectionOf($cond = self::MUST) {
-        $method = 'get'.  \Symfony\Component\DependencyInjection\Container::camelize($cond);
+        $inflector = \ICanBoogie\Inflector::get();
+        $method = 'get'.  $inflector->camelize($cond);
         return $this->$method();
     }
     
@@ -136,11 +137,6 @@ class QueryBool extends AbstractQuery {
         $collection->addQuery($queryStrategy);
         $this->$methodSet($collection);
         return $this;
-    }
-    
-    public function getListQueries() {
-        $collection = new \Fafas\QueryBuilder\Query\QueryCollection();
-        
     }
     
     /**

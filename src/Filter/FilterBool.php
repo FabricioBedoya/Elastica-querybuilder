@@ -21,22 +21,22 @@ class FilterBool extends AbstractFilter {
     
     /**
      *
-     * @var \Fafas\QueryBuilder\Query\QueryCollection 
+     * @var \Fafas\QueryBuilder\Filter\FilterCollection 
      */
     protected $must = null;
     protected $should = null;
     protected $mustNot = null;
     /**
      * 
-     * @param \Fafas\QueryBuilder\Query\QueryCollection $must
+     * @param \Fafas\QueryBuilder\Filter\FilterCollection $must
      */
-    public function setMust(QueryCollection $must) {
+    public function setMust(\Fafas\QueryBuilder\Filter\FilterCollection $must) {
         $this->must = $must;
     }
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Query\QueryCollection
+     * @return \Fafas\QueryBuilder\Filter\FilterCollection
      */
     public function getMust() {
         return $this->must;
@@ -44,15 +44,15 @@ class FilterBool extends AbstractFilter {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Query\QueryCollection $should
+     * @param \Fafas\QueryBuilder\Filter\FilterCollection $should
      */
-    public function setShould(QueryCollection $should) {
+    public function setShould(\Fafas\QueryBuilder\Filter\FilterCollection $should) {
         $this->should = $should;
     }
 
     /**
      * 
-     * @return \Fafas\QueryBuilder\Query\QueryCollection
+     * @return \Fafas\QueryBuilder\Filter\FilterCollection
      */
     public function getShould() {
         return $this->should;
@@ -60,15 +60,15 @@ class FilterBool extends AbstractFilter {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Query\QueryCollection $mustNot
+     * @param \Fafas\QueryBuilder\Filter\FilterCollection $mustNot
      */
-    public function setMustNot(QueryCollection $mustNot) {
+    public function setMustNot(\Fafas\QueryBuilder\Filter\FilterCollection $mustNot) {
         $this->mustNot = $mustNot;
     }
 
     /**
      * 
-     * @return \Fafas\QueryBuilder\Query\QueryCollection
+     * @return \Fafas\QueryBuilder\Filter\FilterCollection
      */
     public function getMustNot() {
         return $this->mustNot;
@@ -94,23 +94,93 @@ class FilterBool extends AbstractFilter {
         return null;
     }
     
+    public function getMandatoryBoolButId(array $idsExcluded) {
+        $bool = clone $this;
+        /*@var $query \Fafas\QueryBuilder\Elastica\EntityInterface */
+        foreach(array(static::MUST, static::SHOULD, static::MUST_NOT) as $cond) {
+            $collection = $bool->getCollectionOf($cond);
+            if ($collection !== null) {
+                foreach($collection->getCollection() as $key => $filter) {
+                    if (in_array($key, $idsExcluded)) {
+                        $collection->deleteFilter($filter);
+                        $bool->setCollectionOf($collection, $cond);
+                        break;
+                    }
+                }
+            }
+        }
+        return $bool;
+    }
+    
+    /**
+     * 
+     * @param type $cond
+     * @return \Fafas\QueryBuilder\Filter\FilterCollection
+     */
+    public function getCollectionOf($cond = self::MUST) {
+        $inflector = \ICanBoogie\Inflector::get();
+        $method = 'get'.  $inflector->camelize($cond);
+        return $this->$method();
+    }
+    
+    /**
+     * 
+     * @param type $cond
+     * @return \Fafas\QueryBuilder\Filter\FilterCollection
+     */
+    public function setCollectionOf(\Fafas\QueryBuilder\Filter\FilterCollection $collection, $cond = self::MUST) {
+        $inflector = \ICanBoogie\Inflector::get();
+        $method = 'set'.  $inflector->camelize($cond);
+        return $this->$method($collection);
+    }
+    
+    /**
+     * 
+     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $queryStrategy
+     * @param type $cond
+     * @return \Fafas\QueryBuilder\Query\QueryBool
+     */
+    public function addQueryToCollection(\Fafas\QueryBuilder\Elastica\EntityInterface $queryStrategy, $cond = self::MUST) {
+        switch (true) {
+            case $cond == static::MUST_NOT:
+                $methodGet = 'getMustNot';
+                $methodSet = 'setMustNot';
+                break;
+            case $cond == static::SHOULD:
+                $methodGet = 'getShould';
+                $methodSet = 'setShould';
+                break;
+            default:
+            case $cond == static::MUST:
+                $methodGet = 'getMust';
+                $methodSet = 'setMust';
+                break;
+        }
+        $collection = $this->$methodGet();
+        if (!$collection instanceof \Fafas\QueryBuilder\Filter\FilterCollection) {
+            $collection = new \Fafas\QueryBuilder\Filter\FilterCollection();
+        }
+        $collection->addFilter($queryStrategy);
+        $this->$methodSet($collection);
+        return $this;
+    }
+    
     /**
      * 
      * @return array
      */
-    function getFilterAsArray() {
-        $bool = array(FilterConstants::BOOL => array());
-        if ($this->getMust() !== null) {
-            $bool[FilterConstants::BOOL] = $this->getMust()->getCollectionAsArray();
-        }
-        if ($this->getMustNot() !== null) {
-            $bool[FilterConstants::BOOL] = $this->getMustNot()->getCollectionAsArray();
-        }
-        if ($this->getShould() !== null) {
-            $bool[FilterConstants::BOOL] = $this->getShould()->getCollectionAsArray();
-        }
-        
-        return $bool;
+    public function getFilterAsArray() {
+       $bool = array(static::BOOL => array());
+       if ($this->getMust() !== null) {
+           $bool[static::BOOL][static::MUST] = $this->getMust()->getFilterAsArray();
+       }
+       if ($this->getShould() !== null) {
+           $bool[static::BOOL][static::SHOULD] = $this->getShould()->getFilterAsArray();
+       }
+       if ($this->getMustNot() !== null) {
+           $bool[static::BOOL][static::MUST_NOT] = $this->getMustNot()->getFilterAsArray();
+       }
+       return $bool;
     }
 
     /**
@@ -118,35 +188,42 @@ class FilterBool extends AbstractFilter {
      * @param array $array
      */
     public function updateFromArray(array $array) {
-        foreach(array(FilterConstants::MUST, FilterConstants::MUST_NOT, FilterConstants::SHOULD) as $key => $value) {
-            if (isset($array[$key]) && is_array($array[$key])) {
-                $newCollection = new FilterCollection();
+        $this->setId('filter_bool');
+        foreach($array as $key => $params) {
+            if (in_array($key, array(static::MUST, static::SHOULD, static::MUST_NOT))) {
+                $queryCollection = new \Fafas\QueryBuilder\Filter\FilterCollection($this->getFilterManager());
+                $queryCollection->updateFromArray($params);
                 switch(true) {
-                    case $key === FilterConstants::MUST:
-                        $this->setMust($newCollection);
-                        $this->getMust()->updateFromArray($array[$key]);
+                    case $key === static::MUST:
+                        $this->setMust($queryCollection);
                         break;
-                    case $key === FilterConstants::MUST_NOT:
-                        $this->setMustNot($newCollection);
-                        $this->getMustNot()->updateFromArray($array[$key]);
+                    case $key === static::SHOULD:
+                        $this->setShould($queryCollection);
                         break;
-                    case $key === FilterConstants::SHOULD:
-                        $this->setShould($newCollection);
-                        $this->getShould()->updateFromArray($array[$key]);
-                        break;                    
+                    case $key === static::MUST_NOT:
+                        $this->setMustNot($queryCollection);
+                        break;
                 }
             }
         }
     }
     
-    public function getId() {
-        
+    public function __clone() {
+        parent::__clone();
+        $must = $this->getMust();
+        if ($must !== null) {
+            $this->setMust(clone $must);
+        }
+        $should = $this->getShould();
+        if ($should !== null) {
+            $this->setShould(clone $should);
+        }
+        $mustNot = $this->getMustNot();
+        if ($mustNot !== null) {
+            $this->setMustNot(clone $mustNot);
+        }
     }
-
-    public function setId($id) {
-        
-    }
-
+    
 
 
 }

@@ -47,18 +47,6 @@ class QueryNested extends AbstractQuery {
         return implode('.', $parts);
     }
     
-//    public function generateNested($array) {
-//        $field = key($array);
-//        $fieldFake = str_replace('.', '|', $field);
-//        $newArray = array($fieldFake => $array[$field]);
-//        
-//        $queryNested = new static;
-//        $queryNested->updateFromArray(array(
-//          'path' => static::getParent($field),
-//          'query' => array(),
-//        ));
-//    }
-    
     /**
      * 
      * @return array

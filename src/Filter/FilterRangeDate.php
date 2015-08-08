@@ -14,6 +14,9 @@ class FilterRangeDate extends AbstractFilter {
     
     protected $options = array();
     
+    public static $strategyKeys = array(
+      self::RANGE,
+    );
     
     /**
      * 
@@ -21,6 +24,7 @@ class FilterRangeDate extends AbstractFilter {
      * @return boolean
      */
     public function updateFromArray(array $array) {
+        parent::updateFromArray($array);
         if (!isset($array[static::FIELD])) {
             $this->options[static::FIELD] = key($array);
             $array = $array[$this->options[static::FIELD]];
@@ -42,14 +46,19 @@ class FilterRangeDate extends AbstractFilter {
      * @return array
      */
     public function getFilterAsArray() {
-        $query = array();
-        $query[static::RANGE] = array($this->options[static::FIELD] => array());
-        foreach(array(static::GTE, static::LTE, static::GT, static::LT) as $key) {
-            if (isset($this->options[$key]) && $this->options[$key] !== '*') {
-                $query[static::RANGE][$this->options[static::FIELD]][$key] = $this->options[$key];
+        if ($this->getFilterNested() !== null) {
+            return $this->getFilterNested()
+                    ->getFilterAsArray();
+        } else {
+            $query = array();
+            $query[static::RANGE] = array($this->options[static::FIELD] => array());
+            foreach(array(static::GTE, static::LTE, static::GT, static::LT) as $key) {
+                if (isset($this->options[$key]) && $this->options[$key] !== '*') {
+                    $query[static::RANGE][$this->options[static::FIELD]][$key] = $this->options[$key];
+                }
             }
+            return $query;
         }
-        return $query;
     }
     
 }

@@ -78,8 +78,17 @@ class QueryFiltered implements EntityInterface {
      * @param \Fafas\QueryBuilder\Elastica\EntityInterface $filter
      */
     function setFilter(\Fafas\QueryBuilder\Elastica\EntityInterface $filter) {
-        if ($filter instanceof \Fafas\QueryBuilder\Builder\QueryFilteredFilter) {
-            $this->filter = $filter;
+        switch(true) {
+            case ($filter instanceof \Fafas\QueryBuilder\Builder\QueryFilteredFilter):
+                $this->filter = $filter;
+                break;
+            case ($filter instanceof \Fafas\QueryBuilder\Filter\FilterInterface):
+                $filteredFilter = new \Fafas\QueryBuilder\Builder\QueryFilteredFilter();
+                $filteredFilter->setFilter($filter);
+                $this->filter =$filteredFilter;
+                break;
+            default:
+                break;
         }
     }
 

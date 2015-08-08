@@ -6,25 +6,11 @@
 
 namespace Fafas\QueryBuilder\Aggregation;
 
-interface AggregationInterface {
+interface AggregationInterface extends \Fafas\QueryBuilder\Elastica\EntityInterface {
     
-    public function setName($name);
+    public function setFilterManager(\Fafas\QueryBuilder\Filter\FilterManagerInterface $filterManager);
     
-    public function getName();
+    public function getFilterManager();
     
-    public function setField($field);
-    
-    public function getField();
-    
-    public function getIsGlobal();
-
-    public function getSize();
-    
-    public function setIsGlobal($isGlobal);
-
-    public function setSize($value);
-    
-    public function getAggregationAsArray();
-    
-    public function updateFromArray(array $array);
+    public function isGlobalAggregation();
 }

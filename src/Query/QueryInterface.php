@@ -6,7 +6,7 @@
 namespace Fafas\QueryBuilder\Query;
 
 
-interface QueryInterface {
+interface QueryInterface extends \Fafas\QueryBuilder\Elastica\EntityInterface {
     
     public function __construct(\Fafas\QueryBuilder\Builder\ManagerInterface $queryManager);
     

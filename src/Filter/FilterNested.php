@@ -2,90 +2,78 @@
 
 namespace Fafas\QueryBuilder\Filter;
 
-use Fafas\QueryBuilder\Filter\FilterInterface;
-use Fafas\QueryBuilder\Elastica\EntityInterface;
-
 class FilterNested extends AbstractFilter {
+    
+    const NESTED = 'nested';
+    
+    const PATH = 'path';
+    const QUERY = 'query';
+    const SCORE_MODE = 'score_mode';
 
-    protected $field;
-    protected $strategy;
-    protected $value;
-    protected $parent;
-    protected $condition;
+    protected $options = array();
+    
+    protected static $strategyKeys = array(
+      self::NESTED
+    );
     
     /**
      *
      * @var ArrayObject
      */
     protected $filters = null;
+    
+     /**
+     * 
+     * @param string $field
+     * @return boolean
+     */
+    public static function isNested($field = '') {
+        return (strpos($field, '.') ? true : false);
+    }
+    
+    /**
+     * 
+     * @param string $field
+     * @return string
+     */
+    public static function getParent($field) {
+        $parts = explode('.', $field);
+        array_pop($parts);
+        return implode('.', $parts);
+    }
 
-    public function __construct($filters = array(), $condition = 'should', $field = null, $value = null) {
-        $this->condition = $condition;
-        if ($field !== null) {
-            $this->field = $field;
-        }
-        if ($value !== null) {
-            $this->value = $value;
-        }
-        foreach ($filters as $key => $filter) {
-            if ($filter instanceof FilterInterface) {
-                $this->addFilterStrategy($key, $filter);
+    /**
+     * 
+     * @param array $array
+     */
+    public function updateFromArray(array $array) {
+        parent::updateFromArray($array);
+        foreach(array(self::PATH, self::QUERY, self::SCORE_MODE) as $key)  {
+            if (isset($array[$key])) {
+                $this->options[$key] = $array[$key];
             }
         }
     }
-    
+
     /**
      * 
-     * @param type $key
-     * @param FilterInterface $filter
-     */
-    public function addFilterStrategy($key, FilterInterface $filter) {
-        $this->filters[$key] = $filter;
-    }
-    
-    /**
-     * 
-     * @param type $nameFilter
      * @return type
-     * @throws \Exception
      */
-    private function getFilterStrategy($nameFilter) {
-        if (!array_key_exists($nameFilter, $this->filters)) {
-            throw new \Exception(sprintf('Filter %s not found', $nameFilter));
-        }
-        $filter = clone $this->filters[$nameFilter];
-        return $filter;
-    }
-
-    public function updateFromArray(array $parameters) {
-        $this->condition = key($parameters);
-        $this->strategy = key($parameters[$this->condition]['nested']);
-        $this->field = key($parameters[$this->condition]['nested'][$this->strategy]);
-        $parts = explode('.', $this->field);
-        array_pop($parts);
-        $this->parent = implode('.', $parts);
-        $this->value = $parameters[$this->condition]['nested'][$this->strategy][$this->field];
-    }
-
     public function getFilterAsArray() {
-        $filterStragety = $this->getFilterStrategy($this->strategy);
-        $filterStragety->updateFromArray(array($this->field => $this->value));
-        $subFilter = $filterStragety->getFilter();
-        return $filter = array(
-          'nested' => array(
-            'path' => $this->parent,
-            'filter' => array(
-              'bool' => array(
-                $this->condition => array(
-                  0 => $subFilter
-                ),
-              ),
-            ),
-          ),
+        $nested = array(
+            static::NESTED => array(),
         );
+        foreach(array(self::PATH, self::QUERY, self::SCORE_MODE) as $key) {
+            if (isset($this->options[$key])) {
+                $nested[static::NESTED][$key] = $this->options[$key];
+            }
+        }
+        
+        return $nested;
     }
     
     public function __clone() {
+        parent::__clone();
         $this->field = null;
         $this->value = null;
         $this->condition = null;

@@ -13,7 +13,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Fafas\\QueryBuilder\\": "src/"
+            "Fafas\\ElasticaQuery\\": "src/"
         }
     }
 }
