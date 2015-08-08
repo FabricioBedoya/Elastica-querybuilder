@@ -1,8 +1,8 @@
 <?php
 
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
-use Fafas\QueryBuilder\Filter\GeoPointInterface;
+use Fafas\ElasticaQuery\Filter\GeoPointInterface;
 
 class GeoPoint implements GeoPointInterface {
     

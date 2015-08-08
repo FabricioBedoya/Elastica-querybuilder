@@ -1,7 +1,7 @@
 <?php
-namespace Fafas\QueryBuilder\Builder;
+namespace Fafas\ElasticaQuery\Builder;
 
-use Fafas\QueryBuilder\Elastica\EntityInterface;
+use Fafas\ElasticaQuery\Elastica\EntityInterface;
 /**
  * Description of newPHPClass
  *
@@ -20,7 +20,7 @@ class ManagerAbstract implements ManagerInterface {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Builder\ManagerInterface
+     * @return \Fafas\ElasticaQuery\Builder\ManagerInterface
      */
     public static function createInstance() {
         if (static::$instance === null) {
@@ -37,7 +37,7 @@ class ManagerAbstract implements ManagerInterface {
     /**
      * 
      * @param type $name
-     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $queryStrategy
+     * @param \Fafas\ElasticaQuery\Elastica\EntityInterface $queryStrategy
      */
     public function addQueryStrategy($name, EntityInterface $queryStrategy) {
         $this->strategy[$name] = $queryStrategy;
@@ -46,7 +46,7 @@ class ManagerAbstract implements ManagerInterface {
     /**
      * 
      * @param string $name
-     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
+     * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
      * @throws \Exception
      */
     public function getQueryStrategy($name) {
@@ -76,7 +76,7 @@ class ManagerAbstract implements ManagerInterface {
                         if (preg_match($patternFile, $entry)) {
                             $queryStrategy = new $class($this);
                             if (is_array(class_implements($queryStrategy)) 
-                                && array_key_exists('Fafas\QueryBuilder\Elastica\EntityInterface', class_implements($queryStrategy))) {
+                                && array_key_exists('Fafas\ElasticaQuery\Elastica\EntityInterface', class_implements($queryStrategy))) {
                                 try {
                                     foreach($queryStrategy->getStrategyKeys() as $nomStrategy) { 
                                         $this->addQueryStrategy($nomStrategy, $queryStrategy);

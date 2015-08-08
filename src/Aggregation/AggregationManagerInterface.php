@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder\Aggregation;
+namespace Fafas\ElasticaQuery\Aggregation;
 
 /**
  *
@@ -8,7 +8,7 @@ namespace Fafas\QueryBuilder\Aggregation;
  */
 interface AggregationManagerInterface {
     
-    public function setFilterManager(\Fafas\QueryBuilder\Filter\FilterManager $filterManager);
+    public function setFilterManager(\Fafas\ElasticaQuery\Filter\FilterManager $filterManager);
     
     public function getFilterManager();
     

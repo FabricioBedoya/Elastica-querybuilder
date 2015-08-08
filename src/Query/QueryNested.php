@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-namespace Fafas\QueryBuilder\Query;
+namespace Fafas\ElasticaQuery\Query;
 
 /**
  * Description of QueryNested

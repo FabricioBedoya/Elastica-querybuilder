@@ -4,7 +4,7 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder\Aggregation;
+namespace Fafas\ElasticaQuery\Aggregation;
 
 class AggregationNested extends AbstractAggregation {
     

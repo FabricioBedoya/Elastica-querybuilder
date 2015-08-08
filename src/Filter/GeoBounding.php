@@ -1,20 +1,20 @@
 <?php
 
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
-use Fafas\QueryBuilder\Filter\GeoPoint;
+use Fafas\ElasticaQuery\Filter\GeoPoint;
 
 class GeoBounding {
     
     /**
      *
-     * @var \Fafas\QueryBuilder\Filter\GeoPoint 
+     * @var \Fafas\ElasticaQuery\Filter\GeoPoint 
      */
     protected $topLeft = null;
     
     /**
      *
-     * @var \Fafas\QueryBuilder\Filter\GeoPoint 
+     * @var \Fafas\ElasticaQuery\Filter\GeoPoint 
      */
     protected $bottomRigth = null;
     
@@ -51,7 +51,7 @@ class GeoBounding {
     }
     /**
      * 
-     * @return \Fafas\QueryBuilder\Filter\GeoPoint
+     * @return \Fafas\ElasticaQuery\Filter\GeoPoint
      */
     public function getTopLeft() {
         return $this->topLeft;
@@ -59,7 +59,7 @@ class GeoBounding {
 
     /**
      * 
-     * @return \Fafas\QueryBuilder\Filter\GeoPoint
+     * @return \Fafas\ElasticaQuery\Filter\GeoPoint
      */
     public function getBottomRigth() {
         return $this->bottomRigth;

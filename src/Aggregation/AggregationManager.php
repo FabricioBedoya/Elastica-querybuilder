@@ -4,9 +4,9 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder\Aggregation;
+namespace Fafas\ElasticaQuery\Aggregation;
 
-use Fafas\QueryBuilder\Builder\ManagerAbstract;
+use Fafas\ElasticaQuery\Builder\ManagerAbstract;
 
 class AggregationManager extends ManagerAbstract implements AggregationManagerInterface {
     
@@ -29,40 +29,40 @@ class AggregationManager extends ManagerAbstract implements AggregationManagerIn
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Builder\QueryAggs $aggregation
+     * @param \Fafas\ElasticaQuery\Builder\QueryAggs $aggregation
      */
-    public function setAggregation(\Fafas\QueryBuilder\Builder\QueryAggs $aggregation) {
+    public function setAggregation(\Fafas\ElasticaQuery\Builder\QueryAggs $aggregation) {
         $this->aggregation = $aggregation;
         return $this;
     }
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Builder\QueryAggs
+     * @return \Fafas\ElasticaQuery\Builder\QueryAggs
      */
     public function getAggregation() {
         if ($this->aggregation === null) {
-            $this->aggregation = new \Fafas\QueryBuilder\Builder\QueryAggs();
+            $this->aggregation = new \Fafas\ElasticaQuery\Builder\QueryAggs();
         }
         return $this->aggregation;
     }
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Filter\FilterManager $filterManager
+     * @param \Fafas\ElasticaQuery\Filter\FilterManager $filterManager
      */
-    public function setFilterManager(\Fafas\QueryBuilder\Filter\FilterManager $filterManager) {
+    public function setFilterManager(\Fafas\ElasticaQuery\Filter\FilterManager $filterManager) {
         $this->filterManager = $filterManager;
         return $this;
     }
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Filter\FilterManager
+     * @return \Fafas\ElasticaQuery\Filter\FilterManager
      */
     public function getFilterManager() {
         if ($this->filterManager === null) {
-            $this->filterManager = \Fafas\QueryBuilder\Filter\FilterManager::createInstance();
+            $this->filterManager = \Fafas\ElasticaQuery\Filter\FilterManager::createInstance();
         }
         return $this->filterManager;
     }
@@ -73,7 +73,7 @@ class AggregationManager extends ManagerAbstract implements AggregationManagerIn
             case $flag === true :
                 $strategy = key($aggArray);
                 $queryStrategy =  $this->getQueryStrategy($strategy);
-                if ($queryStrategy instanceof \Fafas\QueryBuilder\Aggregation\AggregationInterface) {
+                if ($queryStrategy instanceof \Fafas\ElasticaQuery\Aggregation\AggregationInterface) {
                     $queryStrategy->updateFromArray($aggArray[$strategy]);
                     $this->addAggregation($queryStrategy);
                 }
@@ -87,12 +87,12 @@ class AggregationManager extends ManagerAbstract implements AggregationManagerIn
         return $this->getAggregation();
     }
     
-    public function addAggregation(\Fafas\QueryBuilder\Aggregation\AggregationInterface $aggregation) {
+    public function addAggregation(\Fafas\ElasticaQuery\Aggregation\AggregationInterface $aggregation) {
         $this->getAggregation()->addAgg($aggregation);
         return $this;
     }
     
-    public function addAggRelatedToFilter(\Fafas\QueryBuilder\Filter\FilterInterface $filter) {
+    public function addAggRelatedToFilter(\Fafas\ElasticaQuery\Filter\FilterInterface $filter) {
         $aggStrategy = $this->getQueryStrategy('terms');
         $array =array(
             AggregationTerms::ID => $filter->getId(),

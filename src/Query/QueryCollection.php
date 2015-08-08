@@ -4,9 +4,9 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder\Query;
+namespace Fafas\ElasticaQuery\Query;
 
-use Fafas\QueryBuilder\Elastica\EntityInterface;
+use Fafas\ElasticaQuery\Elastica\EntityInterface;
 
 class QueryCollection extends AbstractQuery implements QueryCollectionInterface {
     
@@ -18,7 +18,7 @@ class QueryCollection extends AbstractQuery implements QueryCollectionInterface 
       self::QUERY_COLLECTION,
     );
     
-    public function __construct(\Fafas\QueryBuilder\Builder\ManagerInterface $queryManager = null) {
+    public function __construct(\Fafas\ElasticaQuery\Builder\ManagerInterface $queryManager = null) {
         parent::__construct($queryManager);
         $this->position = 0;
     }
@@ -31,7 +31,7 @@ class QueryCollection extends AbstractQuery implements QueryCollectionInterface 
      * 
      * @param EntityInterface $query
      * @param string $key
-     * @return \Fafas\QueryBuilder\Query\QueryCollection
+     * @return \Fafas\ElasticaQuery\Query\QueryCollection
      */
     public function addQuery(EntityInterface $query) {
         $this->filterCollection[$query->getId()] = $query;
@@ -44,7 +44,7 @@ class QueryCollection extends AbstractQuery implements QueryCollectionInterface 
      */
     public function getCollectionAsArray() {
         $collectionAsArray = array();
-        /*@var $filter Fafas\QueryBuilder\Filter\FilterInterface */
+        /*@var $filter Fafas\ElasticaQuery\Filter\FilterInterface */
         foreach($this->filterCollection as $key => $filter) {
             $collectionAsArray[] = $filter->getFilterAsArray();
         }
@@ -70,7 +70,7 @@ class QueryCollection extends AbstractQuery implements QueryCollectionInterface 
         /**
      * 
      * @param array $array
-     * @return \Fafas\QueryBuilder\Query\QueryCollection
+     * @return \Fafas\ElasticaQuery\Query\QueryCollection
      */
     public function updateFromArray(array $array) {
         foreach($array as $strategy => $params) {
@@ -80,7 +80,7 @@ class QueryCollection extends AbstractQuery implements QueryCollectionInterface 
             else {
                 $query = $this->getQueryManager()
                     ->getQueryStrategy($strategy);
-                if ($query instanceof \Fafas\QueryBuilder\Elastica\EntityInterface) {
+                if ($query instanceof \Fafas\ElasticaQuery\Elastica\EntityInterface) {
                     $query->updateFromArray($params);
                     $this->addQuery($query);
                 }

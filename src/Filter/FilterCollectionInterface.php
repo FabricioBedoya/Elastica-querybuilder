@@ -4,9 +4,9 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
-use Fafas\QueryBuilder\Filter\FilterInterface;
+use Fafas\ElasticaQuery\Filter\FilterInterface;
 
 interface FilterCollectionInterface {
     

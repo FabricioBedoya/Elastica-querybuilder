@@ -1,8 +1,8 @@
 <?php
 
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
-interface FilterInterface extends \Fafas\QueryBuilder\Elastica\EntityInterface {
+interface FilterInterface extends \Fafas\ElasticaQuery\Elastica\EntityInterface {
     
     public function hasRelevantAggregation();
     

@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder\Controller;
+namespace Fafas\ElasticaQuery\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 

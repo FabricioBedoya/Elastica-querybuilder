@@ -4,9 +4,9 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
-use Fafas\QueryBuilder\Builder\ManagerAbstract;
+use Fafas\ElasticaQuery\Builder\ManagerAbstract;
 
 class FilterManager extends ManagerAbstract {
     
@@ -31,15 +31,15 @@ class FilterManager extends ManagerAbstract {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $filter
+     * @param \Fafas\ElasticaQuery\Elastica\EntityInterface $filter
      */
-    public function setFilter(\Fafas\QueryBuilder\Elastica\EntityInterface $filter) {
+    public function setFilter(\Fafas\ElasticaQuery\Elastica\EntityInterface $filter) {
         $this->filter = $filter;
     }
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Elastica\EntityInterface $query
+     * @return \Fafas\ElasticaQuery\Elastica\EntityInterface $query
      */
     public function getFilter() {
         return $this->filter;
@@ -50,9 +50,9 @@ class FilterManager extends ManagerAbstract {
      * @param QueryBool $queryBool
      * @param array $array
      * @param type $cond
-     * @return \Fafas\QueryBuilder\Query\QueryManager
+     * @return \Fafas\ElasticaQuery\Query\QueryManager
      */
-    protected function addToCollectionFromArray(\Fafas\QueryBuilder\Query\QueryBool $queryBool, array $array, $cond = QueryBool::MUST) {
+    protected function addToCollectionFromArray(\Fafas\ElasticaQuery\Query\QueryBool $queryBool, array $array, $cond = QueryBool::MUST) {
         $flag = (bool) count(array_filter(array_keys($array), 'is_string'));
         switch(true) {
             case ($flag !== true) :
@@ -73,14 +73,14 @@ class FilterManager extends ManagerAbstract {
      /**
      * 
      * @param array $filterArray
-     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
+     * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
      */
     public function processFilter(array $filterArray) {
         foreach ($filterArray as $strategy => $params) {
             $queryStrategy =  $this->getQueryStrategy($strategy);
-            if ($queryStrategy instanceof \Fafas\QueryBuilder\Filter\FilterInterface) {
+            if ($queryStrategy instanceof \Fafas\ElasticaQuery\Filter\FilterInterface) {
                 switch(true) {
-                    case $this->getFilter() instanceof \Fafas\QueryBuilder\Filter\FilterBool && in_array($strategy, $this->getFilter()->getStrategyKeys()):
+                    case $this->getFilter() instanceof \Fafas\ElasticaQuery\Filter\FilterBool && in_array($strategy, $this->getFilter()->getStrategyKeys()):
                         $this->addToCollectionFromArray($this->getFilter(), $params, $strategy);
                         break;
                     case $this->getFilter() === null && in_array($strategy, array(FilterBool::MUST, FilterBool::SHOULD, FilterBool::MUST_NOT)):
@@ -101,16 +101,16 @@ class FilterManager extends ManagerAbstract {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
+     * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
      */
     public function getMandatoryFilters() {
-        if ($this->getFilter() instanceof \Fafas\QueryBuilder\Filter\FilterBool) {
+        if ($this->getFilter() instanceof \Fafas\ElasticaQuery\Filter\FilterBool) {
             $filters = array();
-            /*@var $collection \Fafas\QueryBuilder\Filter\FilterCollection */
+            /*@var $collection \Fafas\ElasticaQuery\Filter\FilterCollection */
             foreach(array('must', 'must_not') as $key) {
                 $collection = $this->getFilter()
                 ->getCollectionOf($key);
-                if ($collection instanceof \Fafas\QueryBuilder\Filter\FilterCollection) {
+                if ($collection instanceof \Fafas\ElasticaQuery\Filter\FilterCollection) {
                     $filters = array_merge($filters, $collection->getCollection());
                 }
             }
@@ -123,7 +123,7 @@ class FilterManager extends ManagerAbstract {
     } 
     
     public function getFiltersButIdAsArray($idExclude) {
-        if ($this->getFilter() instanceof \Fafas\QueryBuilder\Filter\FilterBool) {
+        if ($this->getFilter() instanceof \Fafas\ElasticaQuery\Filter\FilterBool) {
             $filters = $this->getFilter()->getMandatoryBoolButId($idExclude);
             return $filters->getFilterAsArray();
             
@@ -137,27 +137,27 @@ class FilterManager extends ManagerAbstract {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Aggregation\AggregationManager
+     * @return \Fafas\ElasticaQuery\Aggregation\AggregationManager
      */
     function getAggregationManager() {
         if ($this->aggregationManager === null) {
-            $this->aggregationManager = \Fafas\QueryBuilder\Aggregation\AggregationManager::createInstance();
+            $this->aggregationManager = \Fafas\ElasticaQuery\Aggregation\AggregationManager::createInstance();
         }
         return $this->aggregationManager;
     }
 
     /**
      * 
-     * @param \Fafas\QueryBuilder\Aggregation\AggregationManagerInterface $aggregationManager
+     * @param \Fafas\ElasticaQuery\Aggregation\AggregationManagerInterface $aggregationManager
      */
-    function setAggregationManager(\Fafas\QueryBuilder\Aggregation\AggregationManagerInterface $aggregationManager) {
+    function setAggregationManager(\Fafas\ElasticaQuery\Aggregation\AggregationManagerInterface $aggregationManager) {
         $this->aggregationManager = $aggregationManager;
         return $this;
     }
 
     /**
      * 
-     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
+     * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
      */
     public function getAggregation() {
         return $this->aggregation;
@@ -165,16 +165,16 @@ class FilterManager extends ManagerAbstract {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Aggregation\AggregationInterface $aggregation
-     * @return \Fafas\QueryBuilder\Filter\FilterManager
+     * @param \Fafas\ElasticaQuery\Aggregation\AggregationInterface $aggregation
+     * @return \Fafas\ElasticaQuery\Filter\FilterManager
      */
-    public function setAggregation(\Fafas\QueryBuilder\Aggregation\AggregationInterface $aggregation) {
+    public function setAggregation(\Fafas\ElasticaQuery\Aggregation\AggregationInterface $aggregation) {
         $this->aggregation = $aggregation;
         return $this;
     }
     
     public function processAggregationFromFilter() {
-        /*@var $filter \Fafas\QueryBuilder\Filter\FilterInterface */
+        /*@var $filter \Fafas\ElasticaQuery\Filter\FilterInterface */
         foreach($this->getMandatoryFilters() as $key => $filter) {
             if ($filter->hasRelevantAggregation()) {
                 $this->getAggregationManager()->addAggRelatedToFilter($filter);

@@ -1,8 +1,8 @@
 <?php
 
-namespace Fafas\QueryBuilder\Query;
+namespace Fafas\ElasticaQuery\Query;
 
-use Fafas\QueryBuilder\Query\QueryCollection;
+use Fafas\ElasticaQuery\Query\QueryCollection;
 
 /**
  * Description of QueryBool
@@ -25,14 +25,14 @@ class QueryBool extends AbstractQuery {
     
     /**
      *
-     * @var \Fafas\QueryBuilder\Query\QueryCollection 
+     * @var \Fafas\ElasticaQuery\Query\QueryCollection 
      */
     protected $must = null;
     protected $should = null;
     protected $mustNot = null;
     /**
      * 
-     * @param \Fafas\QueryBuilder\Query\QueryCollection $must
+     * @param \Fafas\ElasticaQuery\Query\QueryCollection $must
      */
     public function setMust(QueryCollection $must) {
         $this->must = $must;
@@ -40,7 +40,7 @@ class QueryBool extends AbstractQuery {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Query\QueryCollection
+     * @return \Fafas\ElasticaQuery\Query\QueryCollection
      */
     public function getMust() {
         return $this->must;
@@ -48,7 +48,7 @@ class QueryBool extends AbstractQuery {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Query\QueryCollection $should
+     * @param \Fafas\ElasticaQuery\Query\QueryCollection $should
      */
     public function setShould(QueryCollection $should) {
         $this->should = $should;
@@ -56,7 +56,7 @@ class QueryBool extends AbstractQuery {
 
     /**
      * 
-     * @return \Fafas\QueryBuilder\Query\QueryCollection
+     * @return \Fafas\ElasticaQuery\Query\QueryCollection
      */
     public function getShould() {
         return $this->should;
@@ -64,7 +64,7 @@ class QueryBool extends AbstractQuery {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Query\QueryCollection $mustNot
+     * @param \Fafas\ElasticaQuery\Query\QueryCollection $mustNot
      */
     public function setMustNot(QueryCollection $mustNot) {
         $this->mustNot = $mustNot;
@@ -72,7 +72,7 @@ class QueryBool extends AbstractQuery {
 
     /**
      * 
-     * @return \Fafas\QueryBuilder\Query\QueryCollection
+     * @return \Fafas\ElasticaQuery\Query\QueryCollection
      */
     public function getMustNot() {
         return $this->mustNot;
@@ -81,10 +81,10 @@ class QueryBool extends AbstractQuery {
     /**
      * 
      * @param string $id
-     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
+     * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
      */
     public function getEntityById($id) {
-        /*@var $query \Fafas\QueryBuilder\Elastica\EntityInterface */
+        /*@var $query \Fafas\ElasticaQuery\Elastica\EntityInterface */
         foreach(array(static::MUST, static::SHOULD, static::MUST_NOT) as $cond) {
             $collection = $this->getCollectionOf($cond);
             if ($collection !== null) {
@@ -110,11 +110,11 @@ class QueryBool extends AbstractQuery {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $queryStrategy
+     * @param \Fafas\ElasticaQuery\Elastica\EntityInterface $queryStrategy
      * @param type $cond
-     * @return \Fafas\QueryBuilder\Query\QueryBool
+     * @return \Fafas\ElasticaQuery\Query\QueryBool
      */
-    public function addQueryToCollection(\Fafas\QueryBuilder\Elastica\EntityInterface $queryStrategy, $cond = self::MUST) {
+    public function addQueryToCollection(\Fafas\ElasticaQuery\Elastica\EntityInterface $queryStrategy, $cond = self::MUST) {
         switch (true) {
             case $cond == static::MUST_NOT:
                 $methodGet = 'getMustNot';
@@ -131,8 +131,8 @@ class QueryBool extends AbstractQuery {
                 break;
         }
         $collection = $this->$methodGet();
-        if (!$collection instanceof \Fafas\QueryBuilder\Query\QueryCollection) {
-            $collection = new \Fafas\QueryBuilder\Query\QueryCollection();
+        if (!$collection instanceof \Fafas\ElasticaQuery\Query\QueryCollection) {
+            $collection = new \Fafas\ElasticaQuery\Query\QueryCollection();
         }
         $collection->addQuery($queryStrategy);
         $this->$methodSet($collection);

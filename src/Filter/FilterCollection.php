@@ -4,23 +4,23 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
 class FilterCollection extends AbstractFilter {
     
     protected $filterCollection = array();
     
-    /*@var Fafas\QueryBuilder\Query\QueryManager */
+    /*@var Fafas\ElasticaQuery\Query\QueryManager */
     protected $queryManager;
     
-    /*@var Fafas\QueryBuilder\Filter\FilterManager */
+    /*@var Fafas\ElasticaQuery\Filter\FilterManager */
     protected $filterManager;
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $filter
+     * @param \Fafas\ElasticaQuery\Elastica\EntityInterface $filter
      */
-    public function addFilter(\Fafas\QueryBuilder\Elastica\EntityInterface $filter) {
+    public function addFilter(\Fafas\ElasticaQuery\Elastica\EntityInterface $filter) {
         $id = $filter->getId();
         $this->filterCollection[$id] = $filter;
         return $this;
@@ -29,7 +29,7 @@ class FilterCollection extends AbstractFilter {
     /**
      * 
      * @param type $filter
-     * @return \Fafas\QueryBuilder\Filter\FilterCollection
+     * @return \Fafas\ElasticaQuery\Filter\FilterCollection
      */
     public function deleteFilter($filter) {
         unset($this->filterCollection[$filter->getId()]);
@@ -42,7 +42,7 @@ class FilterCollection extends AbstractFilter {
      */
     public function getCollectionAsArray() {
         $collectionAsArray = array();
-        /*@var $filter Fafas\QueryBuilder\Filter\FilterInterface */
+        /*@var $filter Fafas\ElasticaQuery\Filter\FilterInterface */
         foreach($this->filterCollection as $key => $filter) {
             $collectionAsArray[] = $filter->getFilterAsArray();
         }
@@ -75,7 +75,7 @@ class FilterCollection extends AbstractFilter {
                 $filterStrategy = $this->getFilterManager()
                     ->getQueryStrategy($strategy);
                 $filter = clone $filterStrategy;
-                if ($filter instanceof \Fafas\QueryBuilder\Elastica\EntityInterface) {
+                if ($filter instanceof \Fafas\ElasticaQuery\Elastica\EntityInterface) {
                     $filter->updateFromArray($params);
                     $this->addFilter($filter);
                 }

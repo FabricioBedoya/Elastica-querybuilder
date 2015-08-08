@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-namespace Fafas\QueryBuilder\Aggregation;
+namespace Fafas\ElasticaQuery\Aggregation;
 
 /**
  * Description of AbstractAggregation
@@ -41,11 +41,11 @@ abstract class AbstractAggregation implements AggregationInterface {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Builder\ManagerInterface $aggregationManager
+     * @param \Fafas\ElasticaQuery\Builder\ManagerInterface $aggregationManager
      */
-    public function __construct(\Fafas\QueryBuilder\Builder\ManagerInterface $aggregationManager = null) {
+    public function __construct(\Fafas\ElasticaQuery\Builder\ManagerInterface $aggregationManager = null) {
         if ($aggregationManager === null) {
-            $aggregationManager = \Fafas\QueryBuilder\Aggregation\AggregationManager::createInstance();
+            $aggregationManager = \Fafas\ElasticaQuery\Aggregation\AggregationManager::createInstance();
         }
         $this->setAggregationManager($aggregationManager);
         $this->setId(uniqid(static::PREFIX_ID));
@@ -57,7 +57,7 @@ abstract class AbstractAggregation implements AggregationInterface {
 
     /**
      * 
-     * @return \Fafas\QueryBuilder\Builder\ManagerInterface
+     * @return \Fafas\ElasticaQuery\Builder\ManagerInterface
      */
     public function getAggregationManager() {
         return $this->aggregationManager;
@@ -65,28 +65,28 @@ abstract class AbstractAggregation implements AggregationInterface {
 
     /**
      * 
-     * @param \Fafas\QueryBuilder\Builder\ManagerInterface $aggregationManager
+     * @param \Fafas\ElasticaQuery\Builder\ManagerInterface $aggregationManager
      */
-    public function setAggregationManager(\Fafas\QueryBuilder\Builder\ManagerInterface $aggregationManager) {
+    public function setAggregationManager(\Fafas\ElasticaQuery\Builder\ManagerInterface $aggregationManager) {
         $this->aggregationManager = $aggregationManager;
         return $this;
     }
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Filter\FilterManagerInterface $filterManager
+     * @param \Fafas\ElasticaQuery\Filter\FilterManagerInterface $filterManager
      */
-    public function setFilterManager(\Fafas\QueryBuilder\Filter\FilterManagerInterface $filterManager) {
+    public function setFilterManager(\Fafas\ElasticaQuery\Filter\FilterManagerInterface $filterManager) {
         $this->filterManager = $filterManager;
     }
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Filter\FilterManager
+     * @return \Fafas\ElasticaQuery\Filter\FilterManager
      */
     public function getFilterManager() {
         if ($this->filterManager === null) {
-            $this->filterManager = \Fafas\QueryBuilder\Filter\FilterManager::createInstance();
+            $this->filterManager = \Fafas\ElasticaQuery\Filter\FilterManager::createInstance();
         }
         return $this->filterManager;
     }
@@ -94,12 +94,12 @@ abstract class AbstractAggregation implements AggregationInterface {
     /**
      * 
      * @param array $array
-     * @return \Fafas\QueryBuilder\Query\QueryNested
+     * @return \Fafas\ElasticaQuery\Query\QueryNested
      */
-    public function generateNested(\Fafas\QueryBuilder\Elastica\EntityInterface $aggregation, $path) {
+    public function generateNested(\Fafas\ElasticaQuery\Elastica\EntityInterface $aggregation, $path) {
         $this->nestedLocked = true;
         $aggNested = $this->getAggregationManager()->getQueryStrategy('nested');
-        if ($aggNested instanceof \Fafas\QueryBuilder\Elastica\EntityInterface) {
+        if ($aggNested instanceof \Fafas\ElasticaQuery\Elastica\EntityInterface) {
             $aggNested = clone $this->getAggregationManager()->getQueryStrategy('nested');
             $options = array(
                 QueryNested::PATH => $path,
@@ -113,7 +113,7 @@ abstract class AbstractAggregation implements AggregationInterface {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Aggregation\AggregationNested
+     * @return \Fafas\ElasticaQuery\Aggregation\AggregationNested
      */
     public function getAggregationNested() {
         return $this->aggNested;
@@ -121,9 +121,9 @@ abstract class AbstractAggregation implements AggregationInterface {
 
     /**
      * 
-     * @param \Fafas\QueryBuilder\Aggregation\AggregationNested $aggNested
+     * @param \Fafas\ElasticaQuery\Aggregation\AggregationNested $aggNested
      */
-    public function setAggregationNested(\Fafas\QueryBuilder\Aggregation\AggregationNested $aggNested) {
+    public function setAggregationNested(\Fafas\ElasticaQuery\Aggregation\AggregationNested $aggNested) {
         $this->aggNested = $aggNested;
     }
     

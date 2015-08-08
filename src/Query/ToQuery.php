@@ -5,9 +5,9 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder\Query;
+namespace Fafas\ElasticaQuery\Query;
 
-use Fafas\QueryBuilder\Query\QueryInterface;
+use Fafas\ElasticaQuery\Query\QueryInterface;
 
 class Query implements QueryInterface {
     

@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder\Builder;
+namespace Fafas\ElasticaQuery\Builder;
 
 interface QueryInterface {
     

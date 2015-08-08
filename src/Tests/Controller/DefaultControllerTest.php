@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder\Tests\Controller;
+namespace Fafas\ElasticaQuery\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

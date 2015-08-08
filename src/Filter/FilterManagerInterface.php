@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
 /**
  *
@@ -8,7 +8,7 @@ namespace Fafas\QueryBuilder\Filter;
  */
 interface FilterManagerInterface {
     
-    public function setFilter(\Fafas\QueryBuilder\Elastica\EntityInterface $filter);
+    public function setFilter(\Fafas\ElasticaQuery\Elastica\EntityInterface $filter);
     
     public function getFilter();
     

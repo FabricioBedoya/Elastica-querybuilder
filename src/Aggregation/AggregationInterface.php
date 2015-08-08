@@ -4,11 +4,11 @@
  * @author fabriciobedoya
  */
 
-namespace Fafas\QueryBuilder\Aggregation;
+namespace Fafas\ElasticaQuery\Aggregation;
 
-interface AggregationInterface extends \Fafas\QueryBuilder\Elastica\EntityInterface {
+interface AggregationInterface extends \Fafas\ElasticaQuery\Elastica\EntityInterface {
     
-    public function setFilterManager(\Fafas\QueryBuilder\Filter\FilterManagerInterface $filterManager);
+    public function setFilterManager(\Fafas\ElasticaQuery\Filter\FilterManagerInterface $filterManager);
     
     public function getFilterManager();
     

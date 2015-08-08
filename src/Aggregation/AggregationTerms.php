@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder\Aggregation;
+namespace Fafas\ElasticaQuery\Aggregation;
 
 class AggregationTerms extends AbstractAggregation {
     
@@ -32,7 +32,7 @@ class AggregationTerms extends AbstractAggregation {
         $aggs = null;
     
     
-    public function __construct(\Fafas\QueryBuilder\Builder\ManagerInterface $aggregationManager = null) {
+    public function __construct(\Fafas\ElasticaQuery\Builder\ManagerInterface $aggregationManager = null) {
         parent::__construct($aggregationManager);
         $this->options = static::$defaultOptions;
     }

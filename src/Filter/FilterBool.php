@@ -4,7 +4,7 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
 class FilterBool extends AbstractFilter {
     
@@ -21,22 +21,22 @@ class FilterBool extends AbstractFilter {
     
     /**
      *
-     * @var \Fafas\QueryBuilder\Filter\FilterCollection 
+     * @var \Fafas\ElasticaQuery\Filter\FilterCollection 
      */
     protected $must = null;
     protected $should = null;
     protected $mustNot = null;
     /**
      * 
-     * @param \Fafas\QueryBuilder\Filter\FilterCollection $must
+     * @param \Fafas\ElasticaQuery\Filter\FilterCollection $must
      */
-    public function setMust(\Fafas\QueryBuilder\Filter\FilterCollection $must) {
+    public function setMust(\Fafas\ElasticaQuery\Filter\FilterCollection $must) {
         $this->must = $must;
     }
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Filter\FilterCollection
+     * @return \Fafas\ElasticaQuery\Filter\FilterCollection
      */
     public function getMust() {
         return $this->must;
@@ -44,15 +44,15 @@ class FilterBool extends AbstractFilter {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Filter\FilterCollection $should
+     * @param \Fafas\ElasticaQuery\Filter\FilterCollection $should
      */
-    public function setShould(\Fafas\QueryBuilder\Filter\FilterCollection $should) {
+    public function setShould(\Fafas\ElasticaQuery\Filter\FilterCollection $should) {
         $this->should = $should;
     }
 
     /**
      * 
-     * @return \Fafas\QueryBuilder\Filter\FilterCollection
+     * @return \Fafas\ElasticaQuery\Filter\FilterCollection
      */
     public function getShould() {
         return $this->should;
@@ -60,15 +60,15 @@ class FilterBool extends AbstractFilter {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Filter\FilterCollection $mustNot
+     * @param \Fafas\ElasticaQuery\Filter\FilterCollection $mustNot
      */
-    public function setMustNot(\Fafas\QueryBuilder\Filter\FilterCollection $mustNot) {
+    public function setMustNot(\Fafas\ElasticaQuery\Filter\FilterCollection $mustNot) {
         $this->mustNot = $mustNot;
     }
 
     /**
      * 
-     * @return \Fafas\QueryBuilder\Filter\FilterCollection
+     * @return \Fafas\ElasticaQuery\Filter\FilterCollection
      */
     public function getMustNot() {
         return $this->mustNot;
@@ -77,10 +77,10 @@ class FilterBool extends AbstractFilter {
     /**
      * 
      * @param string $id
-     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
+     * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
      */
     public function getEntityById($id) {
-        /*@var $query \Fafas\QueryBuilder\Elastica\EntityInterface */
+        /*@var $query \Fafas\ElasticaQuery\Elastica\EntityInterface */
         foreach(array(static::MUST, static::SHOULD, static::MUST_NOT) as $cond) {
             $collection = $this->getCollectionOf($cond);
             if ($collection !== null) {
@@ -96,7 +96,7 @@ class FilterBool extends AbstractFilter {
     
     public function getMandatoryBoolButId(array $idsExcluded) {
         $bool = clone $this;
-        /*@var $query \Fafas\QueryBuilder\Elastica\EntityInterface */
+        /*@var $query \Fafas\ElasticaQuery\Elastica\EntityInterface */
         foreach(array(static::MUST, static::SHOULD, static::MUST_NOT) as $cond) {
             $collection = $bool->getCollectionOf($cond);
             if ($collection !== null) {
@@ -115,7 +115,7 @@ class FilterBool extends AbstractFilter {
     /**
      * 
      * @param type $cond
-     * @return \Fafas\QueryBuilder\Filter\FilterCollection
+     * @return \Fafas\ElasticaQuery\Filter\FilterCollection
      */
     public function getCollectionOf($cond = self::MUST) {
         $inflector = \ICanBoogie\Inflector::get();
@@ -126,9 +126,9 @@ class FilterBool extends AbstractFilter {
     /**
      * 
      * @param type $cond
-     * @return \Fafas\QueryBuilder\Filter\FilterCollection
+     * @return \Fafas\ElasticaQuery\Filter\FilterCollection
      */
-    public function setCollectionOf(\Fafas\QueryBuilder\Filter\FilterCollection $collection, $cond = self::MUST) {
+    public function setCollectionOf(\Fafas\ElasticaQuery\Filter\FilterCollection $collection, $cond = self::MUST) {
         $inflector = \ICanBoogie\Inflector::get();
         $method = 'set'.  $inflector->camelize($cond);
         return $this->$method($collection);
@@ -136,11 +136,11 @@ class FilterBool extends AbstractFilter {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $queryStrategy
+     * @param \Fafas\ElasticaQuery\Elastica\EntityInterface $queryStrategy
      * @param type $cond
-     * @return \Fafas\QueryBuilder\Query\QueryBool
+     * @return \Fafas\ElasticaQuery\Query\QueryBool
      */
-    public function addQueryToCollection(\Fafas\QueryBuilder\Elastica\EntityInterface $queryStrategy, $cond = self::MUST) {
+    public function addQueryToCollection(\Fafas\ElasticaQuery\Elastica\EntityInterface $queryStrategy, $cond = self::MUST) {
         switch (true) {
             case $cond == static::MUST_NOT:
                 $methodGet = 'getMustNot';
@@ -157,8 +157,8 @@ class FilterBool extends AbstractFilter {
                 break;
         }
         $collection = $this->$methodGet();
-        if (!$collection instanceof \Fafas\QueryBuilder\Filter\FilterCollection) {
-            $collection = new \Fafas\QueryBuilder\Filter\FilterCollection();
+        if (!$collection instanceof \Fafas\ElasticaQuery\Filter\FilterCollection) {
+            $collection = new \Fafas\ElasticaQuery\Filter\FilterCollection();
         }
         $collection->addFilter($queryStrategy);
         $this->$methodSet($collection);
@@ -191,7 +191,7 @@ class FilterBool extends AbstractFilter {
         $this->setId('filter_bool');
         foreach($array as $key => $params) {
             if (in_array($key, array(static::MUST, static::SHOULD, static::MUST_NOT))) {
-                $queryCollection = new \Fafas\QueryBuilder\Filter\FilterCollection($this->getFilterManager());
+                $queryCollection = new \Fafas\ElasticaQuery\Filter\FilterCollection($this->getFilterManager());
                 $queryCollection->updateFromArray($params);
                 switch(true) {
                     case $key === static::MUST:

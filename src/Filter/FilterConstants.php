@@ -4,7 +4,7 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
 
 class FilterConstants {

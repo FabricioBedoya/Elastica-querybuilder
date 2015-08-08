@@ -4,7 +4,7 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder\Query;
+namespace Fafas\ElasticaQuery\Query;
 
 class QueryMatch extends AbstractQuery {
     

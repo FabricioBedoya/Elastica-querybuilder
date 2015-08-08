@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
 class FilterRangeDate extends AbstractFilter {
     

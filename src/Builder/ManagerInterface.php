@@ -1,6 +1,6 @@
 <?php
 
-namespace Fafas\QueryBuilder\Builder;
+namespace Fafas\ElasticaQuery\Builder;
 
 /**
  *
@@ -10,7 +10,7 @@ interface ManagerInterface {
     
     public static function createInstance();
     
-    public function addQueryStrategy($name, \Fafas\QueryBuilder\Elastica\EntityInterface $queryStrategy);
+    public function addQueryStrategy($name, \Fafas\ElasticaQuery\Elastica\EntityInterface $queryStrategy);
     
     public function getQueryStrategy($nameFilter);
 }

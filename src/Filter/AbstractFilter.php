@@ -1,8 +1,8 @@
 <?php
 
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
-use Fafas\QueryBuilder\Elastica\EntityInterface;
+use Fafas\ElasticaQuery\Elastica\EntityInterface;
 /**
  * Description of AbstractFilter
  *
@@ -34,11 +34,11 @@ abstract class AbstractFilter implements EntityInterface, FilterInterface {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Builder\ManagerInterface $filterManager
+     * @param \Fafas\ElasticaQuery\Builder\ManagerInterface $filterManager
      */
-    public function __construct(\Fafas\QueryBuilder\Builder\ManagerInterface $filterManager = null) {
+    public function __construct(\Fafas\ElasticaQuery\Builder\ManagerInterface $filterManager = null) {
         if ($filterManager === null) {
-            $filterManager = \Fafas\QueryBuilder\Query\QueryManager::createInstance();
+            $filterManager = \Fafas\ElasticaQuery\Query\QueryManager::createInstance();
         }
         $this->setFilterManager($filterManager);
         $this->setId(uniqid(static::PREFIX_ID));
@@ -50,7 +50,7 @@ abstract class AbstractFilter implements EntityInterface, FilterInterface {
 
     /**
      * 
-     * @return \Fafas\QueryBuilder\Builder\ManagerInterface
+     * @return \Fafas\ElasticaQuery\Builder\ManagerInterface
      */
     public function getFilterManager() {
         return $this->filterManager;
@@ -58,21 +58,21 @@ abstract class AbstractFilter implements EntityInterface, FilterInterface {
 
     /**
      * 
-     * @param \Fafas\QueryBuilder\Builder\ManagerInterface $filterManager
+     * @param \Fafas\ElasticaQuery\Builder\ManagerInterface $filterManager
      */
-    public function setFilterManager(\Fafas\QueryBuilder\Builder\ManagerInterface $filterManager) {
+    public function setFilterManager(\Fafas\ElasticaQuery\Builder\ManagerInterface $filterManager) {
         $this->filterManager = $filterManager;
     }
     
     /**
      * 
      * @param array $array
-     * @return \Fafas\QueryBuilder\Filter\FilterNested
+     * @return \Fafas\ElasticaQuery\Filter\FilterNested
      */
-    public function generateNested(\Fafas\QueryBuilder\Elastica\EntityInterface $filter, $path) {
+    public function generateNested(\Fafas\ElasticaQuery\Elastica\EntityInterface $filter, $path) {
         $this->nestedLocked = true;
         $filterNested = $this->getFilterManager()->getQueryStrategy('nested');
-        if ($filterNested instanceof \Fafas\QueryBuilder\Elastica\EntityInterface) {
+        if ($filterNested instanceof \Fafas\ElasticaQuery\Elastica\EntityInterface) {
             $filterNested = clone $filterNested;
             $options = array(
                 FilterNested::PATH => $path,
@@ -86,7 +86,7 @@ abstract class AbstractFilter implements EntityInterface, FilterInterface {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Filter\FilterNested
+     * @return \Fafas\ElasticaQuery\Filter\FilterNested
      */
     public function getFilterNested() {
         return $this->filterNested;
@@ -94,9 +94,9 @@ abstract class AbstractFilter implements EntityInterface, FilterInterface {
 
     /**
      * 
-     * @param \Fafas\QueryBuilder\Filter\FilterNested $filterNested
+     * @param \Fafas\ElasticaQuery\Filter\FilterNested $filterNested
      */
-    public function setFilterNested(\Fafas\QueryBuilder\Filter\FilterNested $filterNested) {
+    public function setFilterNested(\Fafas\ElasticaQuery\Filter\FilterNested $filterNested) {
         $this->filterNested = $filterNested;
     }
     

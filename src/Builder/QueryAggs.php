@@ -1,8 +1,8 @@
 <?php
 
-namespace Fafas\QueryBuilder\Builder;
+namespace Fafas\ElasticaQuery\Builder;
 
-use Fafas\QueryBuilder\Elastica\EntityInterface;
+use Fafas\ElasticaQuery\Elastica\EntityInterface;
 /**
  * Description of QueryFilteredQuery
  *
@@ -25,7 +25,7 @@ class QueryAggs implements EntityInterface {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Elastica\EntityInterface
+     * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
      */
     function getAgg() {
         return $this->aggs;
@@ -33,9 +33,9 @@ class QueryAggs implements EntityInterface {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Elastica\EntityInterface $filter
+     * @param \Fafas\ElasticaQuery\Elastica\EntityInterface $filter
      */
-    function addAgg(\Fafas\QueryBuilder\Elastica\EntityInterface $aggs) {
+    function addAgg(\Fafas\ElasticaQuery\Elastica\EntityInterface $aggs) {
         $this->aggs[] = $aggs;
     }
 
@@ -49,7 +49,7 @@ class QueryAggs implements EntityInterface {
             static::GLOBAL_KEY => (object) array(),
           ),
         );
-        /* @var $aggregation \Fafas\QueryBuilder\Aggregation\AggregationInterface */
+        /* @var $aggregation \Fafas\ElasticaQuery\Aggregation\AggregationInterface */
         foreach ($this->getAgg() as $aggregation) {
             if ($aggregation->isGlobalAggregation()) {
                 $aggs[static::GLOBAL_AGGREGATION][static::AGGS][$aggregation->getId()] = $aggregation->getFilterAsArray();

@@ -3,15 +3,15 @@
  *
  * @author fabriciobedoya
  */
-namespace Fafas\QueryBuilder\Query;
+namespace Fafas\ElasticaQuery\Query;
 
 
-interface QueryInterface extends \Fafas\QueryBuilder\Elastica\EntityInterface {
+interface QueryInterface extends \Fafas\ElasticaQuery\Elastica\EntityInterface {
     
-    public function __construct(\Fafas\QueryBuilder\Builder\ManagerInterface $queryManager);
+    public function __construct(\Fafas\ElasticaQuery\Builder\ManagerInterface $queryManager);
     
     function getQueryManager();
     
-    function setQueryManager(\Fafas\QueryBuilder\Builder\ManagerInterface $queryManager);
+    function setQueryManager(\Fafas\ElasticaQuery\Builder\ManagerInterface $queryManager);
     
 }

@@ -1,11 +1,11 @@
 <?php
 
-namespace Fafas\QueryBuilder\Builder;
+namespace Fafas\ElasticaQuery\Builder;
 
-use Fafas\QueryBuilder\Filter\FilterInterface as O2FilterInterface;
-use Fafas\QueryBuilder\Request\QueryRequest;
-use Fafas\QueryBuilder\Query\QueryManager;
-use Fafas\QueryBuilder\Filter\FilterManager;
+use Fafas\ElasticaQuery\Filter\FilterInterface as O2FilterInterface;
+use Fafas\ElasticaQuery\Request\QueryRequest;
+use Fafas\ElasticaQuery\Query\QueryManager;
+use Fafas\ElasticaQuery\Filter\FilterManager;
 
 class QueryBuilder {
 
@@ -100,19 +100,19 @@ class QueryBuilder {
     
     /**
      *
-     * @var Fafas\QueryBuilder\Query\QueryManager
+     * @var Fafas\ElasticaQuery\Query\QueryManager
      */
     protected $queryManager = null;
 
     /**
      *
-     * @var Fafas\QueryBuilder\Filter\FilterManager
+     * @var Fafas\ElasticaQuery\Filter\FilterManager
      */
     protected $filterManager = null;
     
     /**
      *
-     * @var Fafas\QueryBuilder\Aggregation\AggregationManager
+     * @var Fafas\ElasticaQuery\Aggregation\AggregationManager
      */
     protected $aggregationManager = null;
     
@@ -152,7 +152,7 @@ class QueryBuilder {
     /**
      * 
      * @param type $key
-     * @param \Fafas\QueryBuilder\Filter\FilterInterface $filter
+     * @param \Fafas\ElasticaQuery\Filter\FilterInterface $filter
      */
     public function addFilterStrategy($key, O2FilterInterface $filter) {
         $this->filters[$key] = $filter;
@@ -161,7 +161,7 @@ class QueryBuilder {
     /**
      * 
      * @param string $nameFilter
-     * @return \Fafas\QueryBuilder\Filter\FilterInterface
+     * @return \Fafas\ElasticaQuery\Filter\FilterInterface
      * @throws \Exception
      */
     private function getFilterStrategy($nameFilter) {
@@ -174,7 +174,7 @@ class QueryBuilder {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Query\QueryManager $queryManager
+     * @param \Fafas\ElasticaQuery\Query\QueryManager $queryManager
      */
     public function setQueryManager(QueryManager $queryManager) {
         $this->queryManager = $queryManager;
@@ -182,7 +182,7 @@ class QueryBuilder {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Query\QueryManager
+     * @return \Fafas\ElasticaQuery\Query\QueryManager
      */
     public function getQueryManager() {
         return $this->queryManager;
@@ -190,7 +190,7 @@ class QueryBuilder {
     
     /**
      * 
-     * @param Fafas\QueryBuilder\Query\QueryManagerInterface $filterManager
+     * @param Fafas\ElasticaQuery\Query\QueryManagerInterface $filterManager
      */
     public function setFilterManager(FilterManager $filterManager) {
         $this->filterManager = $filterManager;
@@ -198,7 +198,7 @@ class QueryBuilder {
     
     /**
      * 
-     * @return Fafas\QueryBuilder\Query\QueryManagerInterface
+     * @return Fafas\ElasticaQuery\Query\QueryManagerInterface
      */
     public function getFilterManager() {
         return $this->filterManager;
@@ -206,7 +206,7 @@ class QueryBuilder {
     
     /**
      * 
-     * @return \Fafas\QueryBuilder\Builder\Fafas\QueryBuilder\Aggregation\AggregationManager
+     * @return \Fafas\ElasticaQuery\Builder\Fafas\ElasticaQuery\Aggregation\AggregationManager
      */
     function getAggregationManager() {
         return $this->aggregationManager;
@@ -214,9 +214,9 @@ class QueryBuilder {
     
     /**
      * 
-     * @param \Fafas\QueryBuilder\Builder\Fafas\QueryBuilder\Aggregation\AggregationManager $aggregationManager
+     * @param \Fafas\ElasticaQuery\Builder\Fafas\ElasticaQuery\Aggregation\AggregationManager $aggregationManager
      */
-    function setAggregationManager(Fafas\QueryBuilder\Aggregation\AggregationManager $aggregationManager) {
+    function setAggregationManager(Fafas\ElasticaQuery\Aggregation\AggregationManager $aggregationManager) {
         $this->aggregationManager = $aggregationManager;
     }
 
@@ -287,7 +287,7 @@ class QueryBuilder {
     /**
      * 
      * @param array $filters
-     * @return \Fafas\QueryBuilder\Builder\QueryBuilder
+     * @return \Fafas\ElasticaQuery\Builder\QueryBuilder
      */
     public function processFilters(array $filters) {
         foreach ($filters as $key => $parameter) {
@@ -500,7 +500,7 @@ class QueryBuilder {
      * @param type $filter
      */
     public function processAggregation($filter) {
-        /* @var $aggs \Fafas\QueryBuilder\Filter\FilterInterface */
+        /* @var $aggs \Fafas\ElasticaQuery\Filter\FilterInterface */
         if (array_key_exists(static::ES_FIELD_AGGS, $this->filters)) {
             $aggs = $this->filters[static::ES_FIELD_AGGS];
             if (!is_array($filter)) {

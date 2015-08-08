@@ -1,8 +1,8 @@
 <?php
 
-namespace Fafas\QueryBuilder\Filter;
+namespace Fafas\ElasticaQuery\Filter;
 
-use Fafas\QueryBuilder\Filter\GeoBounding;
+use Fafas\ElasticaQuery\Filter\GeoBounding;
 
 class FilterGeoBounding extends AbstractFilter {
     
