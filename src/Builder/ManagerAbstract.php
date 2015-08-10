@@ -9,7 +9,7 @@ use Fafas\ElasticaQuery\Elastica\EntityInterface;
  */
 class ManagerAbstract implements ManagerInterface {
     
-    public $patternClass = 'Fafas\\QueryBuilder\\Builder\\';
+    public $patternClass = 'Fafas\\ElasticaQuery\\Builder\\';
     public $patternFile = 'Builder';
     
     protected static $strategyKeys = array('test');

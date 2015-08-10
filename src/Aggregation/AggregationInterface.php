@@ -13,4 +13,8 @@ interface AggregationInterface extends \Fafas\ElasticaQuery\Elastica\EntityInter
     public function getFilterManager();
     
     public function isGlobalAggregation();
+    
+    public function getFilter();
+    
+    public function setFilter(\Fafas\ElasticaQuery\Filter\FilterInterface $filter);
 }

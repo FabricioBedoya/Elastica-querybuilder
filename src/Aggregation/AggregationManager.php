@@ -19,7 +19,7 @@ class AggregationManager extends ManagerAbstract implements AggregationManagerIn
     protected $filterManager = null;
     
     public function __construct() {
-        $this->patternClass = 'Fafas\\QueryBuilder\\Aggregation\\';
+        $this->patternClass = 'Fafas\\ElasticaQuery\\Aggregation\\';
         $this->patternFile = 'Aggregation';
     }
     

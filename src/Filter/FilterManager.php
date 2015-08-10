@@ -8,7 +8,7 @@ namespace Fafas\ElasticaQuery\Filter;
 
 use Fafas\ElasticaQuery\Builder\ManagerAbstract;
 
-class FilterManager extends ManagerAbstract {
+class FilterManager extends ManagerAbstract implements FilterManagerInterface {
     
     protected $filter = null;
     
@@ -21,7 +21,7 @@ class FilterManager extends ManagerAbstract {
     protected static $instance = null;
     
     public function __construct() {
-        $this->patternClass = 'Fafas\\QueryBuilder\\Filter\\';
+        $this->patternClass = 'Fafas\\ElasticaQuery\\Filter\\';
         $this->patternFile = 'Filter';
     }
     
@@ -47,24 +47,24 @@ class FilterManager extends ManagerAbstract {
     
     /**
      * 
-     * @param QueryBool $queryBool
+     * @param QueryBool $filterBool
      * @param array $array
      * @param type $cond
      * @return \Fafas\ElasticaQuery\Query\QueryManager
      */
-    protected function addToCollectionFromArray(\Fafas\ElasticaQuery\Query\QueryBool $queryBool, array $array, $cond = QueryBool::MUST) {
+    protected function addToCollectionFromArray(\Fafas\ElasticaQuery\Filter\FilterBool $filterBool, array $array, $cond = QueryBool::MUST) {
         $flag = (bool) count(array_filter(array_keys($array), 'is_string'));
         switch(true) {
             case ($flag !== true) :
                 foreach ($array as $params) {
-                    $this->addToCollectionFromArray($queryBool, $params, $cond);
+                    $this->addToCollectionFromArray($filterBool, $params, $cond);
                 }
                 break;
             default:
                 $key = key($array);
                 $queryStrategy = clone $this->getQueryStrategy($key);
                 $queryStrategy->updateFromArray($array[$key]);
-                $this->getQuery()->addQueryToCollection($queryStrategy, $cond);
+                $this->getFilter()->addFilterToCollection($queryStrategy, $cond);
                 break;
         }
         return $this;
@@ -80,12 +80,16 @@ class FilterManager extends ManagerAbstract {
             $queryStrategy =  $this->getQueryStrategy($strategy);
             if ($queryStrategy instanceof \Fafas\ElasticaQuery\Filter\FilterInterface) {
                 switch(true) {
-                    case $this->getFilter() instanceof \Fafas\ElasticaQuery\Filter\FilterBool && in_array($strategy, $this->getFilter()->getStrategyKeys()):
+                    case $this->getFilter() instanceof FilterBool && in_array($strategy, $this->getFilter()->getStrategyKeys()):
                         $this->addToCollectionFromArray($this->getFilter(), $params, $strategy);
                         break;
                     case $this->getFilter() === null && in_array($strategy, array(FilterBool::MUST, FilterBool::SHOULD, FilterBool::MUST_NOT)):
                         $queryStrategy->updateFromArray(array($strategy => $params));
                         $this->setFilter($queryStrategy);
+                        break;
+                    case $this->getFilter() instanceof FilterBool && !in_array($strategy, $this->getFilter()->getStrategyKeys()):
+                        $arrayMust = array($strategy => $params);
+                        $this->addToCollectionFromArray($this->getFilter(), $arrayMust, FilterBool::MUST);
                         break;
                     default:
                         $queryStrategy->updateFromArray($params);
@@ -179,6 +183,13 @@ class FilterManager extends ManagerAbstract {
             if ($filter->hasRelevantAggregation()) {
                 $this->getAggregationManager()->addAggRelatedToFilter($filter);
             }
+        }
+    }
+    
+    public function __clone() {
+        if ($this->getFilter() !== null) {
+            $filter = clone $this->getFilter();
+            $this->setFilter($filter);
         }
     }
 }

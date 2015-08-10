@@ -22,7 +22,7 @@ class FilterNested extends AbstractFilter {
      */
     protected $filters = null;
     
-     /**
+    /**
      * 
      * @param string $field
      * @return boolean

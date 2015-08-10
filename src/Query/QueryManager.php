@@ -15,7 +15,7 @@ class QueryManager extends ManagerAbstract {
     protected $query = null;
     
     public function __construct() {
-        $this->patternClass = 'Fafas\\QueryBuilder\\Query\\';
+        $this->patternClass = 'Fafas\\ElasticaQuery\\Query\\';
         $this->patternFile = 'Query';
     }
     

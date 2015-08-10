@@ -94,6 +94,11 @@ class FilterBool extends AbstractFilter {
         return null;
     }
     
+    /**
+     * 
+     * @param array $idsExcluded
+     * @return \Fafas\ElasticaQuery\Filter\FilterBool
+     */
     public function getMandatoryBoolButId(array $idsExcluded) {
         $bool = clone $this;
         /*@var $query \Fafas\ElasticaQuery\Elastica\EntityInterface */
@@ -140,7 +145,7 @@ class FilterBool extends AbstractFilter {
      * @param type $cond
      * @return \Fafas\ElasticaQuery\Query\QueryBool
      */
-    public function addQueryToCollection(\Fafas\ElasticaQuery\Elastica\EntityInterface $queryStrategy, $cond = self::MUST) {
+    public function addFilterToCollection(\Fafas\ElasticaQuery\Elastica\EntityInterface $queryStrategy, $cond = self::MUST) {
         switch (true) {
             case $cond == static::MUST_NOT:
                 $methodGet = 'getMustNot';

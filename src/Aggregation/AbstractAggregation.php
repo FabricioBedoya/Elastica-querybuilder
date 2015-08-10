@@ -19,6 +19,7 @@ abstract class AbstractAggregation implements AggregationInterface {
     const PREFIX_ID = 'agg_';
     const FILTER_RELATED = '_filter_related';
     const FILTER_PIVOT = '_filter_pivot';
+    const FILTER = 'filter';
     
     protected static $strategyKeys = array(
       'abstractagg'
@@ -27,6 +28,8 @@ abstract class AbstractAggregation implements AggregationInterface {
     protected $id = null;
     
     protected $options = array();
+    
+    protected $filter = null;
     
     protected $aggregationManager = null;
     
@@ -93,6 +96,23 @@ abstract class AbstractAggregation implements AggregationInterface {
     
     /**
      * 
+     * @return \Fafas\ElasticaQuery\Filter\FilterInterface
+     */
+    public function getFilter() {
+        return $this->filter;
+    }
+
+    /**
+     * 
+     * @param \Fafas\ElasticaQuery\Filter\FilterInterface $filter
+     */
+    public function setFilter(\Fafas\ElasticaQuery\Filter\FilterInterface $filter) {
+        $this->filter = $filter;
+    }
+
+        
+    /**
+     * 
      * @param array $array
      * @return \Fafas\ElasticaQuery\Query\QueryNested
      */
@@ -102,10 +122,11 @@ abstract class AbstractAggregation implements AggregationInterface {
         if ($aggNested instanceof \Fafas\ElasticaQuery\Elastica\EntityInterface) {
             $aggNested = clone $this->getAggregationManager()->getQueryStrategy('nested');
             $options = array(
-                QueryNested::PATH => $path,
-                QueryNested::QUERY =>  $aggregation->getFilterAsArray(),
+                AggregationNested::PATH => $path,
+                AggregationNested::AGGS =>  $aggregation->getFilterAsArray(),
             );
             $aggNested->updateFromArray($options);
+            $aggNested->setId($this->getId());
             $this->setAggregationNested($aggNested);
         }
         return $this;
@@ -164,10 +185,12 @@ abstract class AbstractAggregation implements AggregationInterface {
         if (isset($array[static::FILTER_RELATED]) && $array[static::FILTER_RELATED] == true) {
             $this->filterRelated = true;
         }
-        if (isset($array[static::FILTER_PIVOT])) {
-            $this->filterRelated = true;
+        if (isset($array[static::FILTER_PIVOT]) && $array[static::FILTER_PIVOT] == true) {
             $this->filterPivot = $array[static::FILTER_PIVOT];
             $this->setId($array[static::FILTER_PIVOT]);
+            $this->filter = $this->getFilterManager()->getFilter();
+        }
+        if (isset($array[static::FILTER])) {
             
         }
     }
