@@ -1,6 +1,8 @@
 {
     "name": "fafas/elastica-querybuilder",
     "description": "This library provides an easy way to manage several query, filters, aggregation and others in elastica structure",
+    "keywords": ["elastica", "elasticsearch", "search"],
+    "license": "MIT",
     "authors": [
         {
             "name": "Fabricio Bedoya",
@@ -14,6 +16,11 @@
     "autoload": {
         "psr-4": {
             "Fafas\\ElasticaQuery\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-develop": "1.x-dev"
         }
     }
 }
