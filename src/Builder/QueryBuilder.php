@@ -7,6 +7,7 @@ class QueryBuilder {
     const SIZE = 'size';
     const FROM = 'from';
     const QUERY = 'query';
+    const FILTER = 'filter';
     const AGGS = 'aggs';
     const SEARCH_TYPE = 'search_type';
 
@@ -55,19 +56,17 @@ class QueryBuilder {
 
     /**
      * 
-     * @param type $filters
-     * @param array $parameters
+     * @param type $parameters
+     * @param array $options
      */
-    public function __construct($filters = array(), array $parameters = array(), array $options = array()) {
+    public function __construct(array $parameters = array(), array $options = array()) {
         if (!empty($parameters)) {
             $this->parameters = $parameters;
         }
         $this->options = array_merge(static::$optionsDefault, $options);
 
-        foreach ($filters as $key => $filter) {
-            $this->addFilterStrategy($key, $filter);
-        }
         $this->setQueryFiltered(new \Fafas\ElasticaQuery\Builder\QueryFiltered());
+        $this->processQuery(array('match_all' => array()));
     }
 
     /**
@@ -172,13 +171,19 @@ class QueryBuilder {
      * @return array
      */
     public function processParams(array $params) {
-        if (isset($params['query'])) {
+        if (isset($params[static::SIZE])) {
+            $this->options[static::SIZE] = $params[static::SIZE];
+        }
+        if (isset($params[static::FROM])) {
+            $this->options[static::FROM] = $params[static::FROM];
+        }
+        if (isset($params[static::QUERY])) {
             $this->processQuery($params['query']);
         }
-        if (isset($params['filter'])) {
+        if (isset($params[static::FILTER])) {
             $this->processFilter($params['filter']);
         }
-        if (isset($params['aggs'])) {
+        if (isset($params[static::AGGS])) {
             $this->processAggs($params['aggs']);
         }
     }
@@ -272,6 +277,8 @@ class QueryBuilder {
      */
     function getPayloadAsArray() {
         $body = array(
+          static::SIZE => $this->options[static::SIZE],
+          static::FROM => $this->options[static::FROM],
           static::QUERY => $this->getQueryFiltered()->getFilterAsArray()
         );
         if ($this->getAggregation() !== null) {

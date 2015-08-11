@@ -76,27 +76,34 @@ class FilterManager extends ManagerAbstract implements FilterManagerInterface {
      * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
      */
     public function processFilter(array $filterArray) {
-        foreach ($filterArray as $strategy => $params) {
-            $queryStrategy =  $this->getQueryStrategy($strategy);
-            if ($queryStrategy instanceof \Fafas\ElasticaQuery\Filter\FilterInterface) {
-                switch(true) {
-                    case $this->getFilter() instanceof FilterBool && in_array($strategy, $this->getFilter()->getStrategyKeys()):
-                        $this->addToCollectionFromArray($this->getFilter(), $params, $strategy);
-                        break;
-                    case $this->getFilter() === null && in_array($strategy, array(FilterBool::MUST, FilterBool::SHOULD, FilterBool::MUST_NOT)):
-                        $queryStrategy->updateFromArray(array($strategy => $params));
-                        $this->setFilter($queryStrategy);
-                        break;
-                    case $this->getFilter() instanceof FilterBool && !in_array($strategy, $this->getFilter()->getStrategyKeys()):
-                        $arrayMust = array($strategy => $params);
-                        $this->addToCollectionFromArray($this->getFilter(), $arrayMust, FilterBool::MUST);
-                        break;
-                    default:
-                        $queryStrategy->updateFromArray($params);
-                        $this->setFilter($queryStrategy);
-                        break;
+        if (!\Fafas\ElasticaQuery\Helper\ElasticaHelper::isAssociativeArray($filterArray)) {
+            foreach($filterArray as $item) {
+                $this->processFilter($item);
+            }
+        }
+        else {
+            foreach ($filterArray as $strategy => $params) {
+                $queryStrategy =  $this->getQueryStrategy($strategy);
+                if ($queryStrategy instanceof \Fafas\ElasticaQuery\Filter\FilterInterface) {
+                    switch(true) {
+                        case $this->getFilter() instanceof FilterBool && in_array($strategy, $this->getFilter()->getStrategyKeys()):
+                            $this->addToCollectionFromArray($this->getFilter(), $params, $strategy);
+                            break;
+                        case $this->getFilter() === null && in_array($strategy, array(FilterBool::MUST, FilterBool::SHOULD, FilterBool::MUST_NOT)):
+                            $queryStrategy->updateFromArray(array($strategy => $params));
+                            $this->setFilter($queryStrategy);
+                            break;
+                        case $this->getFilter() instanceof FilterBool && !in_array($strategy, $this->getFilter()->getStrategyKeys()):
+                            $arrayMust = array($strategy => $params);
+                            $this->addToCollectionFromArray($this->getFilter(), $arrayMust, FilterBool::MUST);
+                            break;
+                        default:
+                            $queryStrategy->updateFromArray($params);
+                            $this->setFilter($queryStrategy);
+                            break;
+                    }
+
                 }
-                
             }
         }
         $this->processAggregationFromFilter();
