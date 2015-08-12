@@ -54,7 +54,7 @@ class AggregationNested extends AbstractAggregation {
             static::FILTER => array(),
         );
         $filter = null;
-        if ($this->filter !== null) {
+        if ($this->getFilter() !== null) {
             $idFilterExcluded = array($this->getId());
             $filter = $this->getFilter()
                 ->getMandatoryBoolButId($idFilterExcluded)
@@ -81,7 +81,7 @@ class AggregationNested extends AbstractAggregation {
      */
     public function updateFromArray(array $array) {
         parent::updateFromArray($array);
-        foreach(array(self::PATH, self::AGGS) as $key)  {
+        foreach(array(static::PATH, static::AGGS, static::FILTER) as $key)  {
             if (isset($array[$key])) {
                 $this->options[$key] = $array[$key];
             }

@@ -76,13 +76,6 @@ class AggregationTerms extends AbstractAggregation {
                 $this->options[$key] = $array[$key];
             }
         }
-        if (isset($array[static::FILTER])) {
-            $filterManager = clone $this->getFilterManager();
-            $filter = new \Fafas\ElasticaQuery\Filter\FilterBool();
-            $filterManager->setFilter($filter);
-            $filterManager->processFilter($array[static::FILTER]);
-            $this->filter = $filterManager->getFilter();
-        }
         if (AggregationNested::isNested($this->options[static::FIELD]) && !$this->skipNested) {
             $this->generateNested($this, AggregationNested::getParent($this->options[static::FIELD]));
             if ($this->filterPivot !== null) {

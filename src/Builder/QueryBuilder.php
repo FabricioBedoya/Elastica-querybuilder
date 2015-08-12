@@ -177,13 +177,13 @@ class QueryBuilder {
         if (isset($params[static::FROM])) {
             $this->options[static::FROM] = $params[static::FROM];
         }
-        if (isset($params[static::QUERY])) {
+        if (isset($params[static::QUERY]) && !empty($params[static::QUERY])) {
             $this->processQuery($params['query']);
         }
-        if (isset($params[static::FILTER])) {
+        if (isset($params[static::FILTER]) && !empty($params[static::FILTER])) {
             $this->processFilter($params['filter']);
         }
-        if (isset($params[static::AGGS])) {
+        if (isset($params[static::AGGS]) && !empty($params[static::AGGS])) {
             $this->processAggs($params['aggs']);
         }
     }

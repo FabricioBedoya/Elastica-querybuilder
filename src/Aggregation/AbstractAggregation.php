@@ -20,6 +20,7 @@ abstract class AbstractAggregation implements AggregationInterface {
     const FILTER_RELATED = '_filter_related';
     const FILTER_PIVOT = '_filter_pivot';
     const FILTER = 'filter';
+    const FILTER_NESTED = 'filter_nested';
     
     protected static $strategyKeys = array(
       'abstractagg'
@@ -30,6 +31,8 @@ abstract class AbstractAggregation implements AggregationInterface {
     protected $options = array();
     
     protected $filter = null;
+    
+    protected $nestedFilter = null;
     
     protected $aggregationManager = null;
     
@@ -109,6 +112,22 @@ abstract class AbstractAggregation implements AggregationInterface {
     public function setFilter(\Fafas\ElasticaQuery\Filter\FilterInterface $filter) {
         $this->filter = $filter;
     }
+    
+    /**
+     * 
+     * @return \Fafas\ElasticaQuery\Filter\FilterInterface
+     */
+    public function getNestedFilter() {
+        return $this->nestedFilter;
+    }
+
+    /**
+     * 
+     * @param \Fafas\ElasticaQuery\Filter\FilterInterface $filter
+     */
+    public function setNestedFilter(\Fafas\ElasticaQuery\Filter\FilterInterface $nestedFilter) {
+        $this->nestedFilter = $nestedFilter;
+    }
 
         
     /**
@@ -116,15 +135,20 @@ abstract class AbstractAggregation implements AggregationInterface {
      * @param array $array
      * @return \Fafas\ElasticaQuery\Query\QueryNested
      */
-    public function generateNested(\Fafas\ElasticaQuery\Elastica\EntityInterface $aggregation, $path) {
+    public function generateNested(\Fafas\ElasticaQuery\Aggregation\AggregationInterface $aggregation, $path) {
         $this->nestedLocked = true;
         $aggNested = $this->getAggregationManager()->getQueryStrategy('nested');
         if ($aggNested instanceof \Fafas\ElasticaQuery\Elastica\EntityInterface) {
             $aggNested = clone $this->getAggregationManager()->getQueryStrategy('nested');
+            $mainFilter = $aggregation->getFilter();
+            $aggregation->setFilter($aggregation->getNestedFilter());
             $options = array(
                 AggregationNested::PATH => $path,
                 AggregationNested::AGGS =>  $aggregation->getFilterAsArray(),
             );
+            if ($mainFilter !== null) {
+                $options[AggregationNested::FILTER] = $mainFilter;
+            }
             $aggNested->updateFromArray($options);
             $aggNested->setId($this->getId());
             $this->setAggregationNested($aggNested);
@@ -190,8 +214,12 @@ abstract class AbstractAggregation implements AggregationInterface {
             $this->setId($array[static::FILTER_PIVOT]);
             $this->filter = $this->getFilterManager()->getFilter();
         }
-        if (isset($array[static::FILTER])) {
-            
+        if (isset($array[static::FILTER_NESTED])) {
+            $filterManager = clone $this->getFilterManager();
+            $filter = new \Fafas\ElasticaQuery\Filter\FilterBool();
+            $filterManager->setFilter($filter);
+            $filterManager->processFilter($array[static::FILTER_NESTED]);
+            $this->setNestedFilter($filterManager->getFilter());
         }
     }
     

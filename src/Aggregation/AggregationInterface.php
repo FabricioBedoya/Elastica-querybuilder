@@ -17,4 +17,8 @@ interface AggregationInterface extends \Fafas\ElasticaQuery\Elastica\EntityInter
     public function getFilter();
     
     public function setFilter(\Fafas\ElasticaQuery\Filter\FilterInterface $filter);
+    
+    public function getNestedFilter();
+    
+    public function setNestedFilter(\Fafas\ElasticaQuery\Filter\FilterInterface $filter);
 }
