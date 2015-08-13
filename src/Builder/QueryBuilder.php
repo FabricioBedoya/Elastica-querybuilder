@@ -209,23 +209,27 @@ class QueryBuilder {
     /**
      * 
      * @param array $queryArray
+     * @return \Fafas\ElasticaQuery\Builder\QueryBuilder
      */
     public function processQuery(array $queryArray) {
         $query = $this->getQueryManager()->processQuery($queryArray);
-        $this->setQuery($query);
+        if ($query instanceof \Fafas\ElasticaQuery\Query\QueryInterface) {
+            $this->setQuery($query);
+        }
+        return $this;
     }
     
     /**
      * 
-     * @param \Fafas\ElasticaQuery\Elastica\EntityInterface $filter
+     * @param \Fafas\ElasticaQuery\Filter\FilterInterface $filter
      */
-    public function setFilter(\Fafas\ElasticaQuery\Elastica\EntityInterface $filter) {
+    public function setFilter(\Fafas\ElasticaQuery\Filter\FilterInterface $filter) {
         $this->getQueryFiltered()->setFilter($filter);
     }
     
     /**
      * 
-     * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
+     * @return \Fafas\ElasticaQuery\Filter\FilterInterface
      */
     public function getFilter() {
         return $this->getFilterManager();
@@ -234,15 +238,19 @@ class QueryBuilder {
     /**
      * 
      * @param array $filterArray
+     * @return \Fafas\ElasticaQuery\Builder\QueryBuilder
      */
     public function processFilter(array $filterArray) {
         $filter = $this->getFilterManager()->processFilter($filterArray);
-        $this->setFilter($filter);
+        if ($filter instanceof \Fafas\ElasticaQuery\Filter\FilterInterface) {
+            $this->setFilter($filter);
+        }
+        return $this;
     }
     
     /**
      * 
-     * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
+     * @return \Fafas\ElasticaQuery\Aggregation\AggregationInterface
      */
     public function getAggregation() {
         return $this->getAggregationManager()->getAggregation();
@@ -250,9 +258,9 @@ class QueryBuilder {
     
     /**
      * 
-     * @param \Fafas\ElasticaQuery\Elastica\EntityInterface $aggregation
+     * @param \Fafas\ElasticaQuery\Aggregation\AggregationInterface $aggregation
      */
-    public function setAggregation(\Fafas\ElasticaQuery\Elastica\EntityInterface $aggregation) {
+    public function setAggregation(\Fafas\ElasticaQuery\Aggregation\AggregationInterface $aggregation) {
         $this->getAggregationManager()->setAggregation($aggregation);
         return $this;
     }
@@ -260,6 +268,7 @@ class QueryBuilder {
     /**
      * 
      * @param array $aggsArray
+     * @return \Fafas\ElasticaQuery\Builder\QueryBuilder
      */
     public function processAggs(array $aggsArray) {
         $aggs = $this->getAggregationManager()
@@ -268,6 +277,7 @@ class QueryBuilder {
         if ($aggs !== null) {
             $this->setAggregation($aggs);
         }
+        return $this;
     }
     
     
