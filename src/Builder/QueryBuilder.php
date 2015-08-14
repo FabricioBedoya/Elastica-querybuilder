@@ -4,11 +4,16 @@ namespace Fafas\ElasticaQuery\Builder;
 
 class QueryBuilder {
     
+    const INDEX = 'index';
+    const TYPE = 'type';
+    const BODY = 'body';
+    
     const SIZE = 'size';
     const FROM = 'from';
     const QUERY = 'query';
     const FILTER = 'filter';
     const AGGS = 'aggs';
+    const FACETS = 'facets';
     const SEARCH_TYPE = 'search_type';
 
     /**
@@ -41,9 +46,17 @@ class QueryBuilder {
      */
     protected $aggregationManager = null;
     
+    /**
+     *
+     * @var Fafas\ElasticaQuery\Facet\FacetManager
+     */
+    protected $facetManager = null;
+    
     protected $queryFiltered = null;
     
     protected $aggregation = null;
+    
+    protected $queryFacet = null;
     
     /**
      *
@@ -67,29 +80,6 @@ class QueryBuilder {
 
         $this->setQueryFiltered(new \Fafas\ElasticaQuery\Builder\QueryFiltered());
         $this->processQuery(array('match_all' => array()));
-    }
-
-    /**
-     * 
-     * @param type $key
-     * @param Fafas\ElasticaQuery\Elastica\EntityInterface $strategy
-     */
-    public function addStrategy($key, Fafas\ElasticaQuery\Elastica\EntityInterface $strategy) {
-        $this->strategy[$key] = $strategy;
-    }
-    
-    /**
-     * 
-     * @param string $nameStrategy
-     * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
-     * @throws \Exception
-     */
-    private function getStrategy($nameStrategy) {
-        if (!array_key_exists($nameStrategy, $this->strategy)) {
-            throw new \Exception(sprintf('Filter %s not found', $nameStrategy));
-        }
-        $strategy = clone $this->strategy[$nameStrategy];
-        return $strategy;
     }
     
     /**
@@ -151,6 +141,26 @@ class QueryBuilder {
     
     /**
      * 
+     * @return Fafas\ElasticaQuery\Facet\FacetManager
+     */
+    function getFacetManager() {
+        if ($this->facetManager === null) {
+            $this->facetManager = \Fafas\ElasticaQuery\Facet\FacetManager::createInstance();
+        }
+        return $this->facetManager;
+    }
+    
+    /**
+     * 
+     * @param \Fafas\ElasticaQuery\Builder\Fafas\ElasticaQuery\Facet\FacetManager $facetManager
+     */
+    function setFacetManager(Fafas\ElasticaQuery\Facet\FacetManager $facetManager) {
+        $this->facetManager = $facetManager;
+    }
+
+        
+    /**
+     * 
      * @return \Fafas\ElasticaQuery\Builder\QueryFiltered
      */
     function getQueryFiltered() {
@@ -164,7 +174,26 @@ class QueryBuilder {
     function setQueryFiltered(\Fafas\ElasticaQuery\Builder\QueryFiltered $queryFiltered) {
         $this->queryFiltered = $queryFiltered;
     }
+    
+    /**
+     * 
+     * @return \Fafas\ElasticaQuery\Builder\QueryFacets
+     */
+    function getQueryFacet() {
+        return $this->queryFacet;
+    }
+    
+    /**
+     * 
+     * @param \Fafas\ElasticaQuery\Builder\QueryFacets $queryFacet
+     * @return \Fafas\ElasticaQuery\Builder\QueryBuilder
+     */
+    function setQueryFacet(\Fafas\ElasticaQuery\Builder\QueryFacets $queryFacet) {
+        $this->queryFacet = $queryFacet;
+        return $this;
+    }
 
+    
     /**
      * 
      * @param array $params
@@ -177,14 +206,23 @@ class QueryBuilder {
         if (isset($params[static::FROM])) {
             $this->options[static::FROM] = $params[static::FROM];
         }
+        if (isset($params[static::INDEX])) {
+            $this->options[static::INDEX] = $params[static::INDEX];
+        }
+        if (isset($params[static::TYPE])) {
+            $this->options[static::TYPE] = $params[static::TYPE];
+        }
         if (isset($params[static::QUERY]) && !empty($params[static::QUERY])) {
-            $this->processQuery($params['query']);
+            $this->processQuery($params[static::QUERY]);
         }
         if (isset($params[static::FILTER]) && !empty($params[static::FILTER])) {
-            $this->processFilter($params['filter']);
+            $this->processFilter($params[static::FILTER]);
         }
         if (isset($params[static::AGGS]) && !empty($params[static::AGGS])) {
-            $this->processAggs($params['aggs']);
+            $this->processAggs($params[static::AGGS]);
+        }
+        if (isset($params[static::FACETS]) && !empty($params[static::FACETS])) {
+            $this->processFacets($params[static::FACETS]);
         }
     }
 
@@ -280,12 +318,35 @@ class QueryBuilder {
         return $this;
     }
     
-    
+    /**
+     * 
+     * @param array $facetArray
+     * @return \Fafas\ElasticaQuery\Builder\QueryBuilder
+     */
+    public function processFacets(array $facetArray) {
+        $queryFacet = $this->getFacetManager()->processFacets($facetArray);
+        if ($queryFacet instanceof \Fafas\ElasticaQuery\Builder\QueryFacets) {
+            $this->setQueryFacet($queryFacet);
+        }
+        return $this;
+    }
+     
+    /**
+     * 
+     * @return array
+     */
+    public function getAllParams() {
+        return array(
+            static::INDEX => $this->options[static::INDEX],
+            static::TYPE => $this->options[static::TYPE],
+            static::BODY => $this->getPayloadAsArray(),
+        );
+    }
     /**
      * 
      * @return type
      */
-    function getPayloadAsArray() {
+    public function getPayloadAsArray() {
         $body = array(
           static::SIZE => $this->options[static::SIZE],
           static::FROM => $this->options[static::FROM],
@@ -293,6 +354,9 @@ class QueryBuilder {
         );
         if ($this->getAggregation() !== null) {
             $body[static::AGGS] = $this->getAggregation()->getFilterAsArray();
+        }
+        if ($this->getQueryFacet() !== null) {
+            $body[static::FACETS] = $this->getQueryFacet()->getFilterAsArray();
         }
         return $body;
     }

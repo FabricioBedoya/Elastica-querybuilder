@@ -7,6 +7,7 @@ use Fafas\ElasticaQuery\Filter\GeoBounding;
 class FilterGeoBounding extends AbstractFilter {
     
     const GEO_BOUNDING = 'geo_bounding';
+    const GEO_BOUNDING_BOX = 'geo_bounding_box';
     const TOP_LEFT = 'top_left';
     const BOTTOM_RIGHT = 'bottom_right';
     const LAT = 'lat';
@@ -16,6 +17,7 @@ class FilterGeoBounding extends AbstractFilter {
     
     public static $strategyKeys = array(
       self::GEO_BOUNDING,
+      self::GEO_BOUNDING_BOX,
     );
     
     public function updateFromArray(array $array) {
@@ -30,7 +32,7 @@ class FilterGeoBounding extends AbstractFilter {
                     ->getFilterAsArray();
         } else {
             $query = array();
-            $query[static::GEO_BOUNDING] = array(
+            $query[static::GEO_BOUNDING_BOX] = array(
                 $this->geoBounding->getField() => array(
                     static::TOP_LEFT => array(
                         static::LAT => $this->geoBounding->getTopLeft()->getLat(),

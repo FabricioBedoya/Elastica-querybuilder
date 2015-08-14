@@ -67,6 +67,11 @@ class AggregationManager extends ManagerAbstract implements AggregationManagerIn
         return $this->filterManager;
     }
     
+    /**
+     * 
+     * @param array $aggArray
+     * @return \Fafas\ElasticaQuery\Builder\QueryAggs
+     */
     public function processAggs(array $aggArray) {
         $flag = (bool) count(array_filter(array_keys($aggArray), 'is_string'));
         switch(true) {
