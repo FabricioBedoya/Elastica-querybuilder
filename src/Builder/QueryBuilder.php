@@ -258,9 +258,9 @@ class QueryBuilder {
     
     /**
      * 
-     * @param \Fafas\ElasticaQuery\Aggregation\AggregationInterface $aggregation
+     * @param \Fafas\ElasticaQuery\Builder\QueryAggs $aggregation
      */
-    public function setAggregation(\Fafas\ElasticaQuery\Aggregation\AggregationInterface $aggregation) {
+    public function setAggregation(\Fafas\ElasticaQuery\Builder\QueryAggs $aggregation) {
         $this->getAggregationManager()->setAggregation($aggregation);
         return $this;
     }
