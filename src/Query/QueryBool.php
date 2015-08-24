@@ -103,8 +103,7 @@ class QueryBool extends AbstractQuery {
      * @param type $cond
      */
     protected function getCollectionOf($cond = self::MUST) {
-        $inflector = \ICanBoogie\Inflector::get();
-        $method = 'get'.  $inflector->camelize($cond);
+        $method = 'get'.  \Symfony\Component\DependencyInjection\Container::camelize($cond);
         return $this->$method();
     }
     

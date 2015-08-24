@@ -123,8 +123,7 @@ class FilterBool extends AbstractFilter {
      * @return \Fafas\ElasticaQuery\Filter\FilterCollection
      */
     public function getCollectionOf($cond = self::MUST) {
-        $inflector = \ICanBoogie\Inflector::get();
-        $method = 'get'.  $inflector->camelize($cond);
+        $method = 'get'.  \Symfony\Component\DependencyInjection\Container::camelize($cond);
         return $this->$method();
     }
     
@@ -134,8 +133,7 @@ class FilterBool extends AbstractFilter {
      * @return \Fafas\ElasticaQuery\Filter\FilterCollection
      */
     public function setCollectionOf(\Fafas\ElasticaQuery\Filter\FilterCollection $collection, $cond = self::MUST) {
-        $inflector = \ICanBoogie\Inflector::get();
-        $method = 'set'.  $inflector->camelize($cond);
+        $method = 'set'.  \Symfony\Component\DependencyInjection\Container::camelize($cond);
         return $this->$method($collection);
     }
     
