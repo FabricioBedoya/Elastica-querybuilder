@@ -86,7 +86,7 @@ class QueryManager extends ManagerAbstract {
      * @return \Fafas\ElasticaQuery\Query\QueryManager
      */
     protected function addToCollectionFromArray(\Fafas\ElasticaQuery\Query\QueryBool $queryBool, array $array, $cond = QueryBool::MUST) {
-        $flag = (bool) count(array_filter(array_keys($array), 'is_string'));
+        $flag = \Fafas\ElasticaQuery\Helper\ElasticaHelper::isAssociativeArray($array);
         switch(true) {
             case ($flag !== true) :
                 foreach ($array as $params) {

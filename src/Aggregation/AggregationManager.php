@@ -73,7 +73,7 @@ class AggregationManager extends ManagerAbstract implements AggregationManagerIn
      * @return \Fafas\ElasticaQuery\Builder\QueryAggs
      */
     public function processAggs(array $aggArray) {
-        $flag = (bool) count(array_filter(array_keys($aggArray), 'is_string'));
+        $flag = \Fafas\ElasticaQuery\Helper\ElasticaHelper::isAssociativeArray($aggArray);
         switch(true) {
             case $flag === true :
                 $strategy = key($aggArray);

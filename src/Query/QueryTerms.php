@@ -19,6 +19,7 @@ class QueryTerms extends AbstractQuery {
     
     const FIELD = 'field';
     const VALUES = 'values';
+    const BOOST = 'boost';
     
     protected static $strategyKeys = array(
       self::TERMS,
@@ -45,18 +46,29 @@ class QueryTerms extends AbstractQuery {
      */
     public function getFilterAsArray() {
         if ($this->getQueryNested() !== null) {
-            return $this->getQueryNested()
+            $term = $this->getQueryNested()
                     ->getFilterAsArray();
         } else {
             $term = array();
             if ($this->validationOptions()) {
                 $term = array(
                   static::TERMS => array(
-                    $this->options[static::FIELD] => $this->options[static::VALUES],
+                    $this->options[static::FIELD] => array_values($this->options[static::VALUES]),
                   ),
                 );
+                $this->getBoost($term);
             }
-            return $term;
+        }
+        return $term;
+    }
+    
+    /**
+     * Return boost in array
+     * @param type $term
+     */
+    private function getBoost(&$term) {
+        if (isset($term[static::TERMS][$this->options[static::FIELD]]) && isset($this->options[static::BOOST])) {
+            $term[static::TERMS][static::BOOST] = $this->options[static::BOOST];
         }
     }
 
@@ -71,7 +83,7 @@ class QueryTerms extends AbstractQuery {
             $this->options[static::FIELD] = key($array);
             $array = $array[$this->options[static::FIELD]];
         }
-        foreach(array(static::FIELD, static::VALUES) as $key) {
+        foreach(array(static::FIELD, static::VALUES, static::BOOST) as $key) {
             if (isset($array[$key])) {
                 $this->options[$key] = $array[$key];
             }

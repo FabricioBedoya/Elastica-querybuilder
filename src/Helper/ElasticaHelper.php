@@ -16,7 +16,7 @@ class ElasticaHelper {
     
     /**
      * 
-     * @param array $filters
+     * @param array $aggs
      * @param array $response
      * @return type
      */
@@ -36,8 +36,8 @@ class ElasticaHelper {
      * @return array
      */
     public static function getAggregationIdsAvailables(array $results, $aggName) {
+        $availables = array();
         if (isset($results['aggregations']['global_aggregations'])) {
-            $availables = array();
             if (isset($results['aggregations']['global_aggregations'][$aggName])) {
                 $buckets = static::getBuckets($results['aggregations']['global_aggregations'][$aggName]);
                 foreach($buckets as $key => $agg) {
