@@ -11,13 +11,14 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "symfony/dependency-injection": ">=2.7"
+        "symfony/dependency-injection": "*"
     },
     "autoload": {
         "psr-4": {
             "Fafas\\ElasticaQuery\\": "src/"
         }
     },
+    "minimum-stability": "stable",
     "extra": {
         "branch-alias": {
             "dev-develop": "1.x-dev"
