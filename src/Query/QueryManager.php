@@ -121,6 +121,14 @@ class QueryManager extends ManagerAbstract {
                         $queryStrategy->updateFromArray(array($strategy => $params));
                         $this->setQuery($queryStrategy);
                         break;
+                    case $this->getQuery() instanceof \Fafas\ElasticaQuery\Query\QueryInterface && in_array($strategy, array(QueryBool::MUST, QueryBool::SHOULD, QueryBool::MUST_NOT)):
+                        $bool = new \Fafas\ElasticaQuery\Query\QueryBool();
+                        $collection = new \Fafas\ElasticaQuery\Query\QueryCollection();
+                        $collection->addQuery($this->getQuery());
+                        $bool->setMust($collection);
+                        $this->setQuery($bool);
+                        $this->addToCollectionFromArray($this->getQuery(), $params, $strategy);
+                        break;
                     default:
                         $queryStrategy->updateFromArray($params);
                         $this->setQuery($queryStrategy);

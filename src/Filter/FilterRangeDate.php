@@ -6,6 +6,7 @@ class FilterRangeDate extends AbstractFilter {
     
     const FIELD = 'field';
     const RANGE = 'range';
+    const FROM = 'from';
     const GTE = 'gte';
     const LTE = 'lte';
     const GT = 'gt';
@@ -29,7 +30,7 @@ class FilterRangeDate extends AbstractFilter {
             $this->options[static::FIELD] = key($array);
             $array = $array[$this->options[static::FIELD]];
         }
-        foreach(array(static::FIELD, static::GTE, static::LTE, static::GT, static::LT) as $key) {
+        foreach(array(static::FIELD, static::FROM, static::GTE, static::LTE, static::GT, static::LT) as $key) {
             if (isset($array[$key])) {
                 $this->options[$key] = $array[$key];
             }
@@ -37,6 +38,9 @@ class FilterRangeDate extends AbstractFilter {
         if ((!isset($this->options[static::GTE]) || !isset($this->options[static::GT])) && is_array($array) && count($array) == 2) {
             $this->options[static::GTE] = array_shift($array);
             $this->options[static::LTE] = array_shift($array);
+        }
+        if (FilterNested::isNested($this->options[static::FIELD]) && !$this->skipNested) {
+            $this->generateNested($this, FilterNested::getParent($this->options[static::FIELD]));
         }
     }
     
@@ -52,9 +56,14 @@ class FilterRangeDate extends AbstractFilter {
         } else {
             $query = array();
             $query[static::RANGE] = array($this->options[static::FIELD] => array());
-            foreach(array(static::GTE, static::LTE, static::GT, static::LT) as $key) {
-                if (isset($this->options[$key]) && $this->options[$key] !== '*') {
-                    $query[static::RANGE][$this->options[static::FIELD]][$key] = $this->options[$key];
+            if (isset($this->options[static::FROM])) {
+                $query[static::RANGE][$this->options[static::FIELD]][static::FROM] = $this->options[static::FROM];
+            }
+            else {
+                foreach(array(static::GTE, static::LTE, static::GT, static::LT) as $key) {
+                    if (isset($this->options[$key]) && $this->options[$key] !== '*') {
+                        $query[static::RANGE][$this->options[static::FIELD]][$key] = $this->options[$key];
+                    }
                 }
             }
             return $query;

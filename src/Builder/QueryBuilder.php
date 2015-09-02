@@ -361,6 +361,13 @@ class QueryBuilder {
         return $body;
     }
     
+    public function processSort(array $arraySort) {
+        $flag = \Fafas\ElasticaQuery\Helper\ElasticaHelper::isAssociativeArray($arraySort);
+        if ($flag) {
+            
+        }
+    }
+    
     /**
      * 
      * @param type $field
