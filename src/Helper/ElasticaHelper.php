@@ -72,4 +72,22 @@ class ElasticaHelper {
         }
         return $buckets;
     }
+    
+    /**
+     * Format all date value
+     * @param array $params
+     * @return array
+     */
+    public static function formatRangeDate(array $params) {
+        foreach($params as $key => $value) {
+            if (is_array($value)) {
+                $params[$key] = static::formatRangeDate($value);
+            }
+            if (preg_match('/([0-9]{2,4})\-([0-9]{2,4})\-([0-9]{2,4})/', $value)) {
+                $date = new \DateTime($value);
+                $params[$key] = $date->format('d-m-Y');
+            } 
+        }
+        return $params;
+    }
 }
