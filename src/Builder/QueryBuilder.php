@@ -14,6 +14,7 @@ class QueryBuilder {
     const FILTER = 'filter';
     const AGGS = 'aggs';
     const FACETS = 'facets';
+    const SORT = 'sort';
     const SEARCH_TYPE = 'search_type';
 
     /**
@@ -48,6 +49,12 @@ class QueryBuilder {
     
     /**
      *
+     * @var Fafas\ElasticaQuery\Sort\SortManager 
+     */
+    protected $sortManager = null;
+    
+    /**
+     *
      * @var Fafas\ElasticaQuery\Facet\FacetManager
      */
     protected $facetManager = null;
@@ -57,6 +64,8 @@ class QueryBuilder {
     protected $aggregation = null;
     
     protected $queryFacet = null;
+    
+    protected $querySort = null;
     
     /**
      *
@@ -157,7 +166,27 @@ class QueryBuilder {
     function setFacetManager(Fafas\ElasticaQuery\Facet\FacetManager $facetManager) {
         $this->facetManager = $facetManager;
     }
+    
+    /**
+     * 
+     * @return \Fafas\ElasticaQuery\Sort\SortManager
+     */
+    function getSortManager() {
+        if ($this->sortManager === null) {
+            $this->sortManager = \Fafas\ElasticaQuery\Sort\SortManager::createInstance();
+        }
+        return $this->sortManager;
+    }
+    
+    /**
+     * 
+     * @param \Fafas\ElasticaQuery\Builder\Fafas\ElasticaQuery\Sort\SortManager $sortManager
+     */
+    function setSortManager(Fafas\ElasticaQuery\Sort\SortManager $sortManager) {
+        $this->sortManager = $sortManager;
+    }
 
+    
         
     /**
      * 
@@ -192,7 +221,6 @@ class QueryBuilder {
         $this->queryFacet = $queryFacet;
         return $this;
     }
-
     
     /**
      * 
@@ -223,6 +251,9 @@ class QueryBuilder {
         }
         if (isset($params[static::FACETS]) && !empty($params[static::FACETS])) {
             $this->processFacets($params[static::FACETS]);
+        }
+        if (isset($params[static::SORT]) && !empty($params[static::SORT])) {
+            $this->processSort($params[static::SORT]);
         }
     }
 
@@ -330,6 +361,15 @@ class QueryBuilder {
         }
         return $this;
     }
+    
+    /**
+     * 
+     * @param array $arraySort
+     */
+    public function processSort(array $arraySort) {
+        $this->getSortManager()->processSort($arraySort);
+        return $this;
+    }
      
     /**
      * 
@@ -358,22 +398,17 @@ class QueryBuilder {
         if ($this->getQueryFacet() !== null) {
             $body[static::FACETS] = $this->getQueryFacet()->getFilterAsArray();
         }
+        $sorts = $this->getSortManager()->getSorts();
+        if (!empty($sorts)) {
+            $body[static::SORT] = $this->getSortManager()->getSortAsArray();
+        }
         return $body;
     }
     
     /**
      * 
-     * @param type $field
-     * @param type $order
-     */
-    public function addSort($field, $order = 'asc') {
-        
-    }
-
-    /**
-     * 
      * @param string $key
-     * @param array $parameters
+     * @param array $value
      * @return type
      */
     public function setParameter($key, $value) {
