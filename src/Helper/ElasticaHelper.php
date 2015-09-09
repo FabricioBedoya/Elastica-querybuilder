@@ -83,7 +83,7 @@ class ElasticaHelper {
             if (is_array($value)) {
                 $params[$key] = static::formatRangeDate($value);
             }
-            if (preg_match('/([0-9]{2,4})\-([0-9]{2,4})\-([0-9]{2,4})/', $value)) {
+            if (is_string($value) && preg_match('/([0-9]{2,4})\-([0-9]{2,4})\-([0-9]{2,4})/', $value)) {
                 $date = new \DateTime($value);
                 $params[$key] = $date->format('d-m-Y');
             } 
