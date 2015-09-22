@@ -141,6 +141,9 @@ abstract class AbstractAggregation implements AggregationInterface {
         if ($aggNested instanceof \Fafas\ElasticaQuery\Elastica\EntityInterface) {
             $aggNested = clone $this->getAggregationManager()->getQueryStrategy('nested');
             $mainFilter = $aggregation->getFilter();
+            if ($aggregation->getNestedFilter() === null) {
+                $aggregation->setNestedFilter(new \Fafas\ElasticaQuery\Filter\FilterEmpty());
+            }
             $aggregation->setFilter($aggregation->getNestedFilter());
             $options = array(
                 AggregationNested::PATH => $path,

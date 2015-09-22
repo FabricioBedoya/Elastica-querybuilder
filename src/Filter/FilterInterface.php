@@ -8,4 +8,6 @@ interface FilterInterface extends \Fafas\ElasticaQuery\Elastica\EntityInterface 
     
     public function getFieldName();
     
+    public function getMandatoryBoolButId(array $idsExcluded);
+    
 }

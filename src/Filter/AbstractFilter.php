@@ -165,5 +165,9 @@ abstract class AbstractFilter implements EntityInterface, FilterInterface {
     public function hasRelevantAggregation() {
         return $this->optionRelevantAgg;
     }
+    
+    public function getMandatoryBoolButId(array $idsExcluded) {
+        return $this;
+    }
 
 }
