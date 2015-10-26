@@ -17,6 +17,7 @@ class FilterBool extends AbstractFilter {
       self::BOOL,
       self::MUST,
       self::SHOULD,
+      self::MUST_NOT,
     );
     
     /**

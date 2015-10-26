@@ -86,7 +86,13 @@ class QueryBuilder {
             $this->parameters = $parameters;
         }
         $this->options = array_merge(static::$optionsDefault, $options);
-
+        $this->initQuery();
+    }
+    
+    /**
+     * Initialize query
+     */
+    protected function initQuery() {
         $this->setQueryFiltered(new \Fafas\ElasticaQuery\Builder\QueryFiltered());
         $this->processQuery(array('match_all' => array()));
     }
@@ -95,7 +101,7 @@ class QueryBuilder {
      * 
      * @param \Fafas\ElasticaQuery\Query\QueryManager $queryManager
      */
-    public function setQueryManager(Fafas\ElasticaQuery\Query\QueryManager $queryManager) {
+    public function setQueryManager(\Fafas\ElasticaQuery\Query\QueryManager $queryManager) {
         $this->queryManager = $queryManager;
     }
     
@@ -114,7 +120,7 @@ class QueryBuilder {
      * 
      * @param Fafas\ElasticaQuery\Query\QueryManagerInterface $filterManager
      */
-    public function setFilterManager(Fafas\ElasticaQuery\Filter\FilterManager $filterManager) {
+    public function setFilterManager(\Fafas\ElasticaQuery\Filter\FilterManager $filterManager) {
         $this->filterManager = $filterManager;
     }
     
@@ -144,7 +150,7 @@ class QueryBuilder {
      * 
      * @param \Fafas\ElasticaQuery\Builder\Fafas\ElasticaQuery\Aggregation\AggregationManager $aggregationManager
      */
-    function setAggregationManager(Fafas\ElasticaQuery\Aggregation\AggregationManager $aggregationManager) {
+    function setAggregationManager(\Fafas\ElasticaQuery\Aggregation\AggregationManager $aggregationManager) {
         $this->aggregationManager = $aggregationManager;
     }
     
@@ -376,11 +382,16 @@ class QueryBuilder {
      * @return array
      */
     public function getAllParams() {
-        return array(
-            static::INDEX => $this->options[static::INDEX],
-            static::TYPE => $this->options[static::TYPE],
+        $params = array(
             static::BODY => $this->getPayloadAsArray(),
         );
+        if (isset($this->options[static::INDEX])) {
+            $params[static::INDEX] = $this->options[static::INDEX];
+        }
+        if (isset($this->options[static::TYPE])) {
+            $params[static::TYPE] = $this->options[static::TYPE];
+        }
+        return $params;
     }
     /**
      * 
@@ -442,6 +453,18 @@ class QueryBuilder {
             return $this->options[$key];
         }
         return $defaultValue;
+    }
+    
+    public function __clone() {
+        $filterManager = clone $this->getFilterManager();
+        $this->setFilterManager($filterManager);
+        $queryManager = clone $this->getQueryManager();
+        $this->setQueryManager($queryManager);
+        $aggregationManager = clone $this->getAggregationManager();
+        $this->setAggregationManager($aggregationManager);
+        $this->facetManager = null;
+        $this->sortManager = null;
+        $this->initQuery();
     }
 
 }

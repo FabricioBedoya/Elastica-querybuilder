@@ -7,6 +7,7 @@ class FilterGeoDistance extends AbstractFilter {
     const GEO_DISTANCE = 'geo_distance';
     const FIELD = 'field';
     const DISTANCE = 'distance';
+    const DISTANCE_TYPE = 'distance_type';
     const POINT = 'point';
     const LAT = 'lat';
     const LON = 'lon';
@@ -24,14 +25,14 @@ class FilterGeoDistance extends AbstractFilter {
      */
     public function updateFromArray(array $array) {
         parent::updateFromArray($array);
-        foreach(array(static::FIELD, static::DISTANCE, static::LAT, static::LON) as $key) {
+        foreach(array(static::FIELD, static::DISTANCE, static::DISTANCE_TYPE, static::LAT, static::LON) as $key) {
             if (isset($array[$key])) {
                 $this->options[$key] = $array[$key];
             }
         }
         if (empty($this->options[static::FIELD]) && !empty($this->options[static::DISTANCE])) {
             foreach(array_keys($array) as $key) {
-                if ($key !== static::DISTANCE) {
+                if (!in_array($key, array(static::DISTANCE, static::DISTANCE_TYPE))) {
                     if (!isset($this->options[static::FIELD])) {
                         $this->options[static::FIELD] = $key;
                     }
@@ -82,6 +83,9 @@ class FilterGeoDistance extends AbstractFilter {
             $query[static::GEO_DISTANCE] = array(
               static::DISTANCE => $this->options[static::DISTANCE],
               );
+            if (isset($this->options[static::DISTANCE_TYPE])) {
+                $query[static::GEO_DISTANCE][static::DISTANCE_TYPE] = $this->options[static::DISTANCE_TYPE];
+            }
             if (isset($this->options[static::POINT])) {
                 $query[static::GEO_DISTANCE][$this->options[static::FIELD]] = $this->options[static::POINT];
             }
