@@ -37,6 +37,8 @@ class ElasticaGeoTools
       "18" => 0.2,
       "19" => 0,
       "20" => 0,
+      "21" => 0,
+      "22" => 0,
     );
     /**
      * Calculate distance entre 2 coordinates in meters
