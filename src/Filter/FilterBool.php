@@ -191,13 +191,14 @@ class FilterBool extends AbstractFilter {
      * 
      * @param array $array
      */
-    public function updateFromArray(array $array) {
+    public function updateFromArray(array $array)
+    {
         $this->setId('filter_bool');
-        foreach($array as $key => $params) {
+        foreach ($array as $key => $params) {
             if (in_array($key, array(static::MUST, static::SHOULD, static::MUST_NOT))) {
                 $queryCollection = new \Fafas\ElasticaQuery\Filter\FilterCollection($this->getFilterManager());
                 $queryCollection->updateFromArray($params);
-                switch(true) {
+                switch (true) {
                     case $key === static::MUST:
                         $this->setMust($queryCollection);
                         break;
@@ -208,10 +209,22 @@ class FilterBool extends AbstractFilter {
                         $this->setMustNot($queryCollection);
                         break;
                 }
+            } else {
+                $strategy = key($array);
+                if (in_array($key, $this->getStrategyKeys())) {
+                    $this->addToCollectionFromArray($this, $array, $strategy);
+                } else {
+                    $queryStrategy = clone $this->getFilterManager()->getQueryStrategy($key);
+                    $queryStrategy->updateFromArray($array[$strategy]);
+                    $this->addFilterToCollection($queryStrategy);
+                }
             }
         }
     }
-    
+
+    /**
+     * 
+     */
     public function __clone() {
         parent::__clone();
         $must = $this->getMust();

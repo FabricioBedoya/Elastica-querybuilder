@@ -61,16 +61,24 @@ class FilterManager extends ManagerAbstract implements FilterManagerInterface {
                 }
                 break;
             default:
-                $key = key($array);
-                $queryStrategy = clone $this->getQueryStrategy($key);
-                $queryStrategy->updateFromArray($array[$key]);
-                $this->getFilter()->addFilterToCollection($queryStrategy, $cond);
+                $strategy = key($array);
+                $queryStrategy = clone $this->getQueryStrategy($strategy);
+                switch(true) {
+                    case $this->getFilter() instanceof FilterBool && in_array($strategy, $this->getFilter()->getStrategyKeys()):
+                        $queryStrategy->updateFromArray($array);
+                        $this->getFilter()->addFilterToCollection($queryStrategy, $array[$strategy], $strategy);
+                        break;
+                    default:
+                        $queryStrategy->updateFromArray($array[$strategy]);
+                        $this->getFilter()->addFilterToCollection($queryStrategy, $cond);
+                        break;
+                }
                 break;
         }
         return $this;
     }
-    
-     /**
+
+    /**
      * 
      * @param array $filterArray
      * @return \Fafas\ElasticaQuery\Elastica\EntityInterface
