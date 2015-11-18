@@ -66,12 +66,42 @@ class ElasticaGeoTools
      * @param type $response
      * @param type $distance
      */
-    public static function clearFacetsByDistance($response, $lat1, $lon1, $distanceMax, $maximum = 100000) {
+    public static function clearFacetsByDistance($response, $lat1, $lon1, $distanceMax, $maximum = 10000) {
         $clusters = array();
         if (isset($response['facets']['places']['clusters'])) {
             foreach($response['facets']['places']['clusters'] as $cluster ) {
                 $distance = static::calculateDistanceLatLon($lat1, $lon1, $cluster['center']['lat'], $cluster['center']['lon']);
                 if ($distance < $distanceMax) {
+                    $clusters[] = $cluster;
+                }
+                if (count($clusters) > $maximum) {
+                    break;
+                }
+            }
+        }
+        $response['facets']['places']['clusters'] = $clusters;
+        return $response;
+    }
+    
+    /**
+     * 
+     * @param type $response
+     * @param type $distance
+     */
+    public static function clearFacetsByPoints($response, $geoPoints, $distanceMax, $maximum = 10000) {
+        $clusters = array();
+        if (isset($response['facets']['places']['clusters'])) {
+            foreach($response['facets']['places']['clusters'] as $cluster ) {
+                $nearToAnyPoint = false;
+                foreach($geoPoints as $geoPoint) {
+                    list($lon,$lat) = explode(',', trim($geoPoint));
+                    $distance = static::calculateDistanceLatLon($lat, $lon, $cluster['center']['lat'], $cluster['center']['lon']);
+                    if ($distance <= $distanceMax) {
+                        $nearToAnyPoint = true;
+                        break;
+                    }
+                }
+                if ($nearToAnyPoint) {
                     $clusters[] = $cluster;
                 }
                 if (count($clusters) > $maximum) {
