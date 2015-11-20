@@ -105,6 +105,12 @@ class FilterManager extends ManagerAbstract implements FilterManagerInterface {
                             $arrayMust = array($strategy => $params);
                             $this->addToCollectionFromArray($this->getFilter(), $arrayMust, FilterBool::MUST);
                             break;
+                        case !$this->getFilter() instanceof FilterBool && in_array($strategy, array(FilterBool::MUST, FilterBool::SHOULD, FilterBool::MUST_NOT)):
+                            $filterTemp = $this->getFilter();
+                            $queryStrategy->updateFromArray(array($strategy => $params));
+                            $queryStrategy->addFilterToCollection($filterTemp);
+                            $this->setFilter($queryStrategy);
+                            break;
                         default:
                             $queryStrategy->updateFromArray($params);
                             $this->setFilter($queryStrategy);
