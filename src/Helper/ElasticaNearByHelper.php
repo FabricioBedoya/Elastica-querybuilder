@@ -22,6 +22,9 @@ class ElasticaNearByHelper {
     protected static $multiple = 4;
     protected static $multipleDecimal = 0.2;
     
+    protected static $minDistance = 0.2;
+    protected static $maxDistance = 700;
+    
     protected static $minResults = 5;
     protected static $maxResults = 30;
     
@@ -163,12 +166,14 @@ class ElasticaNearByHelper {
         case (isset($response_raw['hits']['total']) && $this->useMinValidation && $response_raw['hits']['total'] < static::$minResults) :
             $valid = 1;
             break;
-        case (isset($response_raw['hits']['total']) && !$this->useMinValidation && $response_raw['hits']['total'] < static::$minResults ) :
-            $this->useMaxValidation = false;
-            $valid = 1;
+        case (isset($response_raw['hits']['total']) && !$this->useMinValidation && $response_raw['hits']['total'] < static::$minResults) :
+            $valid = 0;
             break;
         case (isset($response_raw['hits']['total']) && $this->useMaxValidation && $response_raw['hits']['total'] > static::$maxResults) :
             $valid = -1;
+            break;
+        case (isset($response_raw['hits']['total']) && !$this->useMaxValidation && $response_raw['hits']['total'] > static::$maxResults) :
+            $valid = 0;
             break;
         }
         return $valid;
@@ -182,13 +187,21 @@ class ElasticaNearByHelper {
     protected function recalculateDistance($factor = 1) {
         switch(true) {
             case $factor === -1:
-                $this->setDistance($this->getDistance() - static::$multipleDecimal);
-                $this->useMinValidation = false;
+                if ((int) $this->getDistance() > (int)  static::$minDistance) {
+                    $this->setDistance($this->getDistance() - static::$multipleDecimal);
+                } else {
+                    $this->useMinValidation = false;
+                    $this->useMaxValidation = false;
+                }
                 break;
             default:
             case $factor === 1:
-                $this->setDistance($this->getDistance() * static::$multiple);
-                $this->useMaxValidation = false;
+                if ((int) $this->getDistance() < (int) static::$maxDistance) {
+                    $this->setDistance($this->getDistance() * static::$multiple);
+                } else {
+                    $this->useMinValidation = false;
+                    $this->useMaxValidation = false;
+                }
                 break;
         }
         return $this;
