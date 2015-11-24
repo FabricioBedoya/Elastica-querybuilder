@@ -128,7 +128,6 @@ class ElasticaNearByHelper {
     public function processWithoutGeoBoundixBox() {
         $found = false;
         $distance = $this->getDistance();
-//        $zoom = $this->calculeZoom();
         while (!$found && $distance < 1000) {
             $queryBuilder = clone $this->getQueryBuilder();
             $this->processCommonOptions($queryBuilder);
@@ -187,7 +186,7 @@ class ElasticaNearByHelper {
     protected function recalculateDistance($factor = 1) {
         switch(true) {
             case $factor === -1:
-                if ((int) $this->getDistance() > (int)  static::$minDistance) {
+                if ((float) $this->getDistance() > (float) static::$minDistance) {
                     $this->setDistance($this->getDistance() - static::$multipleDecimal);
                 } else {
                     $this->useMinValidation = false;
