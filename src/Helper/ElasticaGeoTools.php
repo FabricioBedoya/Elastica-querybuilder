@@ -82,11 +82,13 @@ class ElasticaGeoTools
         $response['facets']['places']['clusters'] = $clusters;
         return $response;
     }
-    
+
     /**
-     * 
-     * @param type $response
-     * @param type $distance
+     * @param $response
+     * @param $geoPoints
+     * @param $distanceMax
+     * @param int $maximum
+     * @return mixed
      */
     public static function clearFacetsByPoints($response, $geoPoints, $distanceMax, $maximum = 10000) {
         $clusters = array();

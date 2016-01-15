@@ -2,6 +2,7 @@
 
 namespace Fafas\ElasticaQuery\Helper;
 
+use Fafas\ElasticaQuery\Helper\ElasticaGeoTools;
 /**
  * Description of NearByHelper
  *
@@ -14,7 +15,25 @@ class ElasticaNearByTouristicRoadHelper extends ElasticaNearByHelper
     protected $distance = 10;
     
     protected $zoom = 0;
-    
+
+    private $ratioGeoPoints = 15;
+
+    /**
+     * @return int
+     */
+    public function getRatioGeoPoints()
+    {
+        return $this->ratioGeoPoints;
+    }
+
+    /**
+     * @param int $ratioGeoPoints
+     */
+    public function setRatioGeoPoints($ratioGeoPoints)
+    {
+        $this->ratioGeoPoints = $ratioGeoPoints;
+    }
+
     /**
      * 
      */
@@ -57,7 +76,7 @@ class ElasticaNearByTouristicRoadHelper extends ElasticaNearByHelper
         if (isset($this->params[static::NEAR_BY][static::GEO_BOUNDING_BOX])) {
             $this->processGeoBoundingBox($queryBuilder);
         }
-        $factor = \Fafas\ElasticaQuery\Helper\ElasticaGeoTools::getFactor($zoom);
+        $factor = ElasticaGeoTools::getFactor($zoom);
         $queryBuilder->processFacets(array(
               'places' => array(
                 'geohash' => array(
@@ -69,11 +88,10 @@ class ElasticaNearByTouristicRoadHelper extends ElasticaNearByHelper
         $response_raw = tq_elastic_search_service()->search($params['body']);
         return $this->cleanUpFacets($response_raw);
     }
-    
+
     /**
-     * 
+     *
      * @param \Fafas\ElasticaQuery\Builder\QueryBuilder $queryBuilder
-     * @param type $distance
      * @return \Fafas\ElasticaQuery\Builder\QueryBuilder
      */
     protected function processGeoDistance(\Fafas\ElasticaQuery\Builder\QueryBuilder &$queryBuilder)
@@ -81,7 +99,7 @@ class ElasticaNearByTouristicRoadHelper extends ElasticaNearByHelper
         $distance = $this->getDistance();
         $geoDistance = array('should' => array());
         foreach ($this->params[static::NEAR_BY][static::ROUTE_POINTS] as $i => $latlng) {
-            if ($i % 30 == 0) {
+            if ($i % $this->getRatioGeoPoints() == 0) {
                 $latlng = explode(',', $latlng);
                 $geoDistance['should'][] = array(
                   'geo_distance' => array(
@@ -98,15 +116,15 @@ class ElasticaNearByTouristicRoadHelper extends ElasticaNearByHelper
         $queryBuilder->processFilter($geoDistance);
         return $queryBuilder;
     }
-    
+
     /**
-     * 
      * @param array $response_raw
+     * @return array
      */
     protected function cleanUpFacets(array $response_raw = array()) {
         $response = $response_raw;
         if (!empty($response_raw)) {
-            $response = \Fafas\ElasticaQuery\Helper\ElasticaGeoTools::clearFacetsByPoints($response_raw, $this->params[static::NEAR_BY][static::ROUTE_POINTS], $this->getDistance() + 10, $this->maximum);
+            $response = ElasticaGeoTools::clearFacetsByPoints($response_raw, $this->params[static::NEAR_BY][static::ROUTE_POINTS], $this->getDistance() + 10, $this->maximum);
         }
         return $response;
     }

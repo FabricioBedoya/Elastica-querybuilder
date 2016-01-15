@@ -22,11 +22,11 @@ class ElasticaNearByHelper {
     protected static $multiple = 4;
     protected static $multipleDecimal = 0.2;
     
-    protected static $minDistance = 0.2;
-    protected static $maxDistance = 700;
+    protected $minDistance = 0.2;
+    protected $maxDistance = 700;
     
-    protected static $minResults = 5;
-    protected static $maxResults = 30;
+    protected $minResults = 5;
+    protected $maxResults = 30;
     
     protected static $factor_default = '0.4';
     protected static $factors = array(
@@ -63,6 +63,90 @@ class ElasticaNearByHelper {
         catch(Exception $e) {
             throw new Exception('Invalidate request structure', 0, $e);
         }
+    }
+
+    /**
+     * @return int
+     */
+    public function getMinResults() {
+        return $this->minResults;
+    }
+
+    /**
+     * @param int $minResults
+     */
+    public function setMinResults($minResults) {
+        $this->minResults = $minResults;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxResults() {
+        return $this->maxResults;
+    }
+
+    /**
+     * @param int $maxResults
+     */
+    public function setMaxResults($maxResults) {
+        $this->maxResults = $maxResults;
+    }
+
+    /**
+     * @return float
+     */
+    public function getMinDistance() {
+        return $this->minDistance;
+    }
+
+    /**
+     * @param float $minDistance
+     */
+    public function setMinDistance($minDistance) {
+        $this->minDistance = $minDistance;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxDistance() {
+        return $this->maxDistance;
+    }
+
+    /**
+     * @param int $maxDistance
+     */
+    public function setMaxDistance($maxDistance) {
+        $this->maxDistance = $maxDistance;
+    }
+
+    /**
+     * @return int
+     */
+    public static function getMultiple() {
+        return self::$multiple;
+    }
+
+    /**
+     * @param int $multiple
+     */
+    public static function setMultiple($multiple) {
+        self::$multiple = $multiple;
+    }
+
+    /**
+     * @return float
+     */
+    public static function getMultipleDecimal() {
+        return self::$multipleDecimal;
+    }
+
+    /**
+     * @param float $multipleDecimal
+     */
+    public static function setMultipleDecimal($multipleDecimal) {
+        self::$multipleDecimal = $multipleDecimal;
     }
     
     public function validateParams() {
@@ -162,16 +246,16 @@ class ElasticaNearByHelper {
     protected function validateResults(array $response_raw = array()) {
         $valid = 0;
         switch(true) {
-        case (isset($response_raw['hits']['total']) && $this->useMinValidation && $response_raw['hits']['total'] < static::$minResults) :
+        case (isset($response_raw['hits']['total']) && $this->useMinValidation && $response_raw['hits']['total'] < $this->getMinResults()) :
             $valid = 1;
             break;
-        case (isset($response_raw['hits']['total']) && !$this->useMinValidation && $response_raw['hits']['total'] < static::$minResults) :
+        case (isset($response_raw['hits']['total']) && !$this->useMinValidation && $response_raw['hits']['total'] < $this->getMinResults()) :
             $valid = 0;
             break;
-        case (isset($response_raw['hits']['total']) && $this->useMaxValidation && $response_raw['hits']['total'] > static::$maxResults) :
+        case (isset($response_raw['hits']['total']) && $this->useMaxValidation && $response_raw['hits']['total'] > $this->getMaxResults()) :
             $valid = -1;
             break;
-        case (isset($response_raw['hits']['total']) && !$this->useMaxValidation && $response_raw['hits']['total'] > static::$maxResults) :
+        case (isset($response_raw['hits']['total']) && !$this->useMaxValidation && $response_raw['hits']['total'] > $this->getMaxResults()) :
             $valid = 0;
             break;
         }
@@ -179,14 +263,14 @@ class ElasticaNearByHelper {
     }
     
     /**
-     * 
-     * @param type $factor
+     * Recalculate distance
+     * @param $factor
      * @return \Fafas\ElasticaQuery\Helper\ElasticaNearByHelper
      */
     protected function recalculateDistance($factor = 1) {
         switch(true) {
             case $factor === -1:
-                if ((float) $this->getDistance() > (float) static::$minDistance) {
+                if ((float) $this->getDistance() > (float) $this->getMinDistance()) {
                     $this->setDistance($this->getDistance() - static::$multipleDecimal);
                 } else {
                     $this->useMinValidation = false;
@@ -195,7 +279,7 @@ class ElasticaNearByHelper {
                 break;
             default:
             case $factor === 1:
-                if ((int) $this->getDistance() < (int) static::$maxDistance) {
+                if ((int) $this->getDistance() < (int) $this->getMaxDistance()) {
                     $this->setDistance($this->getDistance() * static::$multiple);
                 } else {
                     $this->useMinValidation = false;
@@ -238,10 +322,10 @@ class ElasticaNearByHelper {
         $this->processSections($queryBuilder);
         return $this;
     }
-    
+
     /**
-     * 
      * @param array $response_raw
+     * @return array|\Fafas\ElasticaQuery\Helper\type
      */
     protected function cleanUpFacets(array $response_raw = array()) {
         $response = array();
@@ -277,7 +361,6 @@ class ElasticaNearByHelper {
    /**
     * 
     * @param \Fafas\ElasticaQuery\Builder\QueryBuilder $queryBuilder
-    * @param type $distance
     * @return \Fafas\ElasticaQuery\Builder\QueryBuilder
     */
     protected function processGeoDistance(\Fafas\ElasticaQuery\Builder\QueryBuilder &$queryBuilder) {
